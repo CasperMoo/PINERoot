@@ -48,7 +48,7 @@ async function start() {
     app.get('/api/me', {
       preHandler: [authMiddleware],
     }, async (request, reply) => {
-      return reply.send({ user: request.user })
+      return reply.send({ user: request.currentUser })
     })
 
     // Start server

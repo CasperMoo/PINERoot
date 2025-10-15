@@ -27,6 +27,7 @@ export async function authMiddleware(
         id: true,
         email: true,
         name: true,
+        createdAt: true,
       },
     })
 
@@ -35,7 +36,12 @@ export async function authMiddleware(
     }
 
     // Attach user to request
-    request.user = user
+    request.currentUser = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt
+    }
   } catch (error) {
     return reply.status(401).send({ error: 'Unauthorized: Invalid token' })
   }
