@@ -1,45 +1,50 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import { prisma } from '../db'
 import bcrypt from 'bcrypt'
+import { ok, error } from "../utils/response";
 
 interface RegisterBody {
-  email: string
-  password: string
-  name?: string
+  email: string;
+  password: string;
+  name?: string;
 }
 
 interface LoginBody {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   // POST /register
-  fastify.post<{ Body: RegisterBody }>('/register', async (request, reply) => {
+  fastify.post<{ Body: RegisterBody }>("/register", async (request, reply) => {
     try {
-      const { email, password, name } = request.body
+      const { email, password, name } = request.body;
 
       // Validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return reply.status(400).send({ error: 'Invalid email format' })
+        return error(reply, 1001, "Invalid email format");
       }
 
       if (password.length < 6) {
-        return reply.status(400).send({ error: 'Password must be at least 6 characters long' })
+        return error(
+          reply,
+          1002,
+          "Password must be at least 6 characters long"
+        );
       }
 
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
         where: { email },
-      })
+      });
 
       if (existingUser) {
-        return reply.status(400).send({ error: 'Email already in use' })
+        return error(reply, 1003, "Email already in use");
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10)
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // Create user
       const user = await prisma.user.create({
@@ -48,64 +53,64 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
           password: hashedPassword,
           name: name || null,
         },
-      })
+      });
 
       // Generate JWT token
-      const token = fastify.jwt.sign({ userId: user.id })
+      const token = fastify.jwt.sign({ userId: user.id });
 
       // Return user without password
-      const { password: _, ...userWithoutPassword } = user
+      const { password: _, ...userWithoutPassword } = user;
 
-      return reply.status(201).send({
+      return ok(reply, {
         user: userWithoutPassword,
         token,
-      })
-    } catch (error) {
-      request.log.error(error)
-      return reply.status(500).send({ error: 'Internal server error' })
+      });
+    } catch (err) {
+      request.log.error(err);
+      return error(reply, 1000, "Internal server error");
     }
-  })
+  });
 
   // POST /login
-  fastify.post<{ Body: LoginBody }>('/login', async (request, reply) => {
+  fastify.post<{ Body: LoginBody }>("/login", async (request, reply) => {
     try {
-      const { email, password } = request.body
+      const { email, password } = request.body;
 
       if (!email || !password) {
-        return reply.status(400).send({ error: 'Email and password are required' })
+        return error(reply, 1004, "Email and password are required");
       }
 
       // Find user
       const user = await prisma.user.findUnique({
         where: { email },
-      })
+      });
 
       if (!user) {
-        return reply.status(401).send({ error: 'Invalid credentials' })
+        return error(reply, 2001, "Invalid credentials");
       }
 
       // Verify password
-      const isPasswordValid = await bcrypt.compare(password, user.password)
+      const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return reply.status(401).send({ error: 'Invalid credentials' })
+        return error(reply, 2001, "Invalid credentials");
       }
 
       // Generate JWT token
-      const token = fastify.jwt.sign({ userId: user.id })
+      const token = fastify.jwt.sign({ userId: user.id });
 
       // Return user without password
-      const { password: _, ...userWithoutPassword } = user
+      const { password: _, ...userWithoutPassword } = user;
 
-      return reply.send({
+      return ok(reply, {
         user: userWithoutPassword,
         token,
-      })
-    } catch (error) {
-      request.log.error(error)
-      return reply.status(500).send({ error: 'Internal server error' })
+      });
+    } catch (err) {
+      request.log.error(err);
+      return error(reply, 1000, "Internal server error");
     }
-  })
-}
+  });
+};
 
 export default authRoutes
