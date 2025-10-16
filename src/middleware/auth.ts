@@ -1,8 +1,9 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { prisma } from '../db'
+import { error } from "../utils/response";
 
 interface JWTPayload {
-  userId: number
+  userId: number;
 }
 
 export async function authMiddleware(
@@ -11,14 +12,14 @@ export async function authMiddleware(
 ) {
   try {
     // Get token from Authorization header
-    const authHeader = request.headers.authorization
+    const authHeader = request.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return reply.status(401).send({ error: 'Unauthorized: No token provided' })
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return error(reply, 3001, "Unauthorized: No token provided");
     }
 
     // Verify token
-    const payload = await request.jwtVerify<JWTPayload>()
+    const payload = await request.jwtVerify<JWTPayload>();
 
     // Get user from database
     const user = await prisma.user.findUnique({
@@ -29,10 +30,10 @@ export async function authMiddleware(
         name: true,
         createdAt: true,
       },
-    })
+    });
 
     if (!user) {
-      return reply.status(401).send({ error: 'Unauthorized: User not found' })
+      return error(reply, 3002, "Unauthorized: User not found");
     }
 
     // Attach user to request
@@ -40,9 +41,9 @@ export async function authMiddleware(
       id: user.id,
       email: user.email,
       name: user.name,
-      createdAt: user.createdAt
-    }
-  } catch (error) {
-    return reply.status(401).send({ error: 'Unauthorized: Invalid token' })
+      createdAt: user.createdAt,
+    };
+  } catch (err) {
+    return error(reply, 3003, "Unauthorized: Invalid token");
   }
 }
