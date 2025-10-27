@@ -92,6 +92,8 @@ import styles from './Home.module.css'
 <div style={{color: 'red'}}>...</div>
 ```
 
+Tailwind CSS 必须使用 v4 写法：在 CSS 中使用 @import "tailwindcss"，禁止使用旧版 @tailwind base/components/utilities。
+
 ### 响应式规范
 
 使用 Tailwind 响应式前缀：
