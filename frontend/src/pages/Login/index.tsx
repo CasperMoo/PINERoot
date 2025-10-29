@@ -73,7 +73,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
       <Card
         className="w-full max-w-md shadow-xl rounded-2xl"
-        bordered={false}
+        variant="borderless"
       >
         {/* 标题区域 */}
         <div className="text-center mb-8">

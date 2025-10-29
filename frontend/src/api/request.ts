@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import type { ApiResponse } from './types';
 
 /**
@@ -13,12 +13,17 @@ const request = axios.create({
 });
 
 /**
+ * localStorage token key (与 auth.ts store 保持一致)
+ */
+const TOKEN_KEY = 'auth_token';
+
+/**
  * 请求拦截器
  * 自动添加 token 到请求头
  */
 request.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -42,7 +47,7 @@ request.interceptors.response.use(
     // 处理 401 未授权错误
     if (error.response?.status === 401) {
       // 清除 token
-      localStorage.removeItem('token');
+      localStorage.removeItem(TOKEN_KEY);
       // 跳转到登录页
       window.location.href = '/login';
       return Promise.reject(new Error('未授权，请重新登录'));

@@ -35,12 +35,20 @@ interface AuthState {
 const TOKEN_KEY = 'auth_token';
 
 /**
+ * 检查 localStorage 是否有 token
+ * 用于设置初始 isLoading 状态
+ */
+const hasStoredToken = typeof window !== 'undefined'
+  ? !!localStorage.getItem(TOKEN_KEY)
+  : false;
+
+/**
  * 认证状态管理
  */
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
-  isLoading: false,
+  isLoading: hasStoredToken, // 如果有存储的 token，初始为 true
 
   setAuth: (user: User, token: string) => {
     // 保存 token 到 localStorage
