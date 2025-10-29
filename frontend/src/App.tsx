@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { App as AntApp, ConfigProvider } from 'antd'
+import zhCN from 'antd/locale/zh_CN'
 import Login from '@/pages/Login'
+import Register from '@/pages/Register'
 import PrivateRoute from '@/components/PrivateRoute'
 import { useAuthStore } from '@/store/auth'
 
@@ -15,16 +18,34 @@ function App() {
   // 初始化中，显示加载状态
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <div className="text-2xl text-gray-600">加载中...</div>
-        </div>
-      </div>
+      <ConfigProvider
+        locale={zhCN}
+        theme={{
+          cssVar: true,
+        }}
+        wave={{ disabled: true }}
+      >
+        <AntApp>
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+            <div className="text-center">
+              <div className="text-2xl text-gray-600">加载中...</div>
+            </div>
+          </div>
+        </AntApp>
+      </ConfigProvider>
     )
   }
 
   return (
-    <BrowserRouter>
+    <ConfigProvider
+      locale={zhCN}
+      theme={{
+        cssVar: true,
+      }}
+      wave={{ disabled: true }}
+    >
+      <AntApp>
+        <BrowserRouter>
       <Routes>
         {/* 首页 */}
         <Route
@@ -46,6 +67,9 @@ function App() {
         {/* 登录页 */}
         <Route path="/login" element={<Login />} />
 
+        {/* 注册页 */}
+        <Route path="/register" element={<Register />} />
+
         {/* 工作台（需要登录）*/}
         <Route
           path="/dashboard"
@@ -66,6 +90,8 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
+      </AntApp>
+    </ConfigProvider>
   )
 }
 
