@@ -75,22 +75,35 @@
   - 解决刷新页面丢失登录状态的问题
 - **状态**：已完成，禁止修改
 
-### ✅ 登录页面
+### ✅ 用户认证页面
 - 文件：
-  - `src/pages/Login/index.tsx` - 登录页面组件
+  - `src/pages/Login/index.tsx` - 登录页面
+  - `src/pages/Register/index.tsx` - 注册页面
 - 功能：
-  - 邮箱密码登录
+  - 用户登录/注册
   - 表单验证（react-hook-form + zod）
-  - 登录成功后跳转 /dashboard
+  - Token持久化（localStorage）
+  - 路由保护（PrivateRoute）
+  - 自动跳转（成功后跳转到 /dashboard）
+  - Toast 提示（使用 App.useApp() hook）
   - 响应式设计（移动/平板/PC）
 - UI组件：
   - Ant Design 5（Card variant="borderless"）
   - Tailwind CSS v4 样式
-- **状态**：已完成，禁止修改
+  - 页面间导航链接（登录 ↔ 注册）
+- 注意事项：
+  - Message 必须使用 `App.useApp()` hook 方式
+  - 禁用 wave 效果以兼容 React 19
+  - ConfigProvider 需要配置 `wave={{ disabled: true }}`
+- **状态**：已完成测试，禁止修改
 
 ## 开发中模块（🚧 可以修改）
 
-（暂无，随着开发逐步添加）
+### 🚧 首页（Landing Page）
+- 文件：待创建 `src/pages/Home/index.tsx`
+- 功能：品牌展示 + 功能入口
+- 设计：简约现代，微动效
+- 状态：即将开始
 
 ## 重要注意事项
 
