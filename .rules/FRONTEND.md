@@ -24,14 +24,92 @@
   - `src/api/types.ts` - API类型定义
   - `src/api/auth.ts` - 认证API封装
 - 功能：
-  - 自动携带JWT token
+  - 自动携带JWT token（localStorage key: `auth_token`）
   - 401自动跳转登录
-  - 统一响应处理
+  - 统一响应处理（code/message/data）
+- 注意事项：
+  - axios类型导入必须使用 `type` 关键字
+  - 后端API：`/api/auth/login`, `/api/auth/register`, `/api/me`
+- **状态**：已完成，禁止修改
+
+### ✅ 状态管理（Zustand）
+- 文件：
+  - `src/store/auth.ts` - 用户认证状态
+- 功能：
+  - 用户信息管理（user, token）
+  - 登录状态持久化（localStorage）
+  - 初始化认证（initAuth）
+  - 退出登录（logout）
+- 关键实现：
+  - `isLoading` 初始值根据 localStorage 是否有 token 决定
+  - 刷新页面时自动调用 `/api/me` 恢复登录状态
+  - token 失效时自动清理状态
+- **状态**：已完成，禁止修改
+
+### ✅ 路由配置
+- 文件：
+  - `src/App.tsx` - 路由配置入口
+  - `vite.config.ts` - 路径别名配置（@指向src）
+  - `tsconfig.app.json` - TypeScript路径映射
+- 功能：
+  - React Router v7 配置
+  - 路径别名 `@/*` 支持
+  - 应用初始化时调用 initAuth()
+- 当前路由：
+  - `/` - 首页（开发中占位）
+  - `/login` - 登录页
+  - `/dashboard` - 工作台（需要登录）
+- **状态**：已完成，禁止修改
+
+### ✅ 路由守卫
+- 文件：
+  - `src/components/PrivateRoute.tsx` - 路由守卫组件
+- 功能：
+  - 保护需要登录的路由
+  - 检查 token 和 isLoading 状态
+  - 未登录自动跳转 /login
+  - 初始化中显示加载状态（避免闪烁）
+- 关键实现：
+  - 必须同时检查 `isLoading` 和 `token`
+  - isLoading 为 true 时不跳转（等待 initAuth 完成）
+  - 解决刷新页面丢失登录状态的问题
+- **状态**：已完成，禁止修改
+
+### ✅ 登录页面
+- 文件：
+  - `src/pages/Login/index.tsx` - 登录页面组件
+- 功能：
+  - 邮箱密码登录
+  - 表单验证（react-hook-form + zod）
+  - 登录成功后跳转 /dashboard
+  - 响应式设计（移动/平板/PC）
+- UI组件：
+  - Ant Design 5（Card variant="borderless"）
+  - Tailwind CSS v4 样式
 - **状态**：已完成，禁止修改
 
 ## 开发中模块（🚧 可以修改）
 
 （暂无，随着开发逐步添加）
+
+## 重要注意事项
+
+### localStorage 键名统一
+- Token 存储 key：`auth_token`（所有地方必须一致）
+- 禁止使用其他 key 名如 `token`, `jwt`, `user_token` 等
+
+### 刷新页面保持登录的机制
+1. Store 初始化时同步检查 localStorage 是否有 token
+2. 有 token 时，初始 `isLoading = true`
+3. App.tsx useEffect 中调用 `initAuth()`
+4. initAuth 调用 `/api/me` 获取用户信息
+5. PrivateRoute 在 isLoading 时显示加载状态，不跳转
+6. initAuth 完成后，isLoading = false，路由正常渲染
+
+### 类型导入规范
+- Axios 类型必须使用 `type` 关键字导入
+- 示例：`import axios, { type AxiosError, type AxiosResponse } from 'axios'`
+- 原因：避免 Vite 将类型作为运行时值导入导致错误
 
 ## 项目结构规范
 

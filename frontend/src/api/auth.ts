@@ -43,7 +43,7 @@ export const authApi = {
    * 获取当前登录用户信息
    */
   async getMe(): Promise<User> {
-    const response = await request.get<any, ApiResponse<User>>('/api/auth/me');
+    const response = await request.get<any, ApiResponse<User>>('/api/me');
 
     if (response.code !== 0) {
       throw new Error(response.message || '获取用户信息失败');
