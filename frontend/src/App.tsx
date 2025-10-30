@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { App as AntApp, ConfigProvider } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
+import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import PrivateRoute from '@/components/PrivateRoute'
@@ -48,21 +49,7 @@ function App() {
         <BrowserRouter>
       <Routes>
         {/* 首页 */}
-        <Route
-          path="/"
-          element={
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                  首页开发中
-                </h1>
-                <p className="text-gray-600">
-                  敬请期待...
-                </p>
-              </div>
-            </div>
-          }
-        />
+        <Route path="/" element={<Home />} />
 
         {/* 登录页 */}
         <Route path="/login" element={<Login />} />
