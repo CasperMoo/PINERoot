@@ -5,6 +5,7 @@ import zhCN from 'antd/locale/zh_CN'
 import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
+import HalloweenAnchor from '@/pages/HalloweenAnchor'
 import PrivateRoute from '@/components/PrivateRoute'
 import { useAuthStore } from '@/store/auth'
 
@@ -56,6 +57,9 @@ function App() {
 
         {/* 注册页 */}
         <Route path="/register" element={<Register />} />
+
+        {/* Halloween Anchor 页面（无需鉴权）*/}
+        <Route path="/anchor/halloween" element={<HalloweenAnchor />} />
 
         {/* 工作台（需要登录）*/}
         <Route
