@@ -60,7 +60,37 @@
   - 3001 无 Token
   - 3002 用户不存在
   - 3003 Token 无效
+  - 4001 不支持的文件类型
+  - 4002 文件大小超出限制
+  - 4003 图片不存在
+  - 4004 无权限操作
+  - 4005 OSS上传失败
+  - 4006 标签不存在
+  - 4007 批量上传数量超限
+  - 4008 标签名称已存在
   - 9001 服务不可用（健康检查失败）
+
+### ✅ 图片管理模块
+
+- 文件：`src/routes/image.ts`, `src/routes/imageTag.ts`
+- 服务层：`src/services/image.ts`, `src/services/imageTag.ts`, `src/services/oss.ts`
+- 功能：
+  - **图片上传**：POST /api/images/upload - 批量上传图片（最多10张，单张最大5MB）
+  - **图片列表**：GET /api/images - 分页查询图片列表，支持按 tagId 和 userId 过滤
+  - **图片详情**：GET /api/images/:id - 获取单张图片详情
+  - **修改标签**：PATCH /api/images/:id/tag - 修改图片标签（仅所有者）
+  - **删除图片**：DELETE /api/images/:id - 软删除图片（仅所有者）
+  - **标签列表**：GET /api/image-tags - 获取所有标签
+  - **创建标签**：POST /api/image-tags - 创建新标签
+  - **修改标签**：PATCH /api/image-tags/:id - 修改标签名称
+  - **删除标签**：DELETE /api/image-tags/:id - 删除标签（不允许删除 id=1 的默认标签）
+- 数据库：Image 表、ImageTag 表
+- 文件存储：阿里云 OSS（公共读权限）
+- 图片处理：使用 sharp 提取图片尺寸
+- 支持格式：JPEG, PNG, GIF, WebP
+- 软删除：Image 表使用 deletedAt 字段实现软删除
+- 权限控制：所有接口需要 JWT 认证，修改/删除操作验证所有者权限
+- **状态**：已完成测试并部署，禁止修改
 
 ## 开发中模块（🚧 可以修改）
 
@@ -98,15 +128,26 @@ pnpm test:ci        # Run tests once (for CI)
 必需的环境变量（见 `.env.example`）：
 
 - `DATABASE_URL` - MySQL connection string (格式：`mysql://user:password@host:port/database`)
+- `SHADOW_DATABASE_URL` - Shadow database for Prisma migrations (格式同上)
 - `JWT_SECRET` - Secret key for JWT token signing
 - `PORT` - Server port (defaults to 3000)
 - `NODE_ENV` - Environment (development/production)
+- `OSS_REGION` - 阿里云 OSS 区域 (例如：oss-cn-hangzhou)
+- `OSS_ACCESS_KEY_ID` - 阿里云 OSS Access Key ID
+- `OSS_ACCESS_KEY_SECRET` - 阿里云 OSS Access Key Secret
+- `OSS_BUCKET` - 阿里云 OSS Bucket 名称
+- `OSS_ENDPOINT` - 阿里云 OSS 自定义域名或默认域名
 
-应用启动时会验证 `DATABASE_URL` 和 `JWT_SECRET` 是否存在。
+应用启动时会验证 `DATABASE_URL`、`JWT_SECRET` 和所有 OSS 配置是否存在。
 
 ## 架构说明
 
 **入口文件**: `src/index.ts` - Fastify 服务器设置，包含插件注册、路由挂载和优雅关闭处理。
+
+**已注册插件**:
+- `@fastify/cors` - CORS 跨域支持
+- `@fastify/jwt` - JWT 认证
+- `@fastify/multipart` - 文件上传支持（单文件最大 5MB，批量上传最多 10 个文件）
 
 **认证流程**:
 
@@ -114,6 +155,17 @@ pnpm test:ci        # Run tests once (for CI)
 2. Auth 路由 (`src/routes/auth.ts`) 处理注册和登录，成功时签发 JWT token
 3. 受保护的路由使用 `authMiddleware` (`src/middleware/auth.ts`) 作为 preHandler 验证 JWT 并附加用户信息到 request
 4. 用户数据通过 `src/types.ts` 中的类型扩展附加到 `request.currentUser`
+
+**图片上传流程**:
+
+1. 客户端通过 `multipart/form-data` 上传文件到 `/api/images/upload`
+2. 使用 `request.parts()` 迭代处理多个文件和字段（如 `tagId`）
+3. 验证文件类型、大小、上传数量
+4. 使用 sharp 提取图片尺寸信息
+5. 生成唯一 OSS key（格式：`{userId}/{timestamp}-{uuid}.{ext}`）
+6. 并发上传到阿里云 OSS
+7. 保存图片记录到数据库
+8. 返回上传结果（包括成功和失败的文件）
 
 **数据库层**:
 
@@ -157,12 +209,14 @@ pnpm test:ci        # Run tests once (for CI)
 
 ## 数据库 Schema
 
-当前 User 模型：
+当前数据模型：
 
 ```prisma
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  relationMode      = "prisma"
 }
 
 model User {
@@ -173,7 +227,39 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Image {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  originalName String
+  ossKey       String    @unique
+  ossUrl       String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  tagId        Int       @default(1)
+  deletedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([tagId])
+  @@index([deletedAt])
+}
+
+model ImageTag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 ```
+
+**注意**：
+- 使用 `relationMode = "prisma"` 模式，不使用数据库外键
+- 标签关联通过应用层手动 JOIN 查询
+- Image 表使用软删除（`deletedAt` 字段）
 
 ### Schema 变更流程
 

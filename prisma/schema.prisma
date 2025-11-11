@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
   relationMode = "prisma"
 }
 
@@ -13,6 +14,33 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Image {
+  id           Int       @id @default(autoincrement())
+  userId       Int       // 上传者ID
+  originalName String    // 原始文件名
+  ossKey       String    @unique // OSS存储路径/key
+  ossUrl       String    // OSS公开访问URL
+  mimeType     String    // 文件类型 (image/jpeg, image/png等)
+  size         Int       // 文件大小(bytes)
+  width        Int?      // 图片宽度(可选)
+  height       Int?      // 图片高度(可选)
+  tagId        Int       @default(1) // 标签ID（关联 ImageTag，默认为1）
+  deletedAt    DateTime? // 软删除时间
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([tagId])
+  @@index([deletedAt])
+}
+
+model ImageTag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // 标签名
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

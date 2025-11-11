@@ -22,16 +22,22 @@
   "dependencies": {
     "@fastify/cors": "^11.1.0",
     "@fastify/jwt": "^10.0.0",
+    "@fastify/multipart": "^9.3.0",
     "@prisma/client": "^6.17.1",
+    "ali-oss": "^6.23.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
-    "fastify": "^5.6.1"
+    "fastify": "^5.6.1",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
+    "@types/ali-oss": "^6.16.11",
     "@types/bcrypt": "^6.0.0",
+    "@types/form-data": "^2.5.2",
     "@types/node": "^24.7.2",
     "@types/supertest": "^6.0.2",
     "@vitest/ui": "^2.1.8",
+    "form-data": "^4.0.4",
     "prisma": "^6.17.1",
     "supertest": "^7.0.0",
     "tsx": "^4.20.6",
