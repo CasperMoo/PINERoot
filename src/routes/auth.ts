@@ -58,11 +58,11 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       // Generate JWT token
       const token = fastify.jwt.sign({ userId: user.id });
 
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
+      // Return user without password and role
+      const { password: _, role: __, ...userWithoutSensitiveData } = user;
 
       return ok(reply, {
-        user: userWithoutPassword,
+        user: userWithoutSensitiveData,
         token,
       });
     } catch (err) {
@@ -99,11 +99,11 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       // Generate JWT token
       const token = fastify.jwt.sign({ userId: user.id });
 
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
+      // Return user without password and role
+      const { password: _, role: __, ...userWithoutSensitiveData } = user;
 
       return ok(reply, {
-        user: userWithoutPassword,
+        user: userWithoutSensitiveData,
         token,
       });
     } catch (err) {
