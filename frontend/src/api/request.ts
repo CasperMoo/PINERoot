@@ -39,8 +39,8 @@ request.interceptors.request.use(
  * 统一处理响应和错误
  */
 request.interceptors.response.use(
-  (response: AxiosResponse<ApiResponse>) => {
-    // 直接返回响应数据
+  (response: AxiosResponse<ApiResponse>): any => {
+    // 直接返回响应数据（修改了返回类型，所以声明为 any）
     return response.data;
   },
   (error: AxiosError<ApiResponse>) => {
