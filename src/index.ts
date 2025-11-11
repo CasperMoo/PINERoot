@@ -1,9 +1,12 @@
 import fastify from 'fastify'
 import cors from '@fastify/cors'
 import jwt from '@fastify/jwt'
+import multipart from '@fastify/multipart'
 import { config } from './config'
 import { prisma } from './db'
 import authRoutes from './routes/auth'
+import imageRoutes from './routes/image'
+import imageTagRoutes from './routes/imageTag'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -20,6 +23,14 @@ export async function build() {
   // Register JWT plugin
   await app.register(jwt, {
     secret: config.JWT_SECRET,
+  });
+
+  // Register multipart plugin for file uploads
+  await app.register(multipart, {
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB per file
+      files: 10 // Max 10 files per request
+    }
   });
 
   // Health check endpoint
@@ -44,6 +55,12 @@ export async function build() {
 
   // Register auth routes
   await app.register(authRoutes, { prefix: "/api/auth" });
+
+  // Register image routes
+  await app.register(imageRoutes, { prefix: "/api" });
+
+  // Register image tag routes
+  await app.register(imageTagRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(
