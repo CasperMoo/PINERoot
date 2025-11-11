@@ -5,9 +5,24 @@ interface Config {
   NODE_ENV: string
   DATABASE_URL: string
   JWT_SECRET: string
+  OSS: {
+    REGION: string
+    ACCESS_KEY_ID: string
+    ACCESS_KEY_SECRET: string
+    BUCKET: string
+    ENDPOINT: string
+  }
 }
 
-const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET']
+const requiredEnvVars = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'OSS_REGION',
+  'OSS_ACCESS_KEY_ID',
+  'OSS_ACCESS_KEY_SECRET',
+  'OSS_BUCKET',
+  'OSS_ENDPOINT'
+]
 
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
@@ -20,4 +35,11 @@ export const config: Config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   DATABASE_URL: process.env.DATABASE_URL!,
   JWT_SECRET: process.env.JWT_SECRET!,
+  OSS: {
+    REGION: process.env.OSS_REGION!,
+    ACCESS_KEY_ID: process.env.OSS_ACCESS_KEY_ID!,
+    ACCESS_KEY_SECRET: process.env.OSS_ACCESS_KEY_SECRET!,
+    BUCKET: process.env.OSS_BUCKET!,
+    ENDPOINT: process.env.OSS_ENDPOINT!,
+  },
 }
