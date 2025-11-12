@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest'
 import { build } from '@/index'
-import { cleanDatabase, createTestUser, createTestTag, createTestImage } from '../helpers'
+import { cleanDatabase, createTestAdminUser, createTestUser, createTestTag, createTestImage } from '../helpers'
 import FormData from 'form-data'
 import fs from 'fs'
 import path from 'path'
@@ -36,9 +36,9 @@ describe('Image Routes', () => {
     // 创建应用实例
     app = await build()
 
-    // 创建测试用户并登录
-    const user = await createTestUser({
-      email: 'image-test@example.com',
+    // 创建测试管理员用户并登录（因为图片上传、修改、删除需要管理员权限）
+    const user = await createTestAdminUser({
+      email: 'image-admin@example.com',
       password: '123456'
     })
     userId = user.id
@@ -47,7 +47,7 @@ describe('Image Routes', () => {
       method: 'POST',
       url: '/api/auth/login',
       payload: {
-        email: 'image-test@example.com',
+        email: 'image-admin@example.com',
         password: '123456'
       }
     })

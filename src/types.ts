@@ -1,10 +1,12 @@
 import { FastifyRequest } from 'fastify'
+import { UserRole } from '@prisma/client'
 
 // 定义用户负载类型（不含密码）
 export interface UserPayload {
   id: number
   email: string
   name: string | null
+  role: UserRole
   createdAt: Date
 }
 
