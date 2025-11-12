@@ -20,7 +20,7 @@ export async function createTestUser(data?: Partial<any>) {
   })
 }
 
-// 创建测试标签
+// 创建测试标签（返回标签对象包含 ID）
 export async function createTestTag(name: string) {
   return prisma.imageTag.create({
     data: { name }

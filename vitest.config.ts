@@ -8,6 +8,8 @@ export default defineConfig({
     setupFiles: ["./tests/setup.ts"],
     include: ["tests/**/*.{test,spec}.ts"],
     exclude: ["node_modules/**", "dist/**", "tests/**/*.js"],
+    // 串行执行测试，避免数据库并发冲突
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],

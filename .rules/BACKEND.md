@@ -18,8 +18,12 @@
 - 功能：
   - POST /api/auth/register - 用户注册
   - POST /api/auth/login - 用户登录
-- 数据库：User 表（id, email, password, name, createdAt, updatedAt）
+- 数据库：User 表（id, email, password, name, role, createdAt, updatedAt）
 - 密码安全：bcrypt with salt rounds of 10
+- 用户角色：
+  - 枚举类型：USER（普通用户）、ADMIN（管理员）
+  - 注册时默认为 USER
+  - role 字段在 API 响应中对前端不可见（已过滤）
 - **状态**：已完成测试并部署，禁止修改
 
 ### ✅ JWT 中间件
@@ -219,11 +223,17 @@ datasource db {
   relationMode      = "prisma"
 }
 
+enum UserRole {
+  USER  // 普通用户
+  ADMIN // 管理员
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
   name      String?
+  role      UserRole @default(USER)  // 用户角色，默认为普通用户（前端不可见）
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
