@@ -1,4 +1,5 @@
 import { prisma } from '@/db'
+import { UserRole } from '@prisma/client'
 
 // 清理数据库
 export async function cleanDatabase() {
@@ -16,7 +17,18 @@ export async function createTestUser(data?: Partial<any>) {
       email: data?.email || 'test@example.com',
       password: await bcrypt.hash(data?.password || '123456', 10),
       name: data?.name || 'Test User',
+      role: data?.role || UserRole.USER,
     },
+  })
+}
+
+// 创建测试管理员用户
+export async function createTestAdminUser(data?: Partial<any>) {
+  return createTestUser({
+    email: data?.email || 'admin@example.com',
+    password: data?.password || '123456',
+    name: data?.name || 'Admin User',
+    role: UserRole.ADMIN,
   })
 }
 
