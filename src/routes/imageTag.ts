@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { authMiddleware } from '../middleware/auth'
+import { requireAdmin } from '../middleware/roleAuth'
 import { ok, error, ErrorCode } from '../utils/response'
 import {
   getAllTags,
@@ -28,12 +29,12 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // 创建新标签（可选，管理员功能）
+  // 创建新标签（仅管理员）
   fastify.post<{
     Body: { name: string }
   }>(
     '/image-tags',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest<{ Body: { name: string } }>, reply: FastifyReply) => {
       try {
         const { name } = request.body
@@ -57,13 +58,13 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // 修改标签名（可选，管理员功能）
+  // 修改标签名（仅管理员）
   fastify.patch<{
     Params: { id: string }
     Body: { name: string }
   }>(
     '/image-tags/:id',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest<{
       Params: { id: string }
       Body: { name: string }
@@ -95,12 +96,12 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // 删除标签（可选，管理员功能）
+  // 删除标签（仅管理员）
   fastify.delete<{
     Params: { id: string }
   }>(
     '/image-tags/:id',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
         const tagId = parseInt(request.params.id)

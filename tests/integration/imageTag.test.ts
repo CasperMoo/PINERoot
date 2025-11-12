@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { build } from '@/index'
-import { cleanDatabase, createTestUser, createTestTag } from '../helpers'
+import { cleanDatabase, createTestAdminUser, createTestTag } from '../helpers'
 import { prisma } from '@/db'
 
 describe('ImageTag Routes', () => {
@@ -15,9 +15,9 @@ describe('ImageTag Routes', () => {
     // 创建应用实例
     app = await build()
 
-    // 创建测试用户并登录
-    const user = await createTestUser({
-      email: 'tag-test@example.com',
+    // 创建测试管理员用户并登录（因为标签的创建、修改、删除需要管理员权限）
+    const user = await createTestAdminUser({
+      email: 'tag-admin@example.com',
       password: '123456'
     })
     userId = user.id
@@ -26,7 +26,7 @@ describe('ImageTag Routes', () => {
       method: 'POST',
       url: '/api/auth/login',
       payload: {
-        email: 'tag-test@example.com',
+        email: 'tag-admin@example.com',
         password: '123456'
       }
     })

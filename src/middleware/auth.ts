@@ -28,6 +28,7 @@ export async function authMiddleware(
         id: true,
         email: true,
         name: true,
+        role: true,
         createdAt: true,
       },
     });
@@ -41,6 +42,7 @@ export async function authMiddleware(
       id: user.id,
       email: user.email,
       name: user.name,
+      role: user.role,
       createdAt: user.createdAt,
     };
   } catch (err) {

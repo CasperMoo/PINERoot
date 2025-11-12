@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { MultipartFile } from '@fastify/multipart'
 import { authMiddleware } from '../middleware/auth'
+import { requireAdmin } from '../middleware/roleAuth'
 import { ok, error, ErrorCode } from '../utils/response'
 import { validateBatchCount, MAX_BATCH_UPLOAD } from '../utils/validation'
 import {
@@ -17,10 +18,10 @@ import { tagExists } from '../services/imageTag'
  * 图片管理路由
  */
 export default async function imageRoutes(fastify: FastifyInstance) {
-  // 批量上传图片
+  // 批量上传图片（仅管理员）
   fastify.post(
     '/images/upload',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const userId = request.currentUser!.id
@@ -159,13 +160,13 @@ export default async function imageRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // 修改图片标签
+  // 修改图片标签（仅管理员）
   fastify.patch<{
     Params: { id: string }
     Body: { tagId: number }
   }>(
     '/images/:id/tag',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest<{
       Params: { id: string }
       Body: { tagId: number }
@@ -206,12 +207,12 @@ export default async function imageRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // 删除图片（软删除）
+  // 删除图片（软删除，仅管理员）
   fastify.delete<{
     Params: { id: string }
   }>(
     '/images/:id',
-    { preHandler: authMiddleware },
+    { preHandler: [authMiddleware, requireAdmin()] },
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
         const imageId = parseInt(request.params.id)
