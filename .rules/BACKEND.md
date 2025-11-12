@@ -33,6 +33,22 @@
 - JWT 插件：通过 `@fastify/jwt` 插件实现
 - **状态**：已完成测试并部署，禁止修改
 
+### ✅ 角色权限控制中间件
+
+- 文件：`src/middleware/roleAuth.ts`
+- 功能：基于用户角色的访问控制
+- 提供的中间件函数：
+  - `requireRole(...allowedRoles)` - 通用角色验证，接受多个角色参数
+  - `requireAdmin()` - 仅管理员可访问
+  - `requireUser()` - 任何已认证用户可访问（USER 或 ADMIN）
+- 使用方式：与 `authMiddleware` 组合使用，通过 Fastify `preHandler` 数组应用
+- 示例：`{ preHandler: [authMiddleware, requireAdmin()] }`
+- 权限不足时返回业务码 4004（Forbidden: Insufficient permissions）
+- 应用场景：
+  - 图片管理：上传/修改/删除限制为管理员，查询允许所有认证用户
+  - 图片标签：创建/修改/删除限制为管理员，查询允许所有认证用户
+- **状态**：已完成测试并部署，禁止修改
+
 ### ✅ 基础设施
 
 - 文件：`src/config.ts`, `src/db.ts`, `src/types.ts`, `src/index.ts`
@@ -79,21 +95,23 @@
 - 文件：`src/routes/image.ts`, `src/routes/imageTag.ts`
 - 服务层：`src/services/image.ts`, `src/services/imageTag.ts`, `src/services/oss.ts`
 - 功能：
-  - **图片上传**：POST /api/images/upload - 批量上传图片（最多10张，单张最大5MB）
-  - **图片列表**：GET /api/images - 分页查询图片列表，支持按 tagId 和 userId 过滤
-  - **图片详情**：GET /api/images/:id - 获取单张图片详情
-  - **修改标签**：PATCH /api/images/:id/tag - 修改图片标签（仅所有者）
-  - **删除图片**：DELETE /api/images/:id - 软删除图片（仅所有者）
-  - **标签列表**：GET /api/image-tags - 获取所有标签
-  - **创建标签**：POST /api/image-tags - 创建新标签
-  - **修改标签**：PATCH /api/image-tags/:id - 修改标签名称
-  - **删除标签**：DELETE /api/image-tags/:id - 删除标签（不允许删除 id=1 的默认标签）
+  - **图片上传**：POST /api/images/upload - 批量上传图片（最多10张，单张最大5MB，仅管理员）
+  - **图片列表**：GET /api/images - 分页查询图片列表，支持按 tagId 和 userId 过滤（所有认证用户）
+  - **图片详情**：GET /api/images/:id - 获取单张图片详情（所有认证用户）
+  - **修改标签**：PATCH /api/images/:id/tag - 修改图片标签（仅管理员）
+  - **删除图片**：DELETE /api/images/:id - 软删除图片（仅管理员）
+  - **标签列表**：GET /api/image-tags - 获取所有标签（所有认证用户）
+  - **创建标签**：POST /api/image-tags - 创建新标签（仅管理员）
+  - **修改标签**：PATCH /api/image-tags/:id - 修改标签名称（仅管理员）
+  - **删除标签**：DELETE /api/image-tags/:id - 删除标签（仅管理员，不允许删除 id=1 的默认标签）
 - 数据库：Image 表、ImageTag 表
 - 文件存储：阿里云 OSS（公共读权限）
 - 图片处理：使用 sharp 提取图片尺寸
 - 支持格式：JPEG, PNG, GIF, WebP
 - 软删除：Image 表使用 deletedAt 字段实现软删除
-- 权限控制：所有接口需要 JWT 认证，修改/删除操作验证所有者权限
+- 权限控制：
+  - 所有接口需要 JWT 认证
+  - 使用 `roleAuth` 中间件实现权限控制
 - **状态**：已完成测试并部署，禁止修改
 
 ## 开发中模块（🚧 可以修改）
