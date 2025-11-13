@@ -6,7 +6,10 @@ import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import HalloweenAnchor from '@/pages/HalloweenAnchor'
+import Super from '@/pages/Super'
+import ImageManage from '@/pages/Super/ImageManage'
 import PrivateRoute from '@/components/PrivateRoute'
+import AdminRoute from '@/components/AdminRoute'
 import { useAuthStore } from '@/store/auth'
 
 function App() {
@@ -77,6 +80,26 @@ function App() {
                 </div>
               </div>
             </PrivateRoute>
+          }
+        />
+
+        {/* 管理后台（仅管理员）*/}
+        <Route
+          path="/super"
+          element={
+            <AdminRoute>
+              <Super />
+            </AdminRoute>
+          }
+        />
+
+        {/* 图片管理（仅管理员）*/}
+        <Route
+          path="/super/image-manage"
+          element={
+            <AdminRoute>
+              <ImageManage />
+            </AdminRoute>
           }
         />
       </Routes>
