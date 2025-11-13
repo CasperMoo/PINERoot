@@ -23,7 +23,7 @@
 - 用户角色：
   - 枚举类型：USER（普通用户）、ADMIN（管理员）
   - 注册时默认为 USER
-  - role 字段在 API 响应中对前端不可见（已过滤）
+  - role 字段返回给前端（用于前端权限判断）
 - **状态**：已完成测试并部署，禁止修改
 
 ### ✅ JWT 中间件
@@ -212,7 +212,13 @@ pnpm test:ci        # Run tests once (for CI)
   "code": 0,
   "message": "OK",
   "data": {
-    "user": { "id": 1, "email": "a@b.com", "name": null, "createdAt": "..." },
+    "user": {
+      "id": 1,
+      "email": "a@b.com",
+      "name": null,
+      "role": "USER",
+      "createdAt": "..."
+    },
     "token": "<jwt>"
   }
 }

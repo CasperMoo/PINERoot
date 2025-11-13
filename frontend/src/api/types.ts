@@ -8,12 +8,26 @@ export interface ApiResponse<T = any> {
 }
 
 /**
+ * 用户角色类型
+ */
+export type UserRole = 'USER' | 'ADMIN'
+
+/**
+ * 用户角色常量
+ */
+export const UserRole = {
+  USER: 'USER' as const,
+  ADMIN: 'ADMIN' as const
+}
+
+/**
  * 用户信息
  */
 export interface User {
   id: number;
   email: string;
   name: string | null;
+  role: UserRole;
   createdAt: string;
 }
 

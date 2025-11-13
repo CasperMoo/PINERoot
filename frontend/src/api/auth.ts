@@ -9,7 +9,7 @@ export const authApi = {
    * 用户登录
    */
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await request.post<any, ApiResponse<AuthResponse>>('/api/auth/login', data);
+    const response = await request.post<any, ApiResponse<AuthResponse>>('/auth/login', data);
 
     if (response.code !== 0) {
       throw new Error(response.message || '登录失败');
@@ -26,7 +26,7 @@ export const authApi = {
    * 用户注册
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await request.post<any, ApiResponse<AuthResponse>>('/api/auth/register', data);
+    const response = await request.post<any, ApiResponse<AuthResponse>>('/auth/register', data);
 
     if (response.code !== 0) {
       throw new Error(response.message || '注册失败');
@@ -43,7 +43,7 @@ export const authApi = {
    * 获取当前登录用户信息
    */
   async getMe(): Promise<User> {
-    const response = await request.get<any, ApiResponse<User>>('/api/me');
+    const response = await request.get<any, ApiResponse<User>>('/me');
 
     if (response.code !== 0) {
       throw new Error(response.message || '获取用户信息失败');
