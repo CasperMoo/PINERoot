@@ -1,29 +1,36 @@
 import { prisma } from '../db'
 
 /**
- * 获取所有标签
+ * 获取所有标签（排除已删除）
  */
 export async function getAllTags() {
   return prisma.imageTag.findMany({
+    where: { deletedAt: null },
     orderBy: { id: 'asc' }
   })
 }
 
 /**
- * 根据 ID 获取标签
+ * 根据 ID 获取标签（排除已删除）
  */
 export async function getTagById(id: number) {
-  return prisma.imageTag.findUnique({
-    where: { id }
+  return prisma.imageTag.findFirst({
+    where: {
+      id,
+      deletedAt: null
+    }
   })
 }
 
 /**
- * 根据名称获取标签
+ * 根据名称获取标签（排除已删除）
  */
 export async function getTagByName(name: string) {
-  return prisma.imageTag.findUnique({
-    where: { name }
+  return prisma.imageTag.findFirst({
+    where: {
+      name,
+      deletedAt: null
+    }
   })
 }
 
@@ -47,20 +54,24 @@ export async function updateTag(id: number, name: string) {
 }
 
 /**
- * 删除标签
+ * 软删除标签
  */
 export async function deleteTag(id: number) {
-  return prisma.imageTag.delete({
-    where: { id }
+  return prisma.imageTag.update({
+    where: { id },
+    data: { deletedAt: new Date() }
   })
 }
 
 /**
- * 检查标签是否存在
+ * 检查标签是否存在（排除已删除）
  */
 export async function tagExists(id: number): Promise<boolean> {
   const count = await prisma.imageTag.count({
-    where: { id }
+    where: {
+      id,
+      deletedAt: null
+    }
   })
   return count > 0
 }

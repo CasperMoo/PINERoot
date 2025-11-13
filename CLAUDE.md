@@ -9,9 +9,10 @@ my-base-service/
 ├── CLAUDE.md           # 📍 你现在在这里（文档索引）
 ├── .rules/             # 具体规则文档目录
 │   ├── BACKEND.md      # 后端开发规范
-│   └── FRONTEND.md     # 前端开发规范
+│   ├── FRONTEND.md     # 前端开发规范
+│   └── DATABASE_MIGRATION.md  # 数据库迁移 SOP
 ├── src/                # 后端源码
-├── frontend/           # 前端项目（待创建）
+├── frontend/           # 前端项目
 └── ...
 ```
 
@@ -87,16 +88,20 @@ my-base-service/
 - 修改 `prisma/schema.prisma`
 - 创建新的数据库迁移
 - 修改数据模型
+- **执行生产环境数据库迁移**
 
 **必读文档**：
 
-1. `.rules/BACKEND.md` - 数据库规范章节
+1. 📘 `.rules/BACKEND.md` - 数据库规范章节
+2. 🔴 `.rules/DATABASE_MIGRATION.md` - **生产环境迁移 SOP（强制）**
 
-**额外要求**：
+**关键要点**：
 
-- 修改前备份数据
-- 先在开发环境测试
-- 运行测试用例验证
+- 开发环境先测试
+- 1Panel 手动备份
+- 使用 `migrate deploy` 而非 `migrate dev`
+- 准备回滚方案
+- 遵循 6 步标准流程
 
 ---
 
@@ -132,12 +137,13 @@ my-base-service/
 
 ## 📝 快速参考
 
-| 任务类型      | 读取文档             | 关键限制       |
-| ------------- | -------------------- | -------------- |
-| 添加 API 接口 | `.rules/BACKEND.md`  | 不改已完成模块 |
-| 创建新页面    | `.rules/FRONTEND.md` | 响应式+规范    |
-| 数据库改动    | `.rules/BACKEND.md`  | 先测试后部署   |
-| 部署配置      | 两个文档都看         | 环境变量管理   |
+| 任务类型         | 读取文档                           | 关键限制           |
+| ---------------- | ---------------------------------- | ------------------ |
+| 添加 API 接口    | `.rules/BACKEND.md`                | 不改已完成模块     |
+| 创建新页面       | `.rules/FRONTEND.md`               | 响应式+规范        |
+| 数据库 Schema    | `.rules/BACKEND.md`                | 先测试后部署       |
+| **生产环境迁移** | **`.rules/DATABASE_MIGRATION.md`** | **遵循 6 步 SOP**  |
+| 部署配置         | BACKEND + FRONTEND                 | 环境变量管理       |
 
 ---
 

@@ -45,8 +45,11 @@ model Image {
 }
 
 model ImageTag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique // 标签名
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String    @unique // 标签名
+  deletedAt DateTime? // 软删除时间
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([deletedAt])
 }

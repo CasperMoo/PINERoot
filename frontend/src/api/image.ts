@@ -82,7 +82,7 @@ export const imageApi = {
       formData.append('tagId', tagId.toString())
     }
 
-    const response = await request.post<ApiResponse<UploadResult>>(
+    const response: ApiResponse<UploadResult> = await request.post(
       '/images/upload',
       formData,
       {
@@ -91,39 +91,39 @@ export const imageApi = {
         }
       }
     )
-    return response.data.data!
+    return response.data!
   },
 
   /**
    * 获取图片列表
    */
   async getList(query?: ImageListQuery): Promise<ImageListResponse> {
-    const response = await request.get<ApiResponse<ImageListResponse>>('/images', {
+    const response: ApiResponse<ImageListResponse> = await request.get('/images', {
       params: query
     })
-    return response.data.data!
+    return response.data!
   },
 
   /**
    * 获取图片详情
    */
   async getDetail(id: number): Promise<Image> {
-    const response = await request.get<ApiResponse<Image>>(`/images/${id}`)
-    return response.data.data!
+    const response: ApiResponse<Image> = await request.get(`/images/${id}`)
+    return response.data!
   },
 
   /**
    * 修改图片标签
    */
   async updateTag(id: number, data: UpdateImageTagRequest): Promise<Image> {
-    const response = await request.patch<ApiResponse<Image>>(`/images/${id}/tag`, data)
-    return response.data.data!
+    const response: ApiResponse<Image> = await request.patch(`/images/${id}/tag`, data)
+    return response.data!
   },
 
   /**
    * 删除图片
    */
   async delete(id: number): Promise<void> {
-    await request.delete<ApiResponse<void>>(`/images/${id}`)
+    await request.delete(`/images/${id}`)
   }
 }

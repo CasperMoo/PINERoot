@@ -1,7 +1,51 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+
+# Environment variables
 .env
+.env.*
+!.env.example
+
+# Logs
 *.log
-.DS_Store
 .pnpm-debug.log
-pnpm-lock.yaml
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Database
+*.sql
+!prisma/migrations/**/*.sql
+*.dump
+backup_*.sql
+prisma/*.db
+prisma/*.db-journal
+
+# Temporary
+tmp/
+temp/
+
+# Note: pnpm-lock.yaml should be committed to ensure consistent dependencies
