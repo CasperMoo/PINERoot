@@ -18,6 +18,9 @@ export async function build() {
   // Register CORS plugin
   await app.register(cors, {
     origin: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   });
 
   // Register JWT plugin

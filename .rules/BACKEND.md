@@ -103,12 +103,12 @@
   - **标签列表**：GET /api/image-tags - 获取所有标签（所有认证用户）
   - **创建标签**：POST /api/image-tags - 创建新标签（仅管理员）
   - **修改标签**：PATCH /api/image-tags/:id - 修改标签名称（仅管理员）
-  - **删除标签**：DELETE /api/image-tags/:id - 删除标签（仅管理员，不允许删除 id=1 的默认标签）
+  - **删除标签**：DELETE /api/image-tags/:id - 软删除标签（仅管理员，不允许删除 id=1 的默认标签）
 - 数据库：Image 表、ImageTag 表
 - 文件存储：阿里云 OSS（公共读权限）
 - 图片处理：使用 sharp 提取图片尺寸
 - 支持格式：JPEG, PNG, GIF, WebP
-- 软删除：Image 表使用 deletedAt 字段实现软删除
+- 软删除：Image 表和 ImageTag 表都使用 deletedAt 字段实现软删除
 - 权限控制：
   - 所有接口需要 JWT 认证
   - 使用 `roleAuth` 中间件实现权限控制
@@ -283,17 +283,21 @@ model Image {
 }
 
 model ImageTag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([deletedAt])
 }
 ```
 
 **注意**：
 - 使用 `relationMode = "prisma"` 模式，不使用数据库外键
 - 标签关联通过应用层手动 JOIN 查询
-- Image 表使用软删除（`deletedAt` 字段）
+- Image 表和 ImageTag 表都使用软删除（`deletedAt` 字段）
+- 所有查询操作都会自动过滤 `deletedAt IS NOT NULL` 的记录
 
 ### Schema 变更流程
 

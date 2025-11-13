@@ -129,7 +129,10 @@ export async function getImageList(options: {
   // 手动 JOIN 标签信息（因为 relationMode = "prisma"）
   const tagIds = [...new Set(images.map(img => img.tagId))]
   const tags = await prisma.imageTag.findMany({
-    where: { id: { in: tagIds } }
+    where: {
+      id: { in: tagIds },
+      deletedAt: null
+    }
   })
 
   const tagMap = new Map(tags.map(tag => [tag.id, tag.name]))
