@@ -95,16 +95,16 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               animation: `fadeInUp 0.8s ease-out ${image.animationDelay}s both`,
             }}
           >
-            <div className={`${getHeightClasses(image.size)} w-full bg-gradient-to-br from-zinc-950 to-red-950/30`}>
+            <div className={`${getHeightClasses(image.size)} w-full relative bg-gradient-to-br from-zinc-950 to-red-950/30 group`}>
               <img
                 src={image.url}
                 alt={image.alt}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover absolute inset-0"
                 loading="lazy"
               />
               {/* 悬停遮罩 */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
-                <span className="text-white text-sm md:text-base opacity-0 hover:opacity-100 transition-opacity duration-300 px-4 text-center">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                <span className="text-white text-sm md:text-base opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-4 text-center">
                   {image.alt}
                 </span>
               </div>
