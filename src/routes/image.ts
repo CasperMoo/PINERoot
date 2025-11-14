@@ -5,6 +5,7 @@ import { requireAdmin } from '../middleware/roleAuth'
 import { ok, error, ErrorCode } from '../utils/response'
 import { validateBatchCount, MAX_BATCH_UPLOAD } from '../utils/validation'
 import {
+  uploadSingleImage,
   batchUploadImages,
   getImageList,
   getImageById,
@@ -18,6 +19,63 @@ import { tagExists } from '../services/imageTag'
  * 图片管理路由
  */
 export default async function imageRoutes(fastify: FastifyInstance) {
+  // 单文件上传图片（仅管理员）
+  fastify.post(
+    '/images/upload-single',
+    { preHandler: [authMiddleware, requireAdmin()] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      try {
+        const userId = request.currentUser!.id
+
+        // 获取上传的文件
+        const parts = request.parts()
+        let file: MultipartFile | null = null
+        let tagId = 1 // 默认标签
+
+        for await (const part of parts) {
+          if (part.type === 'file') {
+            file = part as MultipartFile
+          } else if (part.type === 'field' && part.fieldname === 'tagId') {
+            const value = (part as any).value
+            tagId = parseInt(value)
+          }
+        }
+
+        // 校验是否有文件
+        if (!file) {
+          return error(reply, ErrorCode.BATCH_LIMIT_EXCEEDED, '请上传一张图片')
+        }
+
+        // 校验标签是否存在
+        if (tagId !== 1) {
+          const exists = await tagExists(tagId)
+          if (!exists) {
+            return error(reply, ErrorCode.TAG_NOT_FOUND, '标签不存在')
+          }
+        }
+
+        // 执行上传
+        const image = await uploadSingleImage(file, userId, tagId)
+
+        // 返回结果
+        return ok(reply, {
+          id: image.id,
+          ossUrl: image.ossUrl,
+          originalName: image.originalName,
+          size: image.size,
+          width: image.width,
+          height: image.height,
+          tagId: image.tagId,
+          createdAt: image.createdAt
+        }, '上传成功')
+      } catch (err) {
+        console.error('Upload error:', err)
+        const errorMessage = err instanceof Error ? err.message : '上传失败'
+        return error(reply, ErrorCode.OSS_UPLOAD_FAILED, errorMessage, 500)
+      }
+    }
+  )
+
   // 批量上传图片（仅管理员）
   fastify.post(
     '/images/upload',

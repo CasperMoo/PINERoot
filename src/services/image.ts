@@ -6,6 +6,50 @@ import { validateImageFile } from '../utils/validation'
 import { getTagById } from './imageTag'
 
 /**
+ * 上传单张图片
+ */
+export async function uploadSingleImage(
+  file: MultipartFile,
+  userId: number,
+  tagId: number = 1
+) {
+  // 校验文件
+  const validationError = validateImageFile(file)
+  if (validationError) {
+    throw new Error(validationError)
+  }
+
+  // 读取文件 buffer
+  const buffer = await file.toBuffer()
+
+  // 使用 sharp 获取图片宽高
+  const metadata = await sharp(buffer).metadata()
+  const width = metadata.width || null
+  const height = metadata.height || null
+
+  // 生成 OSS key 并上传
+  const ossKey = generateOSSKey(userId, file.mimetype)
+  const ossUrl = await uploadToOSS(buffer, ossKey)
+
+  // 保存到数据库
+  const image = await prisma.image.create({
+    data: {
+      userId,
+      originalName: file.filename,
+      ossKey,
+      ossUrl,
+      mimeType: file.mimetype,
+      size: buffer.length,
+      width,
+      height,
+      tagId
+    }
+  })
+
+  return image
+}
+
+/**
  * 批量上传图片
  */
 export async function batchUploadImages(
@@ -140,14 +184,17 @@ export async function getImageList(options: {
   // 组装数据
   const items = images.map(img => ({
     ...img,
-    tagName: tagMap.get(img.tagId) || 'unknown'
+    tag: tags.find(t => t.id === img.tagId)
   }))
+
+  const totalPages = Math.ceil(total / limit)
 
   return {
     items,
     total,
     page,
-    limit
+    pageSize: limit,
+    totalPages
   }
 }
 
