@@ -32,7 +32,8 @@ interface ImagePosition {
   y: number // y坐标（百分比）
   width: number // 宽度（px）
   height: number // 高度（px）
-  rotation: number // 旋转角度
+  rotation: number // 旋转角度（起始）
+  rotationEnd: number // 旋转角度（结束）
   zIndex: number // 层级
   floatDirection: 'left' | 'right' | 'up' | 'down' // 飘动方向
   floatDistance: number // 飘动距离
@@ -50,13 +51,15 @@ const randomInRange = (min: number, max: number): number => {
  */
 const generateRandomPosition = (): ImagePosition => {
   const directions: Array<'left' | 'right' | 'up' | 'down'> = ['left', 'right', 'up', 'down']
+  const startRotation = randomInRange(-8, 8)
 
   return {
     x: randomInRange(0, 85), // x坐标：0-85%（留出空间避免溢出）
     y: randomInRange(0, 85), // y坐标：0-85%
     width: randomInRange(CONFIG.minWidth, CONFIG.maxWidth),
     height: randomInRange(CONFIG.minHeight, CONFIG.maxHeight),
-    rotation: randomInRange(-8, 8), // 轻微旋转：-8到8度
+    rotation: startRotation, // 起始旋转角度：-8到8度
+    rotationEnd: startRotation + randomInRange(-3, 3), // 结束角度：在起始基础上±3度
     zIndex: Math.floor(randomInRange(1, 10)), // 层级：1-10
     floatDirection: directions[Math.floor(Math.random() * directions.length)],
     floatDistance: randomInRange(15, 40), // 飘动距离：15-40px
@@ -148,60 +151,62 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
     }
 
     const timer = setInterval(() => {
-      setDisplayedIndices(prev => {
-        // 随机选择要替换的图片索引
-        const replaceCount = Math.min(CONFIG.rotateCount, prev.length)
-        const shuffledPositions = shuffleArray([...Array(prev.length).keys()])
-        const positionsToReplace = shuffledPositions.slice(0, replaceCount)
+      // 随机选择要替换的图片位置
+      const replaceCount = CONFIG.rotateCount
+      const currentLength = displayedIndices.length
+      const shuffledPositions = shuffleArray([...Array(currentLength).keys()])
+      const positionsToReplace = shuffledPositions.slice(0, replaceCount)
 
-        // 标记要淡出的图片
-        const fadingOut = new Set(positionsToReplace.map(pos => prev[pos]))
-        setFadingOutIndices(fadingOut)
+      // 标记要淡出的图片
+      const fadingOut = new Set(positionsToReplace.map(pos => displayedIndices[pos]))
+      setFadingOutIndices(fadingOut)
 
-        // 延迟后替换图片
-        setTimeout(() => {
-          setDisplayedIndices(current => {
-            // 获取所有未显示的图片索引
-            const available = imagePool
-              .map((_, idx) => idx)
-              .filter(idx => !current.includes(idx))
+      // 延迟后替换图片（批量更新状态，减少渲染次数）
+      setTimeout(() => {
+        // 使用let存储新图片索引，避免重复计算
+        let newImageIndices: number[] = []
 
-            if (available.length === 0) return current
+        setDisplayedIndices(current => {
+          // 获取所有未显示的图片索引
+          const available = imagePool
+            .map((_, idx) => idx)
+            .filter(idx => !current.includes(idx))
 
-            // 随机选择新图片
-            const shuffledAvailable = shuffleArray(available)
-            const newImages = shuffledAvailable.slice(0, replaceCount)
+          if (available.length === 0) return current
 
-            // 为新图片生成位置
-            setImagePositions(prev => {
-              const updated = new Map(prev)
-              newImages.forEach(idx => {
-                updated.set(idx, generateRandomPosition())
-              })
-              return updated
+          // 随机选择新图片
+          const shuffledAvailable = shuffleArray(available)
+          newImageIndices = shuffledAvailable.slice(0, replaceCount)
+
+          // 替换图片
+          const updated = [...current]
+          positionsToReplace.forEach((pos, i) => {
+            if (newImageIndices[i] !== undefined) {
+              updated[pos] = newImageIndices[i]
+            }
+          })
+
+          // 为新图片生成位置（在同一次状态更新中）
+          setImagePositions(prev => {
+            const updated = new Map(prev)
+            newImageIndices.forEach(idx => {
+              updated.set(idx, generateRandomPosition())
             })
-
-            // 替换图片
-            const updated = [...current]
-            positionsToReplace.forEach((pos, i) => {
-              if (newImages[i] !== undefined) {
-                updated[pos] = newImages[i]
-              }
-            })
-
             return updated
           })
 
-          // 清除淡出标记
-          setFadingOutIndices(new Set())
-        }, CONFIG.fadeOutDuration + CONFIG.fadeInDelay)
+          return updated
+        })
 
-        return prev
-      })
+        // 延迟清除淡出标记，等待新图片开始淡入
+        setTimeout(() => {
+          setFadingOutIndices(new Set())
+        }, 100)
+      }, CONFIG.fadeOutDuration)
     }, CONFIG.rotateInterval)
 
     return () => clearInterval(timer)
-  }, [imagePool])
+  }, [imagePool, displayedIndices])
 
   // 当前显示的图片
   const displayedImages = displayedIndices.map(idx => imagePool[idx])
@@ -306,7 +311,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                   opacity: 1;
                 }
                 100% {
-                  transform: rotate(${position.rotation + randomInRange(-3, 3)}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)} scale(1);
+                  transform: rotate(${position.rotationEnd}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)} scale(1);
                   opacity: 1;
                 }
               }
