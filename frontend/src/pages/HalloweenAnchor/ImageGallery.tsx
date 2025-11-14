@@ -1,279 +1,66 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import type { GalleryImage, ImageSize } from './types'
-
-interface ImageGalleryProps {
-  images: Array<{
-    id: string
-    url: string
-    alt: string
-  }>
-}
+import React, { useMemo, useEffect, useState } from 'react'
+import type { ImageGalleryProps } from './types'
+import { GALLERY_CONFIG } from './config'
+import { enrichImages } from './utils'
+import { getFloatAnimation } from './positionUtils'
+import { useImageLifecycle } from './hooks/useImageLifecycle'
 
 /**
- * 配置常量
- */
-const CONFIG = {
-  displayCount: 15, // 同时显示的图片数量
-  rotateInterval: 5000, // 轮换间隔(毫秒)
-  rotateCount: 2, // 每次轮换的图片数量
-  fadeOutDuration: 1500, // 淡出时长(毫秒)
-  fadeInDelay: 500, // 淡入延迟(毫秒)
-  minWidth: 200, // 图片最小宽度
-  maxWidth: 400, // 图片最大宽度
-  minHeight: 150, // 图片最小高度
-  maxHeight: 350, // 图片最大高度
-}
-
-/**
- * 图片位置和尺寸信息
- */
-interface ImagePosition {
-  x: number // x坐标（百分比）
-  y: number // y坐标（百分比）
-  width: number // 宽度（px）
-  height: number // 高度（px）
-  rotation: number // 旋转角度（起始）
-  rotationEnd: number // 旋转角度（结束）
-  zIndex: number // 层级
-  floatDirection: 'left' | 'right' | 'up' | 'down' // 飘动方向
-  floatDistance: number // 飘动距离
-}
-
-/**
- * 生成随机数（范围内）
- */
-const randomInRange = (min: number, max: number): number => {
-  return Math.random() * (max - min) + min
-}
-
-/**
- * 生成随机图片位置和尺寸
- */
-const generateRandomPosition = (): ImagePosition => {
-  const directions: Array<'left' | 'right' | 'up' | 'down'> = ['left', 'right', 'up', 'down']
-  const startRotation = randomInRange(-8, 8)
-
-  return {
-    x: randomInRange(0, 85), // x坐标：0-85%（留出空间避免溢出）
-    y: randomInRange(0, 85), // y坐标：0-85%
-    width: randomInRange(CONFIG.minWidth, CONFIG.maxWidth),
-    height: randomInRange(CONFIG.minHeight, CONFIG.maxHeight),
-    rotation: startRotation, // 起始旋转角度：-8到8度
-    rotationEnd: startRotation + randomInRange(-3, 3), // 结束角度：在起始基础上±3度
-    zIndex: Math.floor(randomInRange(1, 10)), // 层级：1-10
-    floatDirection: directions[Math.floor(Math.random() * directions.length)],
-    floatDistance: randomInRange(15, 40), // 飘动距离：15-40px
-  }
-}
-
-/**
- * 随机生成图片尺寸（保留用于兼容）
- */
-const getRandomSize = (): ImageSize => {
-  const sizes: ImageSize[] = ['small', 'medium', 'large']
-  const weights = [0.4, 0.4, 0.2]
-
-  const random = Math.random()
-  let sum = 0
-
-  for (let i = 0; i < weights.length; i++) {
-    sum += weights[i]
-    if (random <= sum) {
-      return sizes[i]
-    }
-  }
-
-  return 'medium'
-}
-
-/**
- * 随机打乱数组（Fisher-Yates Shuffle）
- */
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array]
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-  }
-  return shuffled
-}
-
-/**
- * 为图片添加元数据
- */
-const enrichImages = (images: ImageGalleryProps['images']): GalleryImage[] => {
-  return images.map(img => ({
-    ...img,
-    size: getRandomSize(),
-    animationDelay: 0,
-  }))
-}
-
-/**
- * 图片相册组件（随机散落飘动版本）
+ * 图片相册组件（独立生命周期版本）
  */
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   // 所有图片池（带随机大小）
   const imagePool = useMemo(() => enrichImages(images), [images])
 
-  // 当前显示的图片索引
-  const [displayedIndices, setDisplayedIndices] = useState<number[]>([])
+  // 使用生命周期管理 Hook
+  const { visibleImages, imagePositions } = useImageLifecycle(imagePool)
 
-  // 每张图片的位置信息（索引 -> 位置）
-  const [imagePositions, setImagePositions] = useState<Map<number, ImagePosition>>(new Map())
+  // 强制更新状态（用于触发 appearing 图片的 opacity 变化）
+  const [, setForceUpdate] = useState(0)
 
-  // 淡出中的图片索引
-  const [fadingOutIndices, setFadingOutIndices] = useState<Set<number>>(new Set())
-
-  // 初始化：随机选择初始显示的图片并生成位置
+  // 监听 appearing 状态的图片，触发重新渲染以实现淡入效果
   useEffect(() => {
-    if (imagePool.length === 0) return
+    const appearingImages = visibleImages.filter(({ lifecycle }) => lifecycle.state === 'appearing')
 
-    const count = Math.min(CONFIG.displayCount, imagePool.length)
-    const shuffled = shuffleArray(imagePool.map((_, idx) => idx))
-    const initialIndices = shuffled.slice(0, count)
+    if (appearingImages.length > 0) {
+      // 16ms 后触发一次重新渲染，让 opacity 从 0 变为 1
+      const timer = setTimeout(() => {
+        setForceUpdate(prev => prev + 1)
+      }, 16)
 
-    // 为每张图片生成随机位置
-    const positions = new Map<number, ImagePosition>()
-    initialIndices.forEach(idx => {
-      positions.set(idx, generateRandomPosition())
-    })
-
-    setDisplayedIndices(initialIndices)
-    setImagePositions(positions)
-  }, [imagePool])
-
-  // 定时轮换图片
-  useEffect(() => {
-    if (imagePool.length <= CONFIG.displayCount) {
-      // 图片不足，不需要轮换
-      return
+      return () => clearTimeout(timer)
     }
-
-    const timer = setInterval(() => {
-      // 随机选择要替换的图片位置
-      const replaceCount = CONFIG.rotateCount
-      const currentLength = displayedIndices.length
-      const shuffledPositions = shuffleArray([...Array(currentLength).keys()])
-      const positionsToReplace = shuffledPositions.slice(0, replaceCount)
-
-      // 标记要淡出的图片
-      const fadingOut = new Set(positionsToReplace.map(pos => displayedIndices[pos]))
-      setFadingOutIndices(fadingOut)
-
-      // 延迟后替换图片（批量更新状态，减少渲染次数）
-      setTimeout(() => {
-        // 使用let存储新图片索引，避免重复计算
-        let newImageIndices: number[] = []
-
-        setDisplayedIndices(current => {
-          // 获取所有未显示的图片索引
-          const available = imagePool
-            .map((_, idx) => idx)
-            .filter(idx => !current.includes(idx))
-
-          if (available.length === 0) return current
-
-          // 随机选择新图片
-          const shuffledAvailable = shuffleArray(available)
-          newImageIndices = shuffledAvailable.slice(0, replaceCount)
-
-          // 替换图片
-          const updated = [...current]
-          positionsToReplace.forEach((pos, i) => {
-            if (newImageIndices[i] !== undefined) {
-              updated[pos] = newImageIndices[i]
-            }
-          })
-
-          // 为新图片生成位置（在同一次状态更新中）
-          setImagePositions(prev => {
-            const updated = new Map(prev)
-            newImageIndices.forEach(idx => {
-              updated.set(idx, generateRandomPosition())
-            })
-            return updated
-          })
-
-          return updated
-        })
-
-        // 延迟清除淡出标记，等待新图片开始淡入
-        setTimeout(() => {
-          setFadingOutIndices(new Set())
-        }, 100)
-      }, CONFIG.fadeOutDuration)
-    }, CONFIG.rotateInterval)
-
-    return () => clearInterval(timer)
-  }, [imagePool, displayedIndices])
-
-  // 当前显示的图片
-  const displayedImages = displayedIndices.map(idx => imagePool[idx])
-
-  /**
-   * 根据尺寸返回对应的CSS类名
-   */
-  const getSizeClasses = (size: ImageSize): string => {
-    const baseClasses = 'relative overflow-hidden rounded-lg cursor-pointer transition-transform duration-300 hover:scale-105'
-
-    switch (size) {
-      case 'small':
-        return `${baseClasses} col-span-1 row-span-1`
-      case 'medium':
-        return `${baseClasses} col-span-1 md:col-span-2 row-span-1 md:row-span-1`
-      case 'large':
-        return `${baseClasses} col-span-1 md:col-span-2 lg:col-span-2 row-span-2`
-      default:
-        return `${baseClasses} col-span-1 row-span-1`
-    }
-  }
-
-  /**
-   * 根据尺寸返回图片高度类名
-   */
-  const getHeightClasses = (size: ImageSize): string => {
-    switch (size) {
-      case 'small':
-        return 'h-48 md:h-56'
-      case 'medium':
-        return 'h-56 md:h-64'
-      case 'large':
-        return 'h-64 md:h-96'
-      default:
-        return 'h-56'
-    }
-  }
-
-  /**
-   * 获取飘动动画的transform
-   */
-  const getFloatAnimation = (direction: string, distance: number): string => {
-    switch (direction) {
-      case 'left':
-        return `translateX(-${distance}px)`
-      case 'right':
-        return `translateX(${distance}px)`
-      case 'up':
-        return `translateY(-${distance}px)`
-      case 'down':
-        return `translateY(${distance}px)`
-      default:
-        return 'translateX(0)'
-    }
-  }
+  }, [visibleImages])
 
   return (
     <div className="w-full h-screen relative overflow-hidden">
       {/* 绝对定位散落布局 */}
-      {displayedImages.map((image, idx) => {
-        const imageIdx = displayedIndices[idx]
+      {visibleImages.map(({ idx: imageIdx, image, lifecycle }) => {
         const position = imagePositions.get(imageIdx)
-        const isFadingOut = fadingOutIndices.has(imageIdx)
 
         if (!position) return null
 
         const animationName = `float-${position.floatDirection}-${imageIdx}`
+        const isAppearing = lifecycle.state === 'appearing'
+        const isDisappearing = lifecycle.state === 'disappearing'
+
+        // 计算 appearing 状态下的经过时间（用于触发淡入效果）
+        const appearingElapsed = isAppearing ? Date.now() - lifecycle.startTime : 0
+        const shouldStartFadeIn = appearingElapsed > 16 // 一帧后开始淡入
+
+        // Opacity 计算逻辑：
+        // - appearing 状态刚开始（< 16ms）: 0
+        // - appearing 状态进行中（>= 16ms）: 1（触发淡入）
+        // - visible: 1
+        // - disappearing: 0（触发淡出）
+        let opacity = 1
+        if (isAppearing && !shouldStartFadeIn) {
+          opacity = 0 // appearing 初始为 0
+        } else if (isAppearing && shouldStartFadeIn) {
+          opacity = 1 // appearing 一帧后变为 1，触发过渡
+        } else if (isDisappearing) {
+          opacity = 0 // disappearing 为 0
+        }
 
         return (
           <div
@@ -285,13 +72,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               width: `${position.width}px`,
               height: `${position.height}px`,
               zIndex: position.zIndex,
-              // 移除transform，避免与animation冲突
-              animation: isFadingOut
-                ? 'none'
-                : `${animationName} 8s ease-in-out infinite alternate`,
-              opacity: isFadingOut ? 0 : 1,
-              transition: isFadingOut
-                ? `opacity ${CONFIG.fadeOutDuration}ms ease-out, transform ${CONFIG.fadeOutDuration}ms ease-out`
+              animation: `${animationName} ${GALLERY_CONFIG.floatAnimationDuration}s ease-in-out infinite alternate`,
+              opacity,
+              transition: isAppearing || isDisappearing
+                ? `opacity ${isAppearing ? GALLERY_CONFIG.fadeInDuration : GALLERY_CONFIG.fadeOutDuration}ms ease-out`
                 : 'none',
               // 硬件加速，防止抖动
               willChange: 'transform, opacity',
@@ -302,17 +86,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             {/* 动态生成飘动动画 */}
             <style>{`
               @keyframes ${animationName} {
-                0%, 15% {
-                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)} scale(0.95);
-                  opacity: 0;
-                }
-                25% {
-                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)} scale(1);
-                  opacity: 1;
+                0% {
+                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)};
                 }
                 100% {
-                  transform: rotate(${position.rotationEnd}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)} scale(1);
-                  opacity: 1;
+                  transform: rotate(${position.rotationEnd}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)};
                 }
               }
             `}</style>
