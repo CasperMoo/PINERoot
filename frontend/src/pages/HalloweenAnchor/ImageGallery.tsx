@@ -95,7 +95,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               animation: `fadeInUp 0.8s ease-out ${image.animationDelay}s both`,
             }}
           >
-            <div className={`${getHeightClasses(image.size)} w-full bg-gradient-to-br from-gray-800 to-gray-900`}>
+            <div className={`${getHeightClasses(image.size)} w-full bg-gradient-to-br from-zinc-950 to-red-950/30`}>
               <img
                 src={image.url}
                 alt={image.alt}

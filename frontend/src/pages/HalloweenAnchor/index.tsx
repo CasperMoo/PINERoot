@@ -25,11 +25,11 @@ const HalloweenAnchor: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-purple-900 to-black">
+    <div className="min-h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950">
       {/* 页面头部 */}
       <header className="py-8 md:py-12 text-center">
         <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-purple-500 to-pink-500"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-red-500 to-rose-600"
           style={{
             animation: 'fadeIn 1s ease-out',
           }}
@@ -37,7 +37,7 @@ const HalloweenAnchor: React.FC = () => {
           🎃 Halloween Memories 👻
         </h1>
         <p
-          className="mt-4 text-gray-300 text-sm md:text-base lg:text-lg max-w-2xl mx-auto px-4"
+          className="mt-4 text-rose-100/90 text-sm md:text-base lg:text-lg max-w-2xl mx-auto px-4"
           style={{
             animation: 'fadeIn 1.5s ease-out',
           }}
@@ -51,7 +51,7 @@ const HalloweenAnchor: React.FC = () => {
 
       {/* 页面底部 */}
       <footer className="py-8 text-center">
-        <p className="text-gray-500 text-xs md:text-sm">
+        <p className="text-rose-900/60 text-xs md:text-sm">
           Happy Halloween 2024 🦇
         </p>
       </footer>
