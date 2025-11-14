@@ -1,28 +1,70 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { App } from 'antd'
 import ImageGallery from './ImageGallery'
+import { imageApi, type Image } from '@/api/image'
+
+/**
+ * 相册配置项
+ */
+interface GalleryConfig {
+  imageTagId: number
+  displayName: string
+}
+
+/**
+ * 相册配置列表（写死配置）
+ */
+const GALLERY_CONFIGS: GalleryConfig[] = [
+  {
+    imageTagId: 422,
+    displayName: '测试用列表'
+  }
+  // 后续可添加更多配置
+]
 
 /**
  * Halloween 相册页面
  */
 const HalloweenAnchor: React.FC = () => {
-  // Mock 图片数据(实际项目中应从API获取)
-  const images = [
-    { id: '1', url: 'https://picsum.photos/400/300?random=1', alt: 'Halloween Night 1' },
-    { id: '2', url: 'https://picsum.photos/400/400?random=2', alt: 'Spooky Scene 2' },
-    { id: '3', url: 'https://picsum.photos/500/300?random=3', alt: 'Pumpkin Patch 3' },
-    { id: '4', url: 'https://picsum.photos/400/500?random=4', alt: 'Ghost Story 4' },
-    { id: '5', url: 'https://picsum.photos/600/400?random=5', alt: 'Haunted House 5' },
-    { id: '6', url: 'https://picsum.photos/400/300?random=6', alt: 'Trick or Treat 6' },
-    { id: '7', url: 'https://picsum.photos/500/500?random=7', alt: 'Costume Party 7' },
-    { id: '8', url: 'https://picsum.photos/400/400?random=8', alt: 'Candy Collection 8' },
-    { id: '9', url: 'https://picsum.photos/600/300?random=9', alt: 'Moonlight 9' },
-    { id: '10', url: 'https://picsum.photos/400/500?random=10', alt: 'Witches Brew 10' },
-    { id: '11', url: 'https://picsum.photos/500/400?random=11', alt: 'Black Cat 11' },
-    { id: '12', url: 'https://picsum.photos/400/300?random=12', alt: 'Spider Web 12' },
-    { id: '13', url: 'https://picsum.photos/600/500?random=13', alt: 'Graveyard 13' },
-    { id: '14', url: 'https://picsum.photos/400/400?random=14', alt: 'Jack-o-Lantern 14' },
-    { id: '15', url: 'https://picsum.photos/500/300?random=15', alt: 'Bats Flying 15' },
-  ]
+  const { message } = App.useApp()
+  const [images, setImages] = useState<Array<{ id: string; url: string; alt: string }>>([])
+  const [loading, setLoading] = useState(true)
+
+  // 获取当前使用的配置（目前只读取第一个）
+  const currentConfig = GALLERY_CONFIGS[0]
+
+  /**
+   * 根据 imageTagId 获取图片列表
+   */
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setLoading(true)
+        const response = await imageApi.getList({
+          tagId: currentConfig.imageTagId,
+          page: 1,
+          pageSize: 100 // 获取足够多的图片
+        })
+
+        // 转换 API 数据为组件需要的格式
+        const transformedImages = response.items.map((img: Image) => ({
+          id: img.id.toString(),
+          url: img.ossUrl,
+          alt: img.originalName
+        }))
+
+        setImages(transformedImages)
+      } catch (error) {
+        console.error('获取图片列表失败:', error)
+        message.error('获取图片列表失败，请稍后重试')
+        setImages([]) // 失败时显示空列表
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchImages()
+  }, [currentConfig.imageTagId, message])
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950">
@@ -42,12 +84,22 @@ const HalloweenAnchor: React.FC = () => {
             animation: 'fadeIn 1.5s ease-out',
           }}
         >
-          A collection of spooky moments from our Halloween celebration
+          {currentConfig.displayName}
         </p>
       </header>
 
-      {/* 相册组件 */}
-      <ImageGallery images={images} />
+      {/* 加载状态 */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-rose-100/90 text-lg">Loading...</div>
+        </div>
+      ) : images.length === 0 ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-rose-100/70 text-base">暂无图片</div>
+        </div>
+      ) : (
+        <ImageGallery images={images} />
+      )}
 
       {/* 页面底部 */}
       <footer className="py-8 text-center">
