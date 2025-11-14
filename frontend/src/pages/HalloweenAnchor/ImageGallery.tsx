@@ -74,23 +74,35 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               zIndex: position.zIndex,
               animation: `${animationName} ${GALLERY_CONFIG.floatAnimationDuration}s ease-in-out infinite alternate`,
               opacity,
-              transition: isAppearing || isDisappearing
-                ? `opacity ${isAppearing ? GALLERY_CONFIG.fadeInDuration : GALLERY_CONFIG.fadeOutDuration}ms ease-out`
-                : 'none',
+              transition:
+                isAppearing || isDisappearing
+                  ? `opacity ${
+                      isAppearing
+                        ? GALLERY_CONFIG.fadeInDuration
+                        : GALLERY_CONFIG.fadeOutDuration
+                    }ms ease-out`
+                  : "none",
               // 硬件加速，防止抖动
-              willChange: 'transform, opacity',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
+              willChange: "transform, opacity",
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
             }}
           >
             {/* 动态生成飘动动画 */}
             <style>{`
               @keyframes ${animationName} {
                 0% {
-                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)};
+                  transform: rotate(${
+                    position.rotation
+                  }deg) ${getFloatAnimation(position.floatDirection, 0)};
                 }
                 100% {
-                  transform: rotate(${position.rotationEnd}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)};
+                  transform: rotate(${
+                    position.rotationEnd
+                  }deg) ${getFloatAnimation(
+              position.floatDirection,
+              position.floatDistance
+            )};
                 }
               }
             `}</style>
@@ -98,9 +110,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             <div
               className="w-full h-full relative bg-gradient-to-br from-zinc-950/80 to-red-950/40 rounded-lg shadow-2xl overflow-hidden"
               style={{
-                backfaceVisibility: 'hidden',
-                WebkitBackfaceVisibility: 'hidden',
-                transform: 'translateZ(0)',
+                backfaceVisibility: "hidden",
+                WebkitBackfaceVisibility: "hidden",
+                transform: "translateZ(0)",
               }}
             >
               <img
@@ -110,14 +122,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                 loading="lazy"
               />
               {/* 悬停遮罩 */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 flex items-center justify-center pointer-events-none">
-                <span className="text-white text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 px-3 text-center font-medium">
-                  {image.alt}
-                </span>
-              </div>
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 pointer-events-none" />
             </div>
           </div>
-        )
+        );
       })}
 
     </div>
