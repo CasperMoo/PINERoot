@@ -69,7 +69,30 @@ export interface UpdateImageTagRequest {
  */
 export const imageApi = {
   /**
-   * 上传图片
+   * 上传单个图片
+   */
+  async uploadSingle(file: File, tagId?: number): Promise<Image> {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    if (tagId) {
+      formData.append('tagId', tagId.toString())
+    }
+
+    const response: ApiResponse<Image> = await request.post(
+      '/images/upload-single',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    )
+    return response.data!
+  },
+
+  /**
+   * 上传图片（批量）
    */
   async upload(files: File[], tagId?: number): Promise<UploadResult> {
     const formData = new FormData()
