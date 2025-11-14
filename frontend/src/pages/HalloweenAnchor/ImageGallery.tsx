@@ -280,29 +280,46 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               width: `${position.width}px`,
               height: `${position.height}px`,
               zIndex: position.zIndex,
-              transform: `rotate(${position.rotation}deg)`,
+              // 移除transform，避免与animation冲突
               animation: isFadingOut
                 ? 'none'
-                : `${animationName} 8s ease-in-out infinite alternate, fadeInScale 1.2s ease-out both`,
+                : `${animationName} 8s ease-in-out infinite alternate`,
               opacity: isFadingOut ? 0 : 1,
               transition: isFadingOut
-                ? `all ${CONFIG.fadeOutDuration}ms ease-out`
+                ? `opacity ${CONFIG.fadeOutDuration}ms ease-out, transform ${CONFIG.fadeOutDuration}ms ease-out`
                 : 'none',
+              // 硬件加速，防止抖动
+              willChange: 'transform, opacity',
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
             }}
           >
             {/* 动态生成飘动动画 */}
             <style>{`
               @keyframes ${animationName} {
-                0% {
-                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)};
+                0%, 15% {
+                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)} scale(0.95);
+                  opacity: 0;
+                }
+                25% {
+                  transform: rotate(${position.rotation}deg) ${getFloatAnimation(position.floatDirection, 0)} scale(1);
+                  opacity: 1;
                 }
                 100% {
-                  transform: rotate(${position.rotation + randomInRange(-3, 3)}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)};
+                  transform: rotate(${position.rotation + randomInRange(-3, 3)}deg) ${getFloatAnimation(position.floatDirection, position.floatDistance)} scale(1);
+                  opacity: 1;
                 }
               }
             `}</style>
 
-            <div className="w-full h-full relative bg-gradient-to-br from-zinc-950/80 to-red-950/40 rounded-lg shadow-2xl overflow-hidden">
+            <div
+              className="w-full h-full relative bg-gradient-to-br from-zinc-950/80 to-red-950/40 rounded-lg shadow-2xl overflow-hidden"
+              style={{
+                backfaceVisibility: 'hidden',
+                WebkitBackfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
+              }}
+            >
               <img
                 src={image.url}
                 alt={image.alt}
@@ -320,19 +337,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         )
       })}
 
-      {/* 全局动画定义 */}
-      <style>{`
-        @keyframes fadeInScale {
-          0% {
-            opacity: 0;
-            transform: scale(0.8) rotate(0deg);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) rotate(var(--rotation, 0deg));
-          }
-        }
-      `}</style>
     </div>
   )
 }
