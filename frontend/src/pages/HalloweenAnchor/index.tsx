@@ -82,56 +82,30 @@ const HalloweenAnchor: React.FC = () => {
   const loading = loadingGalleries || loadingImages
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950">
-      {/* 页面头部 */}
-      <header className="py-8 md:py-12 text-center">
-        <h1
-          className="text-4xl md:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-red-500 to-rose-600"
-          style={{
-            animation: 'fadeIn 1s ease-out',
-          }}
-        >
-          🎃 Halloween Memories 👻
-        </h1>
-        <p
-          className="mt-4 text-rose-100/90 text-sm md:text-base lg:text-lg max-w-2xl mx-auto px-4"
-          style={{
-            animation: 'fadeIn 1.5s ease-out',
-          }}
-        >
-          {activeGallery ? activeGallery.name : 'Loading...'}
-        </p>
-      </header>
-
-      {/* 相册标签切换 */}
+    <div className="h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950 overflow-hidden">
+      {/* 悬浮的相册标签切换 */}
       {!loadingGalleries && galleries.length > 0 && activeGallery && (
-        <GalleryTabs
-          galleries={galleries}
-          activeGallery={activeGallery}
-          onGalleryChange={handleGalleryChange}
-          loading={loadingImages}
-        />
+        <div className="absolute top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm">
+          <GalleryTabs
+            galleries={galleries}
+            activeGallery={activeGallery}
+            onGalleryChange={handleGalleryChange}
+          />
+        </div>
       )}
 
-      {/* 加载状态 */}
+      {/* 图片画布主体 - 占满屏幕高度 */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
+        <div className="flex items-center justify-center h-full">
           <div className="text-rose-100/90 text-lg">Loading...</div>
         </div>
       ) : images.length === 0 ? (
-        <div className="flex items-center justify-center py-20">
+        <div className="flex items-center justify-center h-full">
           <div className="text-rose-100/70 text-base">暂无图片</div>
         </div>
       ) : (
         <ImageGallery images={images} />
       )}
-
-      {/* 页面底部 */}
-      <footer className="py-8 text-center">
-        <p className="text-rose-900/60 text-xs md:text-sm">
-          Happy Halloween 2024 🦇
-        </p>
-      </footer>
 
       {/* 定义淡入动画 */}
       <style>{`

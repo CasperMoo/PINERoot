@@ -7,7 +7,6 @@ import {
   Upload,
   Select,
   Image as AntImage,
-  Space,
   App,
   Popconfirm,
   Progress,

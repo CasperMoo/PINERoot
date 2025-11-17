@@ -6,7 +6,6 @@ interface GalleryTabsProps {
   galleries: Gallery[]
   activeGallery: Gallery
   onGalleryChange: (gallery: Gallery) => void
-  loading?: boolean
 }
 
 /**
@@ -16,7 +15,6 @@ const GalleryTabs: React.FC<GalleryTabsProps> = ({
   galleries,
   activeGallery,
   onGalleryChange,
-  loading = false
 }) => {
   const items = galleries.map((gallery) => ({
     key: gallery.imageTag,
@@ -31,7 +29,7 @@ const GalleryTabs: React.FC<GalleryTabsProps> = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 mb-6">
+    <div className="w-full max-w-4xl mx-auto px-4 py-2">
       <Tabs
         activeKey={activeGallery.imageTag}
         items={items}

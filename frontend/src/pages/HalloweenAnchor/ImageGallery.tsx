@@ -4,6 +4,7 @@ import { GALLERY_CONFIG } from './config'
 import { enrichImages } from './utils'
 import { getFloatAnimation } from './positionUtils'
 import { useImageLifecycle } from './hooks/useImageLifecycle'
+import { useImageLoad } from './hooks/useImageLoad'
 
 /**
  * 图片相册组件（独立生命周期版本）
@@ -14,6 +15,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
 
   // 使用生命周期管理 Hook
   const { visibleImages, imagePositions } = useImageLifecycle(imagePool)
+
+  // 图片加载状态管理
+  const loadedImages = useImageLoad(visibleImages.map(({ image }) => image.url))
 
   // 强制更新状态（用于触发 appearing 图片的 opacity 变化）
   const [, setForceUpdate] = useState(0)
@@ -33,7 +37,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   }, [visibleImages])
 
   return (
-    <div className="w-full h-screen relative overflow-hidden">
+    <div className="w-full h-full relative overflow-hidden pt-16">
       {/* 绝对定位散落布局 */}
       {visibleImages.map(({ idx: imageIdx, image, lifecycle }) => {
         const position = imagePositions.get(imageIdx)
@@ -43,21 +47,27 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
         const animationName = `float-${position.floatDirection}-${imageIdx}`
         const isAppearing = lifecycle.state === 'appearing'
         const isDisappearing = lifecycle.state === 'disappearing'
+        const isImageLoaded = loadedImages.has(image.url)
 
         // 计算 appearing 状态下的经过时间（用于触发淡入效果）
         const appearingElapsed = isAppearing ? Date.now() - lifecycle.startTime : 0
-        const shouldStartFadeIn = appearingElapsed > 16 // 一帧后开始淡入
+
+        // 修复方案：只有当图片已加载且达到最小等待时间后才开始淡入动画
+        const shouldStartFadeIn = isAppearing && isImageLoaded && appearingElapsed > 16
 
         // Opacity 计算逻辑：
-        // - appearing 状态刚开始（< 16ms）: 0
-        // - appearing 状态进行中（>= 16ms）: 1（触发淡入）
+        // - appearing 状态但图片未加载: 0（等待图片加载）
+        // - appearing 状态且图片已加载刚开始（< 16ms）: 0
+        // - appearing 状态且图片已加载进行中（>= 16ms）: 1（触发淡入）
         // - visible: 1
         // - disappearing: 0（触发淡出）
         let opacity = 1
-        if (isAppearing && !shouldStartFadeIn) {
-          opacity = 0 // appearing 初始为 0
+        if (isAppearing && !isImageLoaded) {
+          opacity = 0 // 图片未加载时保持透明，等待加载完成
+        } else if (isAppearing && !shouldStartFadeIn) {
+          opacity = 0 // 图片已加载但刚开始时仍为透明
         } else if (isAppearing && shouldStartFadeIn) {
-          opacity = 1 // appearing 一帧后变为 1，触发过渡
+          opacity = 1 // 图片已加载且等待时间足够后开始淡入，触发过渡
         } else if (isDisappearing) {
           opacity = 0 // disappearing 为 0
         }

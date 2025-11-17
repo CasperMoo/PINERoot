@@ -74,7 +74,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
   useEffect(() => {
     if (imageLifecycles.size === 0) return
 
-    const timers: NodeJS.Timeout[] = []
+    const timers: number[] = []
 
     // 遍历所有图片，管理其生命周期
     imageLifecycles.forEach((lifecycle, idx) => {

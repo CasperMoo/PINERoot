@@ -31,7 +31,7 @@ export async function getHalloweenConfig(): Promise<HalloweenConfig | null> {
     return null
   }
 
-  return config.config as HalloweenConfig
+  return config.config as unknown as HalloweenConfig
 }
 
 /**
