@@ -104,7 +104,9 @@
 - 服务层：`src/services/image.ts`, `src/services/imageTag.ts`, `src/services/oss.ts`
 - 功能：
   - **图片上传**：POST /api/images/upload - 批量上传图片（最多10张，单张最大5MB，仅管理员）
-  - **图片列表**：GET /api/images - 分页查询图片列表，支持按 tagId 和 userId 过滤（所有认证用户）
+  - **图片列表**：GET /api/images - 分页查询图片列表，支持按 tagId、tagName 和 userId 过滤（所有认证用户）
+    - tagName 参数优先级高于 tagId
+    - 使用 SQL JOIN 优化查询（tagName 查询仅需 1 次数据库操作）
   - **图片详情**：GET /api/images/:id - 获取单张图片详情（所有认证用户）
   - **修改标签**：PATCH /api/images/:id/tag - 修改图片标签（仅管理员）
   - **删除图片**：DELETE /api/images/:id - 软删除图片（仅管理员）
@@ -157,7 +159,41 @@
 
 ## 开发中模块（🚧 可以修改）
 
-（暂无）
+### 🚧 Halloween 相册业务接口（Anchor模块）
+
+- 文件：`src/routes/anchor/halloween.ts`
+- 服务层：`src/services/anchor/halloween.ts`
+- 功能：专门为 Halloween 活动相册提供的业务接口
+  - **获取相册列表**：GET /api/anchor/halloween/galleries - 获取 Halloween 活动配置的相册列表（所有认证用户）
+  - **获取相册图片**：GET /api/anchor/halloween/images?tagName=xxx - 获取指定相册的图片列表（所有认证用户）
+    - 支持分页（page, limit）
+    - 自动验证 tagName 是否在配置的相册列表中
+    - 返回相册信息（gallery）和图片列表（items）
+- 数据源：
+  - 从 ActivityConfig 表读取 activityId 为 "anchor_halloween" 的配置
+  - 配置格式示例：
+    ```json
+    {
+      "galleries": [
+        {
+          "imageTag": "default",
+          "name": "测试用列表"
+        },
+        {
+          "imageTag": "avatar",
+          "name": "头像列表"
+        }
+      ]
+    }
+    ```
+  - 调用通用图片列表接口（getImageList）获取图片数据
+- 权限控制：
+  - 所有接口需要认证用户访问（requireUser）
+- 模块隔离：
+  - 独立的 anchor 模块目录结构（src/routes/anchor/, src/services/anchor/）
+  - 与通用接口分离，专注于特定业务场景
+- 测试覆盖：8 个集成测试用例全部通过
+- **状态**：开发中，允许修改和扩展
 
 ## 开发命令
 

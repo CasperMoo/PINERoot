@@ -8,6 +8,7 @@ import authRoutes from './routes/auth'
 import imageRoutes from './routes/image'
 import imageTagRoutes from './routes/imageTag'
 import activityConfigRoutes from './routes/activityConfig'
+import halloweenRoutes from './routes/anchor/halloween'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -68,6 +69,9 @@ export async function build() {
 
   // Register activity config routes
   await app.register(activityConfigRoutes, { prefix: "/api" });
+
+  // Register Halloween anchor routes
+  await app.register(halloweenRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(
