@@ -1,6 +1,4 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { authMiddleware } from '../../middleware/auth'
-import { requireUser } from '../../middleware/roleAuth'
 import { ok, error, ErrorCode } from '../../utils/response'
 import {
   getHalloweenGalleries,
@@ -8,15 +6,14 @@ import {
 } from '../../services/anchor/halloween'
 
 /**
- * Halloween 活动专属路由
+ * Halloween 活动专属路由（公开访问，无需登录）
  */
 export default async function halloweenRoutes(fastify: FastifyInstance) {
   /**
-   * 获取 Halloween 画廊列表
+   * 获取 Halloween 画廊列表（公开接口）
    */
   fastify.get(
     '/anchor/halloween/galleries',
-    { preHandler: [authMiddleware, requireUser()] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const galleries = await getHalloweenGalleries()
@@ -43,7 +40,7 @@ export default async function halloweenRoutes(fastify: FastifyInstance) {
   )
 
   /**
-   * 获取指定画廊的图片列表
+   * 获取指定画廊的图片列表（公开接口）
    */
   fastify.get<{
     Querystring: {
@@ -53,7 +50,6 @@ export default async function halloweenRoutes(fastify: FastifyInstance) {
     }
   }>(
     '/anchor/halloween/images',
-    { preHandler: [authMiddleware, requireUser()] },
     async (
       request: FastifyRequest<{
         Querystring: {

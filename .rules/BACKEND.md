@@ -164,8 +164,8 @@
 - 文件：`src/routes/anchor/halloween.ts`
 - 服务层：`src/services/anchor/halloween.ts`
 - 功能：专门为 Halloween 活动相册提供的业务接口
-  - **获取相册列表**：GET /api/anchor/halloween/galleries - 获取 Halloween 活动配置的相册列表（所有认证用户）
-  - **获取相册图片**：GET /api/anchor/halloween/images?tagName=xxx - 获取指定相册的图片列表（所有认证用户）
+  - **获取相册列表**：GET /api/anchor/halloween/galleries - 获取 Halloween 活动配置的相册列表（公开接口，无需登录）
+  - **获取相册图片**：GET /api/anchor/halloween/images?tagName=xxx - 获取指定相册的图片列表（公开接口，无需登录）
     - 支持分页（page, limit）
     - 自动验证 tagName 是否在配置的相册列表中
     - 返回相册信息（gallery）和图片列表（items）
@@ -188,11 +188,11 @@
     ```
   - 调用通用图片列表接口（getImageList）获取图片数据
 - 权限控制：
-  - 所有接口需要认证用户访问（requireUser）
+  - **公开访问**：无需登录即可访问所有接口
 - 模块隔离：
   - 独立的 anchor 模块目录结构（src/routes/anchor/, src/services/anchor/）
   - 与通用接口分离，专注于特定业务场景
-- 测试覆盖：8 个集成测试用例全部通过
+- 测试覆盖：6 个集成测试用例全部通过
 - **状态**：开发中，允许修改和扩展
 
 ## 开发命令

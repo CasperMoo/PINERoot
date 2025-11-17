@@ -73,13 +73,10 @@ describe('Halloween Anchor Routes', () => {
   })
 
   describe('GET /api/anchor/halloween/galleries', () => {
-    it('should get Halloween galleries list', async () => {
+    it('should get Halloween galleries list (public access)', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/galleries',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/galleries'
       })
 
       expect(response.statusCode).toBe(200)
@@ -101,37 +98,20 @@ describe('Halloween Anchor Routes', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/galleries',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/galleries'
       })
 
       expect(response.statusCode).toBe(200)
       const body = JSON.parse(response.body)
       expect(body.code).toBe(5001) // ACTIVITY_CONFIG_NOT_FOUND
     })
-
-    it('should require authentication', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: '/api/anchor/halloween/galleries'
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(3001) // NO_TOKEN
-    })
   })
 
   describe('GET /api/anchor/halloween/images', () => {
-    it('should get images for specified gallery', async () => {
+    it('should get images for specified gallery (public access)', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images?tagName=default',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/images?tagName=default'
       })
 
       expect(response.statusCode).toBe(200)
@@ -149,10 +129,7 @@ describe('Halloween Anchor Routes', () => {
     it('should support pagination', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images?tagName=default&page=1&limit=1',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/images?tagName=default&page=1&limit=1'
       })
 
       expect(response.statusCode).toBe(200)
@@ -166,10 +143,7 @@ describe('Halloween Anchor Routes', () => {
     it('should get different gallery images', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images?tagName=avatar',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/images?tagName=avatar'
       })
 
       expect(response.statusCode).toBe(200)
@@ -183,10 +157,7 @@ describe('Halloween Anchor Routes', () => {
     it('should return error when tagName not provided', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/images'
       })
 
       expect(response.statusCode).toBe(200)
@@ -197,10 +168,7 @@ describe('Halloween Anchor Routes', () => {
     it('should return error when tagName not in galleries', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images?tagName=non-existent',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
+        url: '/api/anchor/halloween/images?tagName=non-existent'
       })
 
       expect(response.statusCode).toBe(200)
@@ -219,26 +187,12 @@ describe('Halloween Anchor Routes', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/api/anchor/halloween/images?tagName=default',
-        headers: {
-          authorization: `Bearer ${authToken}`
-        }
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(5001) // ACTIVITY_CONFIG_NOT_FOUND
-    })
-
-    it('should require authentication', async () => {
-      const response = await app.inject({
-        method: 'GET',
         url: '/api/anchor/halloween/images?tagName=default'
       })
 
       expect(response.statusCode).toBe(200)
       const body = JSON.parse(response.body)
-      expect(body.code).toBe(3001) // NO_TOKEN
+      expect(body.code).toBe(5001) // ACTIVITY_CONFIG_NOT_FOUND
     })
   })
 })
