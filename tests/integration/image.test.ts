@@ -206,8 +206,9 @@ describe('Image Routes', () => {
       expect(body.data.total).toBe(3)
       expect(body.data.page).toBe(1)
       expect(body.data.limit).toBe(20)
-      // 检查是否有 tagName
-      expect(body.data.items[0].tagName).toBeDefined()
+      // 检查是否有 tag 对象和 name 字段
+      expect(body.data.items[0].tag).toBeDefined()
+      expect(body.data.items[0].tag.name).toBeDefined()
     })
 
     it('should filter by tagId', async () => {
@@ -242,6 +243,63 @@ describe('Image Routes', () => {
       expect(body.data.total).toBe(3)
       expect(body.data.page).toBe(1)
       expect(body.data.limit).toBe(2)
+    })
+
+    it('should filter by tagName', async () => {
+      // 创建一个自定义标签
+      const customTag = await createTestTag('custom-tag')
+      await createTestImage({ userId, tagId: customTag.id })
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/images?tagName=custom-tag',
+        headers: {
+          authorization: `Bearer ${authToken}`
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.code).toBe(0)
+      expect(body.data.items).toHaveLength(1)
+      expect(body.data.items[0].tagId).toBe(customTag.id)
+    })
+
+    it('should return empty array for non-existent tagName', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/images?tagName=non-existent-tag',
+        headers: {
+          authorization: `Bearer ${authToken}`
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.code).toBe(0)
+      expect(body.data.items).toHaveLength(0)
+      expect(body.data.total).toBe(0)
+    })
+
+    it('should prioritize tagName over tagId when both provided', async () => {
+      // 创建一个自定义标签
+      const customTag = await createTestTag('priority-test')
+      await createTestImage({ userId, tagId: customTag.id })
+
+      // 同时传递 tagName 和 tagId，tagName 应该优先
+      const response = await app.inject({
+        method: 'GET',
+        url: `/api/images?tagName=priority-test&tagId=${defaultTagId}`,
+        headers: {
+          authorization: `Bearer ${authToken}`
+        }
+      })
+
+      expect(response.statusCode).toBe(200)
+      const body = JSON.parse(response.body)
+      expect(body.code).toBe(0)
+      expect(body.data.items).toHaveLength(1)
+      expect(body.data.items[0].tagId).toBe(customTag.id)
     })
   })
 

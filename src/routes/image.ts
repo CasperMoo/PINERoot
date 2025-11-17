@@ -163,6 +163,7 @@ export default async function imageRoutes(fastify: FastifyInstance) {
       page?: string
       limit?: string
       tagId?: string
+      tagName?: string
       userId?: string
     }
   }>(
@@ -173,6 +174,7 @@ export default async function imageRoutes(fastify: FastifyInstance) {
         page?: string
         limit?: string
         tagId?: string
+        tagName?: string
         userId?: string
       }
     }>, reply: FastifyReply) => {
@@ -180,9 +182,10 @@ export default async function imageRoutes(fastify: FastifyInstance) {
         const page = request.query.page ? parseInt(request.query.page) : 1
         const limit = request.query.limit ? parseInt(request.query.limit) : 20
         const tagId = request.query.tagId ? parseInt(request.query.tagId) : undefined
+        const tagName = request.query.tagName
         const userId = request.query.userId ? parseInt(request.query.userId) : undefined
 
-        const result = await getImageList({ page, limit, tagId, userId })
+        const result = await getImageList({ page, limit, tagId, tagName, userId })
         return ok(reply, result)
       } catch (err) {
         console.error('Get images error:', err)

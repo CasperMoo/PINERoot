@@ -140,34 +140,133 @@ export async function getImageList(options: {
   page?: number
   limit?: number
   tagId?: number
+  tagName?: string
   userId?: number
 }) {
   const page = options.page || 1
   const limit = options.limit || 20
   const skip = (page - 1) * limit
 
-  // 构建查询条件
-  const where: any = {
+  // 构建基础查询条件
+  const baseWhere: any = {
     deletedAt: null  // 排除已删除的图片
   }
 
-  if (options.tagId !== undefined) {
-    where.tagId = options.tagId
+  if (options.userId !== undefined) {
+    baseWhere.userId = options.userId
   }
 
-  if (options.userId !== undefined) {
-    where.userId = options.userId
+  // 如果提供了 tagName，使用原生 SQL JOIN 查询（一次查询）
+  if (options.tagName !== undefined) {
+    // 构建查询 SQL
+    let selectSql = `
+      SELECT
+        i.*,
+        t.id as tag_id,
+        t.name as tag_name
+      FROM Image i
+      INNER JOIN ImageTag t ON i.tagId = t.id
+      WHERE i.deletedAt IS NULL
+        AND t.deletedAt IS NULL
+        AND t.name = ?
+    `
+
+    let countSql = `
+      SELECT COUNT(*) as count
+      FROM Image i
+      INNER JOIN ImageTag t ON i.tagId = t.id
+      WHERE i.deletedAt IS NULL
+        AND t.deletedAt IS NULL
+        AND t.name = ?
+    `
+
+    const selectParams: any[] = [options.tagName]
+    const countParams: any[] = [options.tagName]
+
+    if (options.userId !== undefined) {
+      selectSql += ' AND i.userId = ?'
+      countSql += ' AND i.userId = ?'
+      selectParams.push(options.userId)
+      countParams.push(options.userId)
+    }
+
+    selectSql += `
+      ORDER BY i.createdAt DESC
+      LIMIT ?
+      OFFSET ?
+    `
+    selectParams.push(limit, skip)
+
+    const result = await prisma.$queryRawUnsafe<Array<{
+      id: number
+      userId: number
+      originalName: string
+      ossKey: string
+      ossUrl: string
+      mimeType: string
+      size: number
+      width: number | null
+      height: number | null
+      tagId: number
+      deletedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+      tag_id: number
+      tag_name: string
+    }>>(selectSql, ...selectParams)
+
+    const countResult = await prisma.$queryRawUnsafe<Array<{ count: bigint }>>(
+      countSql,
+      ...countParams
+    )
+
+    const total = Number(countResult[0]?.count || 0)
+    const totalPages = Math.ceil(total / limit)
+
+    const items = result.map(row => ({
+      id: row.id,
+      userId: row.userId,
+      originalName: row.originalName,
+      ossKey: row.ossKey,
+      ossUrl: row.ossUrl,
+      mimeType: row.mimeType,
+      size: row.size,
+      width: row.width,
+      height: row.height,
+      tagId: row.tagId,
+      deletedAt: row.deletedAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+      tag: {
+        id: row.tag_id,
+        name: row.tag_name
+      }
+    }))
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      pageSize: limit,
+      totalPages
+    }
+  }
+
+  // 使用 tagId 或不使用任何标签过滤
+  if (options.tagId !== undefined) {
+    baseWhere.tagId = options.tagId
   }
 
   // 查询图片列表
   const [images, total] = await Promise.all([
     prisma.image.findMany({
-      where,
+      where: baseWhere,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' }
     }),
-    prisma.image.count({ where })
+    prisma.image.count({ where: baseWhere })
   ])
 
   // 手动 JOIN 标签信息（因为 relationMode = "prisma"）
@@ -178,8 +277,6 @@ export async function getImageList(options: {
       deletedAt: null
     }
   })
-
-  const tagMap = new Map(tags.map(tag => [tag.id, tag.name]))
 
   // 组装数据
   const items = images.map(img => ({
@@ -193,6 +290,7 @@ export async function getImageList(options: {
     items,
     total,
     page,
+    limit,
     pageSize: limit,
     totalPages
   }
