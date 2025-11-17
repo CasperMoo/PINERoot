@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 import { build } from '@/index'
 import { cleanDatabase, createTestUser, createTestTag, createTestImage } from '../helpers'
-import { prisma } from '@/db'
+import { PrismaClient } from '@prisma/client'
+
+// 延迟创建测试 PrismaClient 实例的函数
+function getTestPrisma() {
+  return new PrismaClient()
+}
 
 describe('Halloween Anchor Routes', () => {
   let app: Awaited<ReturnType<typeof build>>
@@ -48,24 +53,29 @@ describe('Halloween Anchor Routes', () => {
     await createTestImage({ userId, tagId: avatarTagId })
 
     // 创建 Halloween 活动配置
-    await prisma.activityConfig.create({
-      data: {
-        activityId: 'anchor_halloween',
-        config: {
-          galleries: [
-            {
-              imageTag: 'default',
-              name: '测试用列表'
-            },
-            {
-              imageTag: 'avatar',
-              name: '头像列表'
-            }
-          ]
-        },
-        version: 1
-      }
-    })
+    const testPrisma = getTestPrisma()
+    try {
+      await testPrisma.activityConfig.create({
+        data: {
+          activityId: 'anchor_halloween',
+          config: {
+            galleries: [
+              {
+                imageTag: 'default',
+                name: '测试用列表'
+              },
+              {
+                imageTag: 'avatar',
+                name: '头像列表'
+              }
+            ]
+          },
+          version: 1
+        }
+      })
+    } finally {
+      await testPrisma.$disconnect()
+    }
   })
 
   afterAll(async () => {
@@ -91,10 +101,15 @@ describe('Halloween Anchor Routes', () => {
 
     it('should return error when config not exists', async () => {
       // 删除配置
-      await prisma.activityConfig.updateMany({
-        where: { activityId: 'anchor_halloween' },
-        data: { deletedAt: new Date() }
-      })
+      const testPrisma = getTestPrisma()
+      try {
+        await testPrisma.activityConfig.updateMany({
+          where: { activityId: 'anchor_halloween' },
+          data: { deletedAt: new Date() }
+        })
+      } finally {
+        await testPrisma.$disconnect()
+      }
 
       const response = await app.inject({
         method: 'GET',
@@ -180,10 +195,15 @@ describe('Halloween Anchor Routes', () => {
 
     it('should return error when config not exists', async () => {
       // 删除配置
-      await prisma.activityConfig.updateMany({
-        where: { activityId: 'anchor_halloween' },
-        data: { deletedAt: new Date() }
-      })
+      const testPrisma = getTestPrisma()
+      try {
+        await testPrisma.activityConfig.updateMany({
+          where: { activityId: 'anchor_halloween' },
+          data: { deletedAt: new Date() }
+        })
+      } finally {
+        await testPrisma.$disconnect()
+      }
 
       const response = await app.inject({
         method: 'GET',

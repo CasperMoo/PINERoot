@@ -1,26 +1,41 @@
-import { prisma } from '@/db'
 import { UserRole } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+
+// 延迟创建测试 PrismaClient 实例的函数
+function getTestPrisma() {
+  return new PrismaClient()
+}
 
 // 清理数据库
 export async function cleanDatabase() {
-  // 先删除图片（有外键依赖）
-  await prisma.image.deleteMany()
-  await prisma.imageTag.deleteMany()
-  await prisma.activityConfig.deleteMany()
-  await prisma.user.deleteMany()
+  const testPrisma = getTestPrisma()
+  try {
+    // 先删除图片（有外键依赖）
+    await testPrisma.image.deleteMany()
+    await testPrisma.imageTag.deleteMany()
+    await testPrisma.activityConfig.deleteMany()
+    await testPrisma.user.deleteMany()
+  } finally {
+    await testPrisma.$disconnect()
+  }
 }
 
 // 创建测试用户
 export async function createTestUser(data?: Partial<any>) {
   const bcrypt = await import('bcrypt')
-  return prisma.user.create({
-    data: {
-      email: data?.email || 'test@example.com',
-      password: await bcrypt.hash(data?.password || '123456', 10),
-      name: data?.name || 'Test User',
-      role: data?.role || UserRole.USER,
-    },
-  })
+  const testPrisma = getTestPrisma()
+  try {
+    return testPrisma.user.create({
+      data: {
+        email: data?.email || 'test@example.com',
+        password: await bcrypt.hash(data?.password || '123456', 10),
+        name: data?.name || 'Test User',
+        role: data?.role || UserRole.USER,
+      },
+    })
+  } finally {
+    await testPrisma.$disconnect()
+  }
 }
 
 // 创建测试管理员用户
@@ -35,9 +50,14 @@ export async function createTestAdminUser(data?: Partial<any>) {
 
 // 创建测试标签（返回标签对象包含 ID）
 export async function createTestTag(name: string) {
-  return prisma.imageTag.create({
-    data: { name }
-  })
+  const testPrisma = getTestPrisma()
+  try {
+    return testPrisma.imageTag.create({
+      data: { name }
+    })
+  } finally {
+    await testPrisma.$disconnect()
+  }
 }
 
 // 创建测试图片记录
@@ -48,19 +68,24 @@ export async function createTestImage(data: {
   ossKey?: string
   ossUrl?: string
 }) {
-  return prisma.image.create({
-    data: {
-      userId: data.userId,
-      originalName: data.originalName || 'test.jpg',
-      ossKey: data.ossKey || `${data.userId}/test-${Date.now()}.jpg`,
-      ossUrl: data.ossUrl || 'https://example.com/test.jpg',
-      mimeType: 'image/jpeg',
-      size: 1024,
-      width: 800,
-      height: 600,
-      tagId: data.tagId || 1
-    }
-  })
+  const testPrisma = getTestPrisma()
+  try {
+    return testPrisma.image.create({
+      data: {
+        userId: data.userId,
+        originalName: data.originalName || 'test.jpg',
+        ossKey: data.ossKey || `${data.userId}/test-${Date.now()}.jpg`,
+        ossUrl: data.ossUrl || 'https://example.com/test.jpg',
+        mimeType: 'image/jpeg',
+        size: 1024,
+        width: 800,
+        height: 600,
+        tagId: data.tagId || 1
+      }
+    })
+  } finally {
+    await testPrisma.$disconnect()
+  }
 }
 
 // 创建测试活动配置
@@ -70,12 +95,17 @@ export async function createTestActivityConfig(data?: {
   version?: number
   deletedAt?: Date | null
 }) {
-  return prisma.activityConfig.create({
-    data: {
-      activityId: data?.activityId || 'test-activity',
-      config: data?.config || { enabled: true },
-      version: data?.version || 1,
-      deletedAt: data?.deletedAt || null
-    }
-  })
+  const testPrisma = getTestPrisma()
+  try {
+    return testPrisma.activityConfig.create({
+      data: {
+        activityId: data?.activityId || 'test-activity',
+        config: data?.config || { enabled: true },
+        version: data?.version || 1,
+        deletedAt: data?.deletedAt || null
+      }
+    })
+  } finally {
+    await testPrisma.$disconnect()
+  }
 }

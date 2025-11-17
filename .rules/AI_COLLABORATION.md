@@ -550,6 +550,178 @@ git push -u origin docs/update-api-docs
    - 绝不 force push 到 main/master
    - 警告用户风险
 
+## 测试环境管理
+
+### 数据库隔离机制
+
+项目采用**开发/测试数据库完全分离**的策略：
+
+```bash
+# 开发数据库（用于日常开发）
+pine_test
+
+# 测试数据库（仅用于测试）
+pine_test_case
+```
+
+### 测试执行命令
+
+```bash
+# 标准测试
+pnpm test:ci
+
+# 完整测试流程（同步数据库 + 运行测试）
+pnpm test:full
+
+# 仅同步测试数据库结构
+pnpm test:sync-db
+```
+
+### 测试数据创建流程
+
+#### 1. 创建测试账户
+
+```bash
+# 创建 Admin 账户
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email": "testuser1@example.com", "password": "123456", "name": "测试用户1"}'
+
+# 创建多个测试账户（User 角色）
+# testuser2@example.com, testuser3@example.com
+```
+
+#### 2. 账户信息配置
+
+将测试账户信息添加到 `.env` 文件：
+
+```bash
+# 测试账户信息
+TEST_USER1_EMAIL=testuser1@example.com
+TEST_USER1_PASSWORD=123456
+TEST_USER1_ID=1536
+TEST_USER1_TOKEN=<登录后获取的token>
+
+TEST_USER2_EMAIL=testuser2@example.com
+TEST_USER2_PASSWORD=123456
+TEST_USER2_ID=1537
+TEST_USER2_TOKEN=<登录后获取的token>
+
+TEST_USER3_EMAIL=testuser3@example.com
+TEST_USER3_PASSWORD=123456
+TEST_USER3_ID=1538
+TEST_USER3_TOKEN=<登录后获取的token>
+```
+
+#### 3. 创建图片标签
+
+```bash
+# 使用 Admin Token 创建标签
+curl -X POST http://localhost:3000/api/image-tags \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d '{"name": "anchor_2024"}'
+
+curl -X POST http://localhost:3000/api/image-tags \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d '{"name": "anchor_2023"}'
+
+curl -X POST http://localhost:3000/api/image-tags \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d '{"name": "anchor_2022"}'
+```
+
+#### 4. 上传测试图片
+
+```bash
+# 上传图片到指定标签
+curl -X POST http://localhost:3000/api/images/upload \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -F "tagId=1344" \
+  -F "file=@/path/to/image.jpg"
+```
+
+#### 5. 创建活动配置
+
+```bash
+# 创建 Halloween 活动配置
+curl -X POST http://localhost:3000/api/activity-configs \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -d '{
+    "activityId": "anchor_halloween",
+    "config": {
+      "galleries": [
+        {
+          "imageTag": "anchor_2024",
+          "name": "🎃 Halloween 2024"
+        },
+        {
+          "imageTag": "anchor_2023",
+          "name": "🎃 Halloween 2023"
+        },
+        {
+          "imageTag": "anchor_2022",
+          "name": "🎃 Halloween 2022"
+        }
+      ]
+    }
+  }'
+```
+
+### 数据库同步脚本
+
+当 Schema 变更时，确保测试数据库结构同步：
+
+```bash
+# 运行同步脚本
+tsx scripts/sync-test-db.ts
+
+# 或者使用快捷命令
+pnpm test:sync-db
+```
+
+### 测试验证步骤
+
+1. **验证数据库隔离**：
+   ```bash
+   # 检查开发数据库中的数据是否完整
+   # 运行测试后检查开发数据是否被清理
+   ```
+
+2. **验证 API 功能**：
+   ```bash
+   # 测试 Halloween 相册接口
+   curl http://localhost:3000/api/anchor/halloween/galleries
+   curl "http://localhost:3000/api/anchor/halloween/images?tagName=anchor_2024"
+   ```
+
+3. **验证前端功能**：
+   - 访问 Halloween 相册页面
+   - 测试图片加载和动画效果
+   - 验证相册切换功能
+
+### 常见测试场景
+
+#### Halloween 相册测试数据
+
+完整测试数据包括：
+- **3 个测试用户**（1个 Admin + 2 个 User）
+- **3 个图片标签**（anchor_2022/2023/2024）
+- **40 张测试图片**（平均分配到各标签）
+- **1 个活动配置**（Halloween 相册配置）
+
+#### 数据隔离验证
+
+```bash
+# 1. 在开发数据库创建测试数据
+# 2. 运行 pnpm test:ci
+# 3. 验证开发数据未被影响
+# 4. 验证测试数据库有对应的测试数据
+```
+
 ## 相关文档
 
 - 项目概述：`PROJECT_OVERVIEW.md`
