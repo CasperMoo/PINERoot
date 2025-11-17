@@ -1,26 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { App } from 'antd'
 import ImageGallery from './ImageGallery'
-import { imageApi, type Image } from '@/api/image'
-
-/**
- * 相册配置项
- */
-interface GalleryConfig {
-  imageTagId: number
-  displayName: string
-}
-
-/**
- * 相册配置列表（写死配置）
- */
-const GALLERY_CONFIGS: GalleryConfig[] = [
-  {
-    imageTagId: 422,
-    displayName: '测试用列表'
-  }
-  // 后续可添加更多配置
-]
+import GalleryTabs from './GalleryTabs'
+import { halloweenApi, type Gallery, type HalloweenImage } from '@/api/halloween'
 
 /**
  * Halloween 相册页面
@@ -28,26 +10,50 @@ const GALLERY_CONFIGS: GalleryConfig[] = [
 const HalloweenAnchor: React.FC = () => {
   const { message } = App.useApp()
   const [images, setImages] = useState<Array<{ id: string; url: string; alt: string }>>([])
-  const [loading, setLoading] = useState(true)
-
-  // 获取当前使用的配置（目前只读取第一个）
-  const currentConfig = GALLERY_CONFIGS[0]
+  const [galleries, setGalleries] = useState<Gallery[]>([])
+  const [activeGallery, setActiveGallery] = useState<Gallery | null>(null)
+  const [loadingGalleries, setLoadingGalleries] = useState(true)
+  const [loadingImages, setLoadingImages] = useState(false)
 
   /**
-   * 根据 imageTagId 获取图片列表
+   * 获取相册列表
    */
   useEffect(() => {
+    const fetchGalleries = async () => {
+      try {
+        setLoadingGalleries(true)
+        const response = await halloweenApi.getGalleries()
+        setGalleries(response.galleries)
+
+        // 默认选中第一个相册
+        if (response.galleries.length > 0) {
+          setActiveGallery(response.galleries[0])
+        }
+      } catch (error) {
+        console.error('获取相册列表失败:', error)
+        message.error('获取相册列表失败，请稍后重试')
+      } finally {
+        setLoadingGalleries(false)
+      }
+    }
+
+    fetchGalleries()
+  }, [message])
+
+  /**
+   * 根据当前选中的相册获取图片列表
+   */
+  useEffect(() => {
+    if (!activeGallery) return
+
     const fetchImages = async () => {
       try {
-        setLoading(true)
-        const response = await imageApi.getList({
-          tagId: currentConfig.imageTagId,
-          page: 1,
-          pageSize: 100 // 获取足够多的图片
-        })
+        setLoadingImages(true)
+        // 使用 gallery.imageTag 作为 tagName 参数
+        const response = await halloweenApi.getImages(activeGallery.imageTag)
 
-        // 转换 API 数据为组件需要的格式
-        const transformedImages = response.items.map((img: Image) => ({
+        // 转换后端数据格式为组件期望的格式
+        const transformedImages = response.items.map((img: HalloweenImage) => ({
           id: img.id.toString(),
           url: img.ossUrl,
           alt: img.originalName
@@ -59,12 +65,21 @@ const HalloweenAnchor: React.FC = () => {
         message.error('获取图片列表失败，请稍后重试')
         setImages([]) // 失败时显示空列表
       } finally {
-        setLoading(false)
+        setLoadingImages(false)
       }
     }
 
     fetchImages()
-  }, [currentConfig.imageTagId, message])
+  }, [activeGallery, message])
+
+  /**
+   * 切换相册
+   */
+  const handleGalleryChange = (gallery: Gallery) => {
+    setActiveGallery(gallery)
+  }
+
+  const loading = loadingGalleries || loadingImages
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950">
@@ -84,9 +99,19 @@ const HalloweenAnchor: React.FC = () => {
             animation: 'fadeIn 1.5s ease-out',
           }}
         >
-          {currentConfig.displayName}
+          {activeGallery ? activeGallery.name : 'Loading...'}
         </p>
       </header>
+
+      {/* 相册标签切换 */}
+      {!loadingGalleries && galleries.length > 0 && activeGallery && (
+        <GalleryTabs
+          galleries={galleries}
+          activeGallery={activeGallery}
+          onGalleryChange={handleGalleryChange}
+          loading={loadingImages}
+        />
+      )}
 
       {/* 加载状态 */}
       {loading ? (

@@ -48,7 +48,17 @@ export async function getHalloweenGalleries() {
 }
 
 /**
+ * 公开图片数据类型（仅包含展示所需字段）
+ */
+interface PublicImageData {
+  id: number
+  ossUrl: string
+  originalName: string
+}
+
+/**
  * 获取指定画廊的图片列表（带分页）
+ * 注意：此接口为公开接口，只返回展示所需的字段，过滤掉敏感信息
  */
 export async function getHalloweenGalleryImages(options: {
   tagName: string
@@ -75,8 +85,20 @@ export async function getHalloweenGalleryImages(options: {
     limit: options.limit
   })
 
+  // 🔒 安全过滤：只返回公开信息，移除敏感字段
+  const publicItems: PublicImageData[] = result.items.map(img => ({
+    id: img.id,
+    ossUrl: img.ossUrl,
+    originalName: img.originalName
+  }))
+
   return {
     gallery,
-    ...result
+    items: publicItems,
+    total: result.total,
+    page: result.page,
+    limit: result.limit,
+    pageSize: result.pageSize,
+    totalPages: result.totalPages
   }
 }
