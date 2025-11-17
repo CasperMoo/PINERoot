@@ -53,3 +53,17 @@ model ImageTag {
 
   @@index([deletedAt])
 }
+
+model ActivityConfig {
+  id         Int       @id @default(autoincrement())
+  activityId String    // 活动英文ID（可重复，用于版本管理）
+  config     Json      // JSON配置数据
+  version    Int       // 版本号（同一个activityId下递增）
+  deletedAt  DateTime? // 软删除（旧版本标记为删除，最新版本为NULL）
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([activityId, version]) // activityId + version 唯一
+  @@index([activityId, deletedAt]) // 查询当前生效版本的索引
+  @@index([deletedAt])
+}

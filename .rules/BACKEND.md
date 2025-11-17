@@ -8,7 +8,10 @@
 - 技术栈：Fastify + TypeScript + Prisma + MySQL
 - 部署方式：Docker + 阿里云 ACR + 1Panel（阿里云 ECS）
 - 部署地址：https://api.mumumumu.net
-- 核心功能：提供用户注册/登录的 JWT 认证和受保护路由
+- 核心功能：
+  - 用户认证与权限管理（JWT + 角色控制）
+  - 图片上传与管理（阿里云 OSS）
+  - 版本化的活动配置管理
 
 ## 已完成模块（🔒 禁止修改）
 
@@ -88,6 +91,11 @@
   - 4006 标签不存在
   - 4007 批量上传数量超限
   - 4008 标签名称已存在
+  - 5001 活动配置不存在
+  - 5002 活动ID已存在
+  - 5003 activityId 必填
+  - 5004 config 必须是有效的 JSON 对象
+  - 5005 指定的历史版本不存在
   - 9001 服务不可用（健康检查失败）
 
 ### ✅ 图片管理模块
@@ -113,6 +121,39 @@
   - 所有接口需要 JWT 认证
   - 使用 `roleAuth` 中间件实现权限控制
 - **状态**：已完成测试并部署，禁止修改
+
+### ✅ 活动配置模块
+
+- 文件：`src/routes/activityConfig.ts`
+- 功能：支持版本化的活动配置管理，每次更新都保留历史记录
+  - **获取配置列表**：GET /api/activity-configs - 获取所有活动的最新配置（所有认证用户）
+  - **获取单个配置**：GET /api/activity-configs/:activityId - 获取指定活动的最新配置（所有认证用户）
+  - **获取历史版本**：GET /api/activity-configs/:activityId/history - 获取所有历史版本（所有认证用户）
+  - **创建配置**：POST /api/activity-configs - 创建新活动配置（仅管理员）
+  - **更新配置**：PATCH /api/activity-configs/:activityId - 更新配置，自动递增版本号（仅管理员）
+  - **回滚版本**：POST /api/activity-configs/:activityId/rollback - 回滚到指定历史版本（仅管理员）
+  - **删除配置**：DELETE /api/activity-configs/:activityId - 软删除当前配置（仅管理员）
+- 数据库：ActivityConfig 表
+  - activityId: 活动英文 ID（可重复，用于版本管理）
+  - config: JSON 配置数据（Prisma Json 类型）
+  - version: 版本号（同一个 activityId 下递增）
+  - deletedAt: 软删除标记（旧版本软删除，最新版本为 NULL）
+  - 唯一约束：activityId + version
+- 核心特性：
+  - **不可变数据模式**：每次更新都新增记录，旧版本软删除
+  - **自动版本管理**：PATCH 更新时自动将 version + 1
+  - **版本回滚**：支持恢复任意历史版本
+  - **查询优化**：通过索引快速查询当前生效版本（activityId + deletedAt）
+- 使用场景：
+  - 前端活动配置（如万圣节、圣诞节等节日活动）
+  - 功能开关配置
+  - 动态主题配置
+  - 需要版本历史和回滚能力的任何配置
+- 权限控制：
+  - 查询接口：所有认证用户可访问（requireUser）
+  - 管理接口：仅管理员可操作（requireAdmin）
+- 测试覆盖：16 个集成测试用例全部通过
+- **状态**：已完成测试，禁止修改
 
 ## 开发中模块（🚧 可以修改）
 
@@ -291,13 +332,28 @@ model ImageTag {
 
   @@index([deletedAt])
 }
+
+model ActivityConfig {
+  id         Int       @id @default(autoincrement())
+  activityId String    // 活动英文ID（可重复，用于版本管理）
+  config     Json      // JSON配置数据
+  version    Int       // 版本号（同一个activityId下递增）
+  deletedAt  DateTime? // 软删除（旧版本标记为删除，最新版本为NULL）
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([activityId, version]) // activityId + version 唯一
+  @@index([activityId, deletedAt]) // 查询当前生效版本的索引
+  @@index([deletedAt])
+}
 ```
 
 **注意**：
 - 使用 `relationMode = "prisma"` 模式，不使用数据库外键
 - 标签关联通过应用层手动 JOIN 查询
-- Image 表和 ImageTag 表都使用软删除（`deletedAt` 字段）
+- Image、ImageTag、ActivityConfig 表都使用软删除（`deletedAt` 字段）
 - 所有查询操作都会自动过滤 `deletedAt IS NOT NULL` 的记录
+- ActivityConfig 使用不可变数据模式：每次更新都新增记录，旧版本软删除
 
 ### Schema 变更流程
 

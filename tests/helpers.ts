@@ -6,6 +6,7 @@ export async function cleanDatabase() {
   // 先删除图片（有外键依赖）
   await prisma.image.deleteMany()
   await prisma.imageTag.deleteMany()
+  await prisma.activityConfig.deleteMany()
   await prisma.user.deleteMany()
 }
 
@@ -58,6 +59,23 @@ export async function createTestImage(data: {
       width: 800,
       height: 600,
       tagId: data.tagId || 1
+    }
+  })
+}
+
+// 创建测试活动配置
+export async function createTestActivityConfig(data?: {
+  activityId?: string
+  config?: Record<string, unknown>
+  version?: number
+  deletedAt?: Date | null
+}) {
+  return prisma.activityConfig.create({
+    data: {
+      activityId: data?.activityId || 'test-activity',
+      config: data?.config || { enabled: true },
+      version: data?.version || 1,
+      deletedAt: data?.deletedAt || null
     }
   })
 }

@@ -7,6 +7,7 @@ import { prisma } from './db'
 import authRoutes from './routes/auth'
 import imageRoutes from './routes/image'
 import imageTagRoutes from './routes/imageTag'
+import activityConfigRoutes from './routes/activityConfig'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -64,6 +65,9 @@ export async function build() {
 
   // Register image tag routes
   await app.register(imageTagRoutes, { prefix: "/api" });
+
+  // Register activity config routes
+  await app.register(activityConfigRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(

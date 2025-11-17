@@ -50,6 +50,13 @@ export function error<T = unknown>(
  * - 4007: 批量上传数量超限（最多 10 张）
  * - 4008: 标签名已存在（创建标签时）
  *
+ * 活动配置模块相关 (5xxx):
+ * - 5001: 活动配置不存在
+ * - 5002: 活动ID已存在（创建时）
+ * - 5003: activityId 必填
+ * - 5004: config 必须是有效的 JSON 对象
+ * - 5005: 指定的历史版本不存在（回滚时）
+ *
  * 系统相关 (9xxx):
  * - 9001: 服务不可用（健康检查失败）
  */
@@ -77,6 +84,13 @@ export const ErrorCode = {
   TAG_NOT_FOUND: 4006,
   BATCH_LIMIT_EXCEEDED: 4007,
   TAG_NAME_EXISTS: 4008,
+
+  // 活动配置模块
+  ACTIVITY_CONFIG_NOT_FOUND: 5001,
+  ACTIVITY_ID_EXISTS: 5002,
+  ACTIVITY_ID_REQUIRED: 5003,
+  INVALID_CONFIG_FORMAT: 5004,
+  VERSION_NOT_FOUND: 5005,
 
   // 系统
   SERVICE_UNAVAILABLE: 9001,
