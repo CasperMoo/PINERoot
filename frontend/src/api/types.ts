@@ -26,7 +26,7 @@ export const UserRole = {
 export interface User {
   id: number;
   email: string;
-  name: string | null;
+  nickname: string | null;
   role: UserRole;
   createdAt: string;
 }
@@ -45,7 +45,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  name?: string;
+  nickname?: string;
 }
 
 /**

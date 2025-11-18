@@ -5,7 +5,7 @@ import { UserRole } from '@prisma/client'
 export interface UserPayload {
   id: number
   email: string
-  name: string | null
+  nickname: string | null
   role: UserRole
   createdAt: Date
 }

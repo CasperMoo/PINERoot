@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { GalleryImage, ImageLifecycle, ImagePosition } from '../types'
-import { GALLERY_CONFIG } from '../config'
+import type { FullGalleryConfig } from '../config'
 import { randomInRange, shuffleArray } from '../utils'
 import { generateRandomPosition } from '../positionUtils'
 
@@ -8,7 +8,7 @@ import { generateRandomPosition } from '../positionUtils'
  * 图片生命周期管理 Hook
  * 负责管理所有图片的状态、位置和数量控制
  */
-export const useImageLifecycle = (imagePool: GalleryImage[]) => {
+export const useImageLifecycle = (imagePool: GalleryImage[], config: FullGalleryConfig) => {
   // 每张图片的生命周期状态（索引 -> 生命周期）
   const [imageLifecycles, setImageLifecycles] = useState<Map<number, ImageLifecycle>>(new Map())
 
@@ -30,7 +30,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
 
     // 计算初始激活数量
     const initialActiveCount = Math.min(
-      GALLERY_CONFIG.targetCount + GALLERY_CONFIG.countTolerance,
+      config.targetCount + config.countTolerance,
       imagePool.length
     )
 
@@ -40,9 +40,9 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
       const isInitiallyActive = order < initialActiveCount
 
       if (isInitiallyActive) {
-        // 波浪式启动：将17张图片的启动时间分散在 initialSpreadTime 内
-        // 第1张：0ms, 第2张：~588ms, 第3张：~1176ms, ..., 第17张：10000ms
-        const spreadDelay = (order / initialActiveCount) * GALLERY_CONFIG.initialSpreadTime
+        // 波浪式启动：将图片的启动时间分散在 initialSpreadTime 内
+        // 第1张：0ms, 第2张：~588ms, 第3张：~1176ms, ...
+        const spreadDelay = (order / initialActiveCount) * config.initialSpreadTime
 
         // 基础延迟 + 额外随机（增加自然感）
         const totalDelay = spreadDelay + randomInRange(0, 2000)
@@ -50,7 +50,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
         lifecycles.set(idx, {
           state: 'waiting',
           appearDelay: totalDelay,
-          displayDuration: randomInRange(GALLERY_CONFIG.minDisplayTime, GALLERY_CONFIG.maxDisplayTime),
+          displayDuration: randomInRange(config.minDisplayTime, config.maxDisplayTime),
           startTime: Date.now(),
         })
       } else {
@@ -63,7 +63,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
         })
       }
 
-      positions.set(idx, generateRandomPosition())
+      positions.set(idx, generateRandomPosition(config))
     })
 
     setImageLifecycles(lifecycles)
@@ -114,7 +114,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
             }
             return updated
           })
-        }, GALLERY_CONFIG.fadeInDuration)
+        }, config.fadeInDuration)
         timers.push(timer)
       } else if (lifecycle.state === 'visible') {
         // 可见中：等待展示时间结束后开始消失
@@ -153,7 +153,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
             }
             return updated
           })
-        }, GALLERY_CONFIG.fadeOutDuration)
+        }, config.fadeOutDuration)
         timers.push(timer)
       }
       // dormant 状态不需要处理，等待被激活
@@ -176,12 +176,12 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
     })
 
     // 当数量低于目标时，激活1张休眠图片
-    const targetCount = GALLERY_CONFIG.targetCount
+    const targetCount = config.targetCount
     if (activeCount < targetCount) {
       const now = Date.now()
 
       // 节流控制：距离上次激活需要一定间隔
-      const minInterval = randomInRange(GALLERY_CONFIG.minActivateInterval, GALLERY_CONFIG.maxActivateInterval)
+      const minInterval = randomInRange(config.minActivateInterval, config.maxActivateInterval)
       if (now - lastActivateTimeRef.current < minInterval) {
         return // 间隔不够，跳过本次激活
       }
@@ -203,8 +203,8 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
           const updated = new Map(prev)
           updated.set(idxToActivate, {
             state: 'waiting',
-            appearDelay: randomInRange(GALLERY_CONFIG.minAppearDelay, GALLERY_CONFIG.maxAppearDelay),
-            displayDuration: randomInRange(GALLERY_CONFIG.minDisplayTime, GALLERY_CONFIG.maxDisplayTime),
+            appearDelay: randomInRange(config.minAppearDelay, config.maxAppearDelay),
+            displayDuration: randomInRange(config.minDisplayTime, config.maxDisplayTime),
             startTime: Date.now(),
           })
           return updated
@@ -214,7 +214,7 @@ export const useImageLifecycle = (imagePool: GalleryImage[]) => {
         lastActivateTimeRef.current = now
       }
     }
-  }, [imageLifecycles])
+  }, [imageLifecycles, config])
 
   // 计算当前可见的图片
   const visibleImages = useMemo(() => {

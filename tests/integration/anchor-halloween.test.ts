@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
-import { build } from '@/index'
+// build import delayed to fix database connection issues
 import { cleanDatabase, createTestUser, createTestTag, createTestImage } from '../helpers'
 import { PrismaClient } from '@prisma/client'
 
@@ -16,10 +16,8 @@ describe('Halloween Anchor Routes', () => {
   let avatarTagId: number
 
   beforeEach(async () => {
-    // 清理数据库
-    await cleanDatabase()
-
-    // 创建应用实例
+    // 延迟导入 build 函数，确保使用正确的 DATABASE_URL
+    const { build } = await import("@/index");
     app = await build()
 
     // 创建测试用户并登录

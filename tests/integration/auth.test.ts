@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { build } from "@/index";
 import { cleanDatabase, createTestUser } from "../helpers";
 
 describe("Auth API - 认证模块集成测试", () => {
@@ -8,6 +7,8 @@ describe("Auth API - 认证模块集成测试", () => {
   beforeEach(async () => {
     // 每个测试前清理数据库
     await cleanDatabase();
+    // 延迟导入 build 函数，确保使用正确的 DATABASE_URL
+    const { build } = await import("@/index");
     // 创建Fastify实例
     app = await build();
   });
@@ -25,7 +26,7 @@ describe("Auth API - 认证模块集成测试", () => {
         payload: {
           email: "newuser@example.com",
           password: "123456",
-          name: "New User",
+          nickname: "New User",
         },
       });
 

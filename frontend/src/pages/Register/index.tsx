@@ -18,9 +18,9 @@ const registerSchema = z.object({
   password: z
     .string()
     .min(6, '密码至少6个字符'),
-  name: z
+  nickname: z
     .string()
-    .min(2, '姓名至少2个字符')
+    .min(2, '昵称至少2个字符')
     .optional()
     .or(z.literal('')),
 });
@@ -45,7 +45,7 @@ export default function Register() {
     defaultValues: {
       email: '',
       password: '',
-      name: '',
+      nickname: '',
     },
   });
 
@@ -146,28 +146,28 @@ export default function Register() {
             )}
           </div>
 
-          {/* 姓名输入（可选）*/}
+          {/* 昵称输入（可选）*/}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              姓名（可选）
+              昵称（可选）
             </label>
             <Controller
-              name="name"
+              name="nickname"
               control={control}
               render={({ field }) => (
                 <Input
                   {...field}
                   size="large"
-                  placeholder="请输入姓名"
-                  status={errors.name ? 'error' : ''}
+                  placeholder="请输入昵称"
+                  status={errors.nickname ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
                 />
               )}
             />
-            {errors.name && (
+            {errors.nickname && (
               <p className="text-red-500 text-sm mt-1">
-                {errors.name.message}
+                {errors.nickname.message}
               </p>
             )}
           </div>

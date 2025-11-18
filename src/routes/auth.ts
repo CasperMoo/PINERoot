@@ -6,7 +6,7 @@ import { ok, error } from "../utils/response";
 interface RegisterBody {
   email: string;
   password: string;
-  name?: string;
+  nickname?: string;
 }
 
 interface LoginBody {
@@ -18,7 +18,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   // POST /register
   fastify.post<{ Body: RegisterBody }>("/register", async (request, reply) => {
     try {
-      const { email, password, name } = request.body;
+      const { email, password, nickname } = request.body;
 
       // Validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,7 +51,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         data: {
           email,
           password: hashedPassword,
-          name: name || null,
+          nickname: nickname || null,
         },
       });
 

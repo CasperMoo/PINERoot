@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
-import { build } from '@/index'
+// build import delayed to fix database connection issues
 import { cleanDatabase, createTestAdminUser, createTestTag } from '../helpers'
 import { prisma } from '@/db'
 
@@ -9,10 +9,8 @@ describe('ImageTag Routes', () => {
   let userId: number
 
   beforeEach(async () => {
-    // 清理数据库
-    await cleanDatabase()
-
-    // 创建应用实例
+    // 延迟导入 build 函数，确保使用正确的 DATABASE_URL
+    const { build } = await import("@/index");
     app = await build()
 
     // 创建测试管理员用户并登录（因为标签的创建、修改、删除需要管理员权限）

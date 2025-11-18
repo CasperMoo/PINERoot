@@ -1,20 +1,23 @@
 import React, { useMemo, useEffect, useState } from 'react'
 import type { ImageGalleryProps } from './types'
-import { GALLERY_CONFIG } from './config'
 import { enrichImages } from './utils'
 import { getFloatAnimation } from './positionUtils'
 import { useImageLifecycle } from './hooks/useImageLifecycle'
 import { useImageLoad } from './hooks/useImageLoad'
+import { useResponsiveConfig } from './hooks/useResponsiveConfig'
 
 /**
- * 图片相册组件（独立生命周期版本）
+ * 图片相册组件（响应式版本）
  */
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
+  // 获取响应式配置
+  const config = useResponsiveConfig()
+
   // 所有图片池（带随机大小）
   const imagePool = useMemo(() => enrichImages(images), [images])
 
-  // 使用生命周期管理 Hook
-  const { visibleImages, imagePositions } = useImageLifecycle(imagePool)
+  // 使用生命周期管理 Hook（传入响应式配置）
+  const { visibleImages, imagePositions } = useImageLifecycle(imagePool, config)
 
   // 图片加载状态管理
   const loadedImages = useImageLoad(visibleImages.map(({ image }) => image.url))
@@ -82,14 +85,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
               width: `${position.width}px`,
               height: `${position.height}px`,
               zIndex: position.zIndex,
-              animation: `${animationName} ${GALLERY_CONFIG.floatAnimationDuration}s ease-in-out infinite alternate`,
+              animation: `${animationName} ${config.floatAnimationDuration}s ease-in-out infinite alternate`,
               opacity,
               transition:
                 isAppearing || isDisappearing
                   ? `opacity ${
                       isAppearing
-                        ? GALLERY_CONFIG.fadeInDuration
-                        : GALLERY_CONFIG.fadeOutDuration
+                        ? config.fadeInDuration
+                        : config.fadeOutDuration
                     }ms ease-out`
                   : "none",
               // 硬件加速，防止抖动

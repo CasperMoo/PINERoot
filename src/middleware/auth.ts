@@ -27,7 +27,7 @@ export async function authMiddleware(
       select: {
         id: true,
         email: true,
-        name: true,
+        nickname: true,
         role: true,
         createdAt: true,
       },
@@ -41,7 +41,7 @@ export async function authMiddleware(
     request.currentUser = {
       id: user.id,
       email: user.email,
-      name: user.name,
+      nickname: user.nickname,
       role: user.role,
       createdAt: user.createdAt,
     };

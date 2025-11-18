@@ -73,7 +73,7 @@ const Header = () => {
                   className="flex items-center space-x-2 transition-all hover:bg-gray-50"
                 >
                   <UserOutlined className="text-lg" />
-                  <span className="hidden md:inline">{user.name || user.email}</span>
+                  <span className="hidden md:inline">{user.nickname || user.email}</span>
                 </Button>
               </Dropdown>
             ) : (

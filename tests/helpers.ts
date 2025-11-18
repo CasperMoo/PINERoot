@@ -3,7 +3,13 @@ import { PrismaClient } from '@prisma/client'
 
 // 延迟创建测试 PrismaClient 实例的函数
 function getTestPrisma() {
-  return new PrismaClient()
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  })
 }
 
 // 清理数据库
@@ -29,7 +35,7 @@ export async function createTestUser(data?: Partial<any>) {
       data: {
         email: data?.email || 'test@example.com',
         password: await bcrypt.hash(data?.password || '123456', 10),
-        name: data?.name || 'Test User',
+        nickname: data?.nickname || 'Test User',
         role: data?.role || UserRole.USER,
       },
     })
@@ -43,7 +49,7 @@ export async function createTestAdminUser(data?: Partial<any>) {
   return createTestUser({
     email: data?.email || 'admin@example.com',
     password: data?.password || '123456',
-    name: data?.name || 'Admin User',
+    nickname: data?.nickname || 'Admin User',
     role: UserRole.ADMIN,
   })
 }

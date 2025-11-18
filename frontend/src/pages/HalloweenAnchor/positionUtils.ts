@@ -1,24 +1,24 @@
 import type { ImagePosition } from './types'
-import { GALLERY_CONFIG } from './config'
+import type { FullGalleryConfig } from './config'
 import { randomInRange } from './utils'
 
 /**
  * 生成随机图片位置和尺寸
  */
-export const generateRandomPosition = (): ImagePosition => {
+export const generateRandomPosition = (config: FullGalleryConfig): ImagePosition => {
   const directions: Array<'left' | 'right' | 'up' | 'down'> = ['left', 'right', 'up', 'down']
-  const startRotation = randomInRange(GALLERY_CONFIG.minRotation, GALLERY_CONFIG.maxRotation)
+  const startRotation = randomInRange(config.minRotation, config.maxRotation)
 
   return {
     x: randomInRange(0, 85), // x坐标：0-85%（留出空间避免溢出）
     y: randomInRange(0, 85), // y坐标：0-85%
-    width: randomInRange(GALLERY_CONFIG.minWidth, GALLERY_CONFIG.maxWidth),
-    height: randomInRange(GALLERY_CONFIG.minHeight, GALLERY_CONFIG.maxHeight),
+    width: randomInRange(config.minWidth, config.maxWidth),
+    height: randomInRange(config.minHeight, config.maxHeight),
     rotation: startRotation, // 起始旋转角度
-    rotationEnd: startRotation + randomInRange(-GALLERY_CONFIG.rotationVariation, GALLERY_CONFIG.rotationVariation), // 结束角度
-    zIndex: Math.floor(randomInRange(GALLERY_CONFIG.minZIndex, GALLERY_CONFIG.maxZIndex)), // 层级
+    rotationEnd: startRotation + randomInRange(-config.rotationVariation, config.rotationVariation), // 结束角度
+    zIndex: Math.floor(randomInRange(config.minZIndex, config.maxZIndex)), // 层级
     floatDirection: directions[Math.floor(Math.random() * directions.length)],
-    floatDistance: randomInRange(GALLERY_CONFIG.minFloatDistance, GALLERY_CONFIG.maxFloatDistance), // 飘动距离
+    floatDistance: randomInRange(config.minFloatDistance, config.maxFloatDistance), // 飘动距离
   }
 }
 
