@@ -114,7 +114,7 @@ pnpm build
 
 1. 登录 1Panel 管理面板
 2. 进入"文件"管理
-3. 导航到网站目录：`/www/sites/mumumumu.net/index`
+3. 导航到网站目录：`/opt/1panel/apps/openresty/openresty/www/sites/mumumumu.net/index`
 4. 删除旧文件（除了 `.well-known` 等系统文件）
 5. 上传 `dist/` 目录下的所有文件
 6. 刷新网站验证部署成功
@@ -123,7 +123,7 @@ pnpm build
 
 ```bash
 # 从本地上传到服务器
-scp -r dist/* user@server:/www/sites/mumumumu.net/index/
+scp -r dist/* user@server:/opt/1panel/apps/openresty/openresty/www/sites/mumumumu.net/index/
 ```
 
 #### 步骤3：验证部署

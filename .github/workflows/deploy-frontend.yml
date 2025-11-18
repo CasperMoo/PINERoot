@@ -39,9 +39,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
           source: "frontend/dist/*"
-          target: "/www/sites/mumumumu.net/index/"
+          target: "/opt/1panel/apps/openresty/openresty/www/sites/mumumumu.net/index/"
           strip_components: 2  # 去掉 frontend/dist/ 路径前缀
-          rm: true  # 部署前删除目标目录旧文件
+          rm: true  # 部署前删除目标目录旧文件（完全替换策略）
 
       - name: Deployment Success
         run: |
