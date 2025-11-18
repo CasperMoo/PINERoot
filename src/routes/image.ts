@@ -28,7 +28,7 @@ export default async function imageRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         // 获取上传的文件
-        let file: MultipartFile | null = null
+        let file: MultipartFile | undefined = undefined
         let tagId = 1 // 默认标签
 
         try {
