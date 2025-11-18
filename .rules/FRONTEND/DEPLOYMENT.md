@@ -137,48 +137,63 @@ https://mumumumu.net
 # 检查页面功能是否正常
 ```
 
-### 方式2：自动部署（CI/CD，可选）
+### 方式2：自动部署（GitHub Actions）✅ 已配置
 
-**GitHub Actions 示例**（未实现，仅供参考）：
+**配置文件**: `.github/workflows/deploy-frontend.yml`
 
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy Frontend
+**触发条件**:
+- 推送到 `master` 分支
+- 且修改了 `frontend/` 目录下的文件
 
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
-
-      - name: Deploy to Server
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          TARGET: /www/sites/mumumumu.net/index/
-          SOURCE: dist/
+**部署流程**:
 ```
+git push → GitHub Actions 自动触发 → build → SCP 上传 → 部署完成
+```
+
+**配置步骤**:
+
+1. **首次配置（仅需一次）**
+
+   详细配置指南请查看: `.github/SSH_SETUP_GUIDE.md`
+
+   核心步骤：
+   - 生成 SSH 密钥对
+   - 将公钥添加到服务器
+   - 在 GitHub Secrets 配置私钥和服务器信息
+
+2. **日常使用（自动化）**
+
+   ```bash
+   # 修改前端代码后，直接提交推送
+   cd frontend
+   # ... 修改代码 ...
+   git add .
+   git commit -m "feat: 添加新功能"
+   git push origin master
+
+   # 🎉 自动触发部署！无需手动 build 和上传
+   ```
+
+3. **查看部署状态**
+
+   访问 GitHub 仓库的 `Actions` 标签页，查看部署进度和日志
+
+**优势**:
+- ✅ 推送代码即自动部署，无需手动操作
+- ✅ 每次部署都有完整日志记录
+- ✅ 部署失败会有通知
+- ✅ 可以随时查看历史部署记录
+
+**GitHub Secrets 配置**:
+
+在 GitHub 仓库的 `Settings` > `Secrets and variables` > `Actions` 中配置：
+
+| Secret Name | 说明 | 示例 |
+|-------------|------|------|
+| `SERVER_HOST` | 服务器 IP 地址 | `123.45.67.89` |
+| `SERVER_USER` | SSH 登录用户名 | `root` |
+| `SSH_PRIVATE_KEY` | SSH 私钥（完整内容） | `-----BEGIN OPENSSH...` |
+| `SERVER_PORT` | SSH 端口（可选） | `22` |
 
 ## Nginx 配置
 

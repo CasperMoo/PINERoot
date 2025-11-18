@@ -1,0 +1,49 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [master]  # 主分支名称
+    paths:
+      - 'frontend/**'  # 只有前端改变才触发
+      - '.github/workflows/deploy-frontend.yml'  # workflow 自身改变也触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: pnpm install
+
+      - name: Build
+        working-directory: ./frontend
+        run: pnpm build
+
+      - name: Deploy to Server via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "frontend/dist/*"
+          target: "/www/sites/mumumumu.net/index/"
+          strip_components: 2  # 去掉 frontend/dist/ 路径前缀
+          rm: true  # 部署前删除目标目录旧文件
+
+      - name: Deployment Success
+        run: |
+          echo "✅ Frontend deployed successfully!"
+          echo "🌐 Visit: https://mumumumu.net"
