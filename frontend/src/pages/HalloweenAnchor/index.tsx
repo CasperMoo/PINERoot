@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { App } from 'antd'
 import ImageGallery from './ImageGallery'
 import GalleryTabs from './GalleryTabs'
+import HalloweenParticles from './components/HalloweenParticles'
 import { halloweenApi, type Gallery, type HalloweenImage } from '@/api/halloween'
 
 /**
@@ -82,7 +83,13 @@ const HalloweenAnchor: React.FC = () => {
   const loading = loadingGalleries || loadingImages
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-black via-red-950 to-zinc-950 overflow-hidden">
+    <div className="h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-hidden relative">
+      {/* 背景特效层 */}
+      <div className="absolute inset-0 z-0">
+        {/* 优雅的粒子背景效果 */}
+        <HalloweenParticles />
+      </div>
+
       {/* 悬浮的相册标签切换 */}
       {!loadingGalleries && galleries.length > 0 && activeGallery && (
         <div className="absolute top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm">
@@ -96,28 +103,81 @@ const HalloweenAnchor: React.FC = () => {
 
       {/* 图片画布主体 - 占满屏幕高度 */}
       {loading ? (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-rose-100/90 text-lg">Loading...</div>
+        <div className="flex items-center justify-center h-full z-10 relative">
+          <div className="text-rose-100/90 text-lg animate-pulse">Loading...</div>
         </div>
       ) : images.length === 0 ? (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center h-full z-10 relative">
           <div className="text-rose-100/70 text-base">暂无图片</div>
         </div>
       ) : (
-        <ImageGallery images={images} />
+        <div className="relative z-10 h-full">
+          <ImageGallery images={images} />
+        </div>
       )}
 
-      {/* 定义淡入动画 */}
+      {/* 优雅的氛围光效和动画 */}
       <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
-            transform: translateY(-20px);
+            transform: translateY(-8px);
           }
           to {
             opacity: 1;
             transform: translateY(0);
           }
+        }
+
+        @keyframes ambientGlow {
+          0%, 100% {
+            background: radial-gradient(ellipse at 30% 40%, rgba(148, 163, 184, 0.02) 0%, transparent 60%);
+          }
+          33% {
+            background: radial-gradient(ellipse at 70% 60%, rgba(100, 116, 139, 0.015) 0%, transparent 70%);
+          }
+          66% {
+            background: radial-gradient(ellipse at 50% 30%, rgba(71, 85, 105, 0.01) 0%, transparent 80%);
+          }
+        }
+
+        @keyframes softPulse {
+          0%, 100% {
+            opacity: 0.8;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
+
+        /* 页面整体优雅氛围光效 */
+        body {
+          animation: ambientGlow 12s ease-in-out infinite;
+        }
+
+        /* 确保内容在特效层之上 */
+        .content-layer {
+          position: relative;
+          z-index: 10;
+          animation: softPulse 4s ease-in-out infinite;
+        }
+
+        /* 优化滚动条样式 */
+        ::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: rgba(148, 163, 184, 0.3);
+          border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(148, 163, 184, 0.5);
         }
       `}</style>
     </div>

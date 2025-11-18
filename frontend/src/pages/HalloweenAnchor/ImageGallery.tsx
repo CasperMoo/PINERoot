@@ -40,7 +40,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   }, [visibleImages])
 
   return (
-    <div className="w-full h-full relative overflow-hidden pt-16">
+    <div className="w-full h-full relative overflow-hidden pt-16" style={{ perspective: '1500px' }}>
       {/* 绝对定位散落布局 */}
       {visibleImages.map(({ idx: imageIdx, image, lifecycle }) => {
         const position = imagePositions.get(imageIdx)
@@ -95,22 +95,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                         : config.fadeOutDuration
                     }ms ease-out`
                   : "none",
-              // 硬件加速，防止抖动
+              // 硬件加速和3D效果
               willChange: "transform, opacity",
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
+              transformStyle: "preserve-3d",
             }}
           >
-            {/* 动态生成飘动动画 */}
+            {/* 动态生成飘动动画 - 添加3D旋转效果 */}
             <style>{`
               @keyframes ${animationName} {
                 0% {
-                  transform: rotate(${
+                  transform: rotateX(${position.rotateX}deg) rotateY(${position.rotateY}deg) rotateZ(${
                     position.rotation
                   }deg) ${getFloatAnimation(position.floatDirection, 0)};
                 }
                 100% {
-                  transform: rotate(${
+                  transform: rotateX(${position.rotateXEnd}deg) rotateY(${position.rotateYEnd}deg) rotateZ(${
                     position.rotationEnd
                   }deg) ${getFloatAnimation(
               position.floatDirection,
@@ -121,11 +122,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             `}</style>
 
             <div
-              className="w-full h-full relative bg-gradient-to-br from-zinc-950/80 to-red-950/40 rounded-lg shadow-2xl overflow-hidden"
+              className="w-full h-full relative bg-gradient-to-br from-slate-900/60 to-slate-800/30 rounded-xl overflow-hidden"
               style={{
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
                 transform: "translateZ(0)",
+                transformStyle: "preserve-3d",
+                // 增强的空间漂浮阴影效果 - 多层次、强对比
+                boxShadow: isImageLoaded ? `
+                  0 20px 60px rgba(0, 0, 0, 0.35),
+                  0 10px 30px rgba(0, 0, 0, 0.25),
+                  0 5px 15px rgba(0, 0, 0, 0.2),
+                  0 0 40px rgba(148, 163, 184, 0.15),
+                  0 0 80px rgba(100, 116, 139, 0.08),
+                  inset 0 0 30px rgba(255, 255, 255, 0.03)
+                ` : '0 8px 20px rgba(0, 0, 0, 0.15)',
+                transition: 'box-shadow 2.4s ease-out, transform 1.2s ease-out',
+                filter: isImageLoaded ? 'blur(0px) drop-shadow(0 15px 25px rgba(0, 0, 0, 0.3))' : 'blur(1px)',
               }}
             >
               <img
@@ -133,9 +146,57 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                 alt={image.alt}
                 className="w-full h-full object-cover absolute inset-0"
                 loading="lazy"
+                style={{
+                  filter: isImageLoaded ?
+                    'brightness(1.02) contrast(1.01) saturate(0.95)' :
+                    'brightness(0.98) contrast(0.98) saturate(0.85)',
+                  transition: 'filter 1.8s ease-out',
+                  transform: isImageLoaded ? 'scale(1)' : 'scale(1.02)',
+                }}
               />
-              {/* 悬停遮罩 */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-500 pointer-events-none" />
+
+              {/* 极致的柔光叠加 */}
+              <div
+                className="absolute inset-0 pointer-events-none transition-all duration-3000 ease-out"
+                style={{
+                  background: isImageLoaded ?
+                    'linear-gradient(135deg, rgba(148, 163, 184, 0.03) 0%, rgba(100, 116, 139, 0.02) 100%)' :
+                    'linear-gradient(135deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.04) 100%)',
+                  mixBlendMode: 'soft-light',
+                }}
+              />
+
+              {/* 优雅的悬停效果 - 极其微妙 */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1200 ease-out pointer-events-none"
+                style={{
+                  background: 'radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.03) 0%, rgba(148, 163, 184, 0.02) 40%, transparent 70%)',
+                  mixBlendMode: 'soft-light',
+                }}
+              />
+
+              {/* 极致的边框柔光 */}
+              <div
+                className="absolute inset-0 rounded-xl pointer-events-none"
+                style={{
+                  boxShadow: isImageLoaded ?
+                    'inset 0 0 40px rgba(148, 163, 184, 0.08), inset 0 0 80px rgba(100, 116, 139, 0.04)' :
+                    'none',
+                  transition: 'box-shadow 2.4s ease-out 0.6s',
+                  mixBlendMode: 'soft-light',
+                }}
+              />
+
+              {/* 柔和的环境光反射 */}
+              {isImageLoaded && (
+                <div
+                  className="absolute top-0 left-0 w-full h-8 pointer-events-none"
+                  style={{
+                    background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 0%, transparent 100%)',
+                    transition: 'opacity 1.8s ease-out',
+                  }}
+                />
+              )}
             </div>
           </div>
         );

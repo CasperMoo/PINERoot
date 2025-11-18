@@ -50,8 +50,12 @@ export interface ImagePosition {
   y: number // y坐标（百分比）
   width: number // 宽度（px）
   height: number // 高度（px）
-  rotation: number // 旋转角度（起始）
-  rotationEnd: number // 旋转角度（结束）
+  rotation: number // Z轴旋转角度（起始）
+  rotationEnd: number // Z轴旋转角度（结束）
+  rotateX: number // X轴3D旋转（起始）
+  rotateXEnd: number // X轴3D旋转（结束）
+  rotateY: number // Y轴3D旋转（起始）
+  rotateYEnd: number // Y轴3D旋转（结束）
   zIndex: number // 层级
   floatDirection: 'left' | 'right' | 'up' | 'down' // 飘动方向
   floatDistance: number // 飘动距离(px)
