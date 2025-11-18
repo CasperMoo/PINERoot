@@ -28,17 +28,14 @@ export default async function imageRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         // 获取上传的文件
-        const parts = request.parts()
         let file: MultipartFile | null = null
         let tagId = 1 // 默认标签
 
-        for await (const part of parts) {
-          if (part.type === 'file') {
-            file = part as MultipartFile
-          } else if (part.type === 'field' && part.fieldname === 'tagId') {
-            const value = (part as any).value
-            tagId = parseInt(value)
-          }
+        try {
+          // 使用 request.file() 直接获取第一个文件
+          file = await request.file({ limits: { fileSize: 5 * 1024 * 1024 } })
+        } catch (error) {
+          throw new Error('文件解析失败: ' + (error instanceof Error ? error.message : '未知错误'))
         }
 
         // 校验是否有文件

@@ -6,7 +6,7 @@ import type { ApiResponse } from './types';
  */
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
-  timeout: 10000,
+  timeout: 60000, // 60秒超时，适合文件上传
   headers: {
     'Content-Type': 'application/json',
   },
@@ -27,6 +27,12 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // 如果是 FormData，删除 Content-Type 让浏览器自动设置
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {

@@ -81,12 +81,7 @@ export const imageApi = {
 
     const response: ApiResponse<Image> = await request.post(
       '/images/upload-single',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
+      formData
     )
     return response.data!
   },
@@ -107,12 +102,7 @@ export const imageApi = {
 
     const response: ApiResponse<UploadResult> = await request.post(
       '/images/upload',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
+      formData
     )
     return response.data!
   },
