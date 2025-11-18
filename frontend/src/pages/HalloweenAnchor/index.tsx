@@ -3,6 +3,7 @@ import { App } from 'antd'
 import ImageGallery from './ImageGallery'
 import GalleryTabs from './GalleryTabs'
 import HalloweenParticles from './components/HalloweenParticles'
+import NoiseTexture from './components/NoiseTexture'
 import { halloweenApi, type Gallery, type HalloweenImage } from '@/api/halloween'
 
 /**
@@ -90,9 +91,12 @@ const HalloweenAnchor: React.FC = () => {
         <HalloweenParticles />
       </div>
 
+      {/* 噪点纹理层 - 电影胶片质感 */}
+      <NoiseTexture />
+
       {/* 悬浮的相册标签切换 */}
       {!loadingGalleries && galleries.length > 0 && activeGallery && (
-        <div className="absolute top-0 left-0 right-0 z-50 bg-black/20 backdrop-blur-sm">
+        <div className="absolute top-0 left-0 right-0 z-50">
           <GalleryTabs
             galleries={galleries}
             activeGallery={activeGallery}

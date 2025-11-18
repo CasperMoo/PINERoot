@@ -122,12 +122,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
             `}</style>
 
             <div
-              className="w-full h-full relative bg-gradient-to-br from-slate-900/60 to-slate-800/30 rounded-xl overflow-hidden"
+              className="w-full h-full relative rounded-xl overflow-hidden"
               style={{
                 backfaceVisibility: "hidden",
                 WebkitBackfaceVisibility: "hidden",
                 transform: "translateZ(0)",
                 transformStyle: "preserve-3d",
+                // 玻璃态效果 - 半透明背景 + 毛玻璃模糊
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+                backdropFilter: 'blur(10px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(10px) saturate(180%)',
+                // 玻璃质感的边框
+                border: '1px solid rgba(255, 255, 255, 0.18)',
                 // 增强的空间漂浮阴影效果 - 多层次、强对比
                 boxShadow: isImageLoaded ? `
                   0 20px 60px rgba(0, 0, 0, 0.35),
@@ -135,9 +141,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
                   0 5px 15px rgba(0, 0, 0, 0.2),
                   0 0 40px rgba(148, 163, 184, 0.15),
                   0 0 80px rgba(100, 116, 139, 0.08),
-                  inset 0 0 30px rgba(255, 255, 255, 0.03)
+                  inset 0 0 30px rgba(255, 255, 255, 0.05),
+                  inset 0 1px 1px rgba(255, 255, 255, 0.15)
                 ` : '0 8px 20px rgba(0, 0, 0, 0.15)',
-                transition: 'box-shadow 2.4s ease-out, transform 1.2s ease-out',
+                transition: 'box-shadow 2.4s ease-out, transform 1.2s ease-out, backdrop-filter 0.6s ease',
                 filter: isImageLoaded ? 'blur(0px) drop-shadow(0 15px 25px rgba(0, 0, 0, 0.3))' : 'blur(1px)',
               }}
             >

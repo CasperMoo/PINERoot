@@ -29,7 +29,16 @@ const GalleryTabs: React.FC<GalleryTabsProps> = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-2">
+    <div
+      className="w-full max-w-4xl mx-auto px-4 py-2"
+      style={{
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+      }}
+    >
       <Tabs
         activeKey={activeGallery.imageTag}
         items={items}
