@@ -1,8 +1,8 @@
 # Builder stage
 FROM public.ecr.aws/docker/library/node:20-alpine AS builder
 
-# 安装pnpm
-RUN npm install -g pnpm
+# 安装指定版本的pnpm
+RUN npm install -g pnpm@10.4.1
 
 WORKDIR /app
 
@@ -21,8 +21,8 @@ RUN pnpm build
 # Runner stage
 FROM public.ecr.aws/docker/library/node:20-alpine AS runner
 
-# 安装pnpm
-RUN npm install -g pnpm
+# 安装指定版本的pnpm
+RUN npm install -g pnpm@10.4.1
 
 WORKDIR /app
 
