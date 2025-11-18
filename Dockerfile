@@ -1,5 +1,5 @@
 # Builder stage
-FROM node:20-alpine AS builder
+FROM public.ecr.aws/docker/library/node:20-alpine AS builder
 
 # 安装pnpm
 RUN npm install -g pnpm
@@ -19,7 +19,7 @@ RUN npx prisma generate
 RUN pnpm build
 
 # Runner stage
-FROM node:20-alpine AS runner
+FROM public.ecr.aws/docker/library/node:20-alpine AS runner
 
 # 安装pnpm
 RUN npm install -g pnpm
