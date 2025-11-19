@@ -1,17 +1,13 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { MultipartFile } from '@fastify/multipart'
 import { authMiddleware } from '../middleware/auth'
 import { requireAdmin } from '../middleware/roleAuth'
 import { ok, error, ErrorCode } from '../utils/response'
-import { validateBatchCount, MAX_BATCH_UPLOAD } from '../utils/validation'
 import {
   uploadSingleImage,
-  batchUploadImages,
   getImageList,
   getImageById,
   updateImageTag,
-  softDeleteImage,
-  isImageOwner
+  softDeleteImage
 } from '../services/image'
 import { tagExists } from '../services/imageTag'
 
@@ -27,13 +23,37 @@ export default async function imageRoutes(fastify: FastifyInstance) {
       try {
         const userId = request.currentUser!.id
 
-        // 获取上传的文件
-        let file: MultipartFile | undefined = undefined
-        let tagId = 1 // 默认标签
+        // 获取上传的文件和 tagId
+        const parts = request.parts()
+        let file: {
+          buffer: Buffer
+          filename: string
+          mimetype: string
+          encoding: string
+          file: { bytesRead: number }
+          toBuffer: () => Promise<Buffer>
+        } | undefined = undefined
+        let tagId: number | undefined = undefined
 
         try {
-          // 使用 request.file() 直接获取第一个文件
-          file = await request.file({ limits: { fileSize: 5 * 1024 * 1024 } })
+          // 解析 multipart form data
+          for await (const part of parts) {
+            if (part.type === 'file' && !file) {
+              // 只取第一个文件
+              const buffer = await part.toBuffer()
+              file = {
+                buffer,
+                filename: part.filename,
+                mimetype: part.mimetype,
+                encoding: part.encoding,
+                file: { bytesRead: buffer.length },
+                toBuffer: async () => buffer
+              }
+            } else if (part.type === 'field' && part.fieldname === 'tagId') {
+              const value = (part as any).value
+              tagId = parseInt(value)
+            }
+          }
         } catch (error) {
           throw new Error('文件解析失败: ' + (error instanceof Error ? error.message : '未知错误'))
         }
@@ -43,16 +63,19 @@ export default async function imageRoutes(fastify: FastifyInstance) {
           return error(reply, ErrorCode.BATCH_LIMIT_EXCEEDED, '请上传一张图片')
         }
 
+        // 校验 tagId 是否提供
+        if (!tagId || isNaN(tagId)) {
+          return error(reply, ErrorCode.TAG_NOT_FOUND, '请选择图片标签')
+        }
+
         // 校验标签是否存在
-        if (tagId !== 1) {
-          const exists = await tagExists(tagId)
-          if (!exists) {
-            return error(reply, ErrorCode.TAG_NOT_FOUND, '标签不存在')
-          }
+        const exists = await tagExists(tagId)
+        if (!exists) {
+          return error(reply, ErrorCode.TAG_NOT_FOUND, '标签不存在')
         }
 
         // 执行上传
-        const image = await uploadSingleImage(file, userId, tagId)
+        const image = await uploadSingleImage(file as any, userId, tagId)
 
         // 返回结果
         return ok(reply, {
@@ -69,87 +92,6 @@ export default async function imageRoutes(fastify: FastifyInstance) {
         console.error('Upload error:', err)
         const errorMessage = err instanceof Error ? err.message : '上传失败'
         return error(reply, ErrorCode.OSS_UPLOAD_FAILED, errorMessage, 500)
-      }
-    }
-  )
-
-  // 批量上传图片（仅管理员）
-  fastify.post(
-    '/images/upload',
-    { preHandler: [authMiddleware, requireAdmin()] },
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      try {
-        const userId = request.currentUser!.id
-
-        // 获取上传的文件
-        const parts = request.parts()
-        const files: MultipartFile[] = []
-        let tagId = 1 // 默认标签
-
-        for await (const part of parts) {
-          if (part.type === 'file') {
-            files.push(part as MultipartFile)
-          } else if (part.type === 'field' && part.fieldname === 'tagId') {
-            const value = (part as any).value
-            tagId = parseInt(value)
-          }
-        }
-
-        // 校验上传数量
-        if (files.length === 0) {
-          return error(reply, ErrorCode.BATCH_LIMIT_EXCEEDED, '请至少上传一张图片')
-        }
-
-        if (!validateBatchCount(files.length)) {
-          return error(
-            reply,
-            ErrorCode.BATCH_LIMIT_EXCEEDED,
-            `批量上传最多 ${MAX_BATCH_UPLOAD} 张图片`
-          )
-        }
-
-        // 校验标签是否存在
-        if (tagId !== 1) {
-          const exists = await tagExists(tagId)
-          if (!exists) {
-            return error(reply, ErrorCode.TAG_NOT_FOUND, '标签不存在')
-          }
-        }
-
-        // 执行批量上传
-        const result = await batchUploadImages(files, userId, tagId)
-
-        // 如果全部失败
-        if (result.failed === files.length) {
-          return error(
-            reply,
-            ErrorCode.OSS_UPLOAD_FAILED,
-            '所有图片上传失败',
-            200,
-            result
-          )
-        }
-
-        // 返回结果
-        return ok(reply, {
-          success: result.success,
-          failed: result.failed,
-          images: result.results
-            .filter(r => r.success)
-            .map(r => ({
-              id: r.image.id,
-              ossUrl: r.image.ossUrl,
-              originalName: r.image.originalName,
-              size: r.image.size,
-              width: r.image.width,
-              height: r.image.height,
-              tagId: r.image.tagId,
-              createdAt: r.image.createdAt
-            }))
-        }, '上传成功')
-      } catch (err) {
-        console.error('Upload error:', err)
-        return error(reply, ErrorCode.OSS_UPLOAD_FAILED, '上传失败', 500)
       }
     }
   )

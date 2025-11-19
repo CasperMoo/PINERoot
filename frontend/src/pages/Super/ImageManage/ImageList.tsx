@@ -375,10 +375,13 @@ export default function ImageList() {
         maskClosable={!isUploading}
       >
         <Form form={uploadForm} layout="vertical">
-          <Form.Item name="tagId" label="选择标签">
+          <Form.Item
+            name="tagId"
+            label="选择标签"
+            rules={[{ required: true, message: '请选择图片标签' }]}
+          >
             <Select
-              placeholder="请选择标签（可选）"
-              allowClear
+              placeholder="请选择标签"
               disabled={isUploading}
               options={tags.map((tag) => ({
                 label: tag.name,

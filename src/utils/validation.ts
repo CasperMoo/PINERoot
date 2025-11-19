@@ -11,9 +11,6 @@ export const ALLOWED_MIME_TYPES = [
 // 单个文件最大大小 (5MB)
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
 
-// 批量上传最大数量
-export const MAX_BATCH_UPLOAD = 10
-
 /**
  * 校验文件类型
  */
@@ -26,13 +23,6 @@ export function validateFileType(mimetype: string): boolean {
  */
 export function validateFileSize(size: number): boolean {
   return size > 0 && size <= MAX_FILE_SIZE
-}
-
-/**
- * 校验批量上传数量
- */
-export function validateBatchCount(count: number): boolean {
-  return count > 0 && count <= MAX_BATCH_UPLOAD
 }
 
 /**

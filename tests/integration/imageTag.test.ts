@@ -1,7 +1,12 @@
 import { describe, it, expect, beforeEach, afterAll } from 'vitest'
 // build import delayed to fix database connection issues
 import { cleanDatabase, createTestAdminUser, createTestTag } from '../helpers'
-import { prisma } from '@/db'
+import { PrismaClient } from '@prisma/client'
+
+// 延迟创建测试 PrismaClient 实例的函数
+function getTestPrisma() {
+  return new PrismaClient()
+}
 
 describe('ImageTag Routes', () => {
   let app: Awaited<ReturnType<typeof build>>
@@ -9,6 +14,9 @@ describe('ImageTag Routes', () => {
   let userId: number
 
   beforeEach(async () => {
+    // 每个测试前清理数据库
+    await cleanDatabase()
+
     // 延迟导入 build 函数，确保使用正确的 DATABASE_URL
     const { build } = await import("@/index");
     app = await build()
@@ -32,12 +40,17 @@ describe('ImageTag Routes', () => {
     const loginData = JSON.parse(loginResponse.body)
     authToken = loginData.data.token
 
-    // 初始化默认标签（使用 upsert 避免重复）
-    await prisma.imageTag.upsert({
-      where: { name: 'default' },
-      update: {},
-      create: { name: 'default' }
-    })
+    // 初始化默认标签（使用测试 Prisma 实例）
+    const testPrisma = getTestPrisma()
+    try {
+      await testPrisma.imageTag.upsert({
+        where: { name: 'default' },
+        update: {},
+        create: { name: 'default' }
+      })
+    } finally {
+      await testPrisma.$disconnect()
+    }
   })
 
   afterAll(async () => {

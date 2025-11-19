@@ -11,7 +11,7 @@ import { getTagById } from './imageTag'
 export async function uploadSingleImage(
   file: MultipartFile,
   userId: number,
-  tagId: number = 1
+  tagId: number
 ) {
   // 校验文件
   const validationError = validateImageFile(file)
@@ -47,90 +47,6 @@ export async function uploadSingleImage(
   })
 
   return image
-}
-
-/**
- * 批量上传图片
- */
-export async function batchUploadImages(
-  files: MultipartFile[],
-  userId: number,
-  tagId: number = 1
-) {
-  const results: Array<{
-    success: boolean
-    filename: string
-    image?: any
-    error?: string
-  }> = []
-
-  // 并发处理所有文件
-  await Promise.all(
-    files.map(async (file) => {
-      try {
-        // 校验文件
-        const validationError = validateImageFile(file)
-        if (validationError) {
-          results.push({
-            success: false,
-            filename: file.filename,
-            error: validationError
-          })
-          return
-        }
-
-        // 读取文件 buffer
-        const buffer = await file.toBuffer()
-
-        // 使用 sharp 获取图片宽高
-        const metadata = await sharp(buffer).metadata()
-        const width = metadata.width || null
-        const height = metadata.height || null
-
-        // 生成 OSS key 并上传
-        const ossKey = generateOSSKey(userId, file.mimetype)
-        const ossUrl = await uploadToOSS(buffer, ossKey)
-
-        // 保存到数据库
-        const image = await prisma.image.create({
-          data: {
-            userId,
-            originalName: file.filename,
-            ossKey,
-            ossUrl,
-            mimeType: file.mimetype,
-            size: buffer.length,
-            width,
-            height,
-            tagId
-          }
-        })
-
-        results.push({
-          success: true,
-          filename: file.filename,
-          image
-        })
-      } catch (error) {
-        console.error(`Upload failed for ${file.filename}:`, error)
-        results.push({
-          success: false,
-          filename: file.filename,
-          error: error instanceof Error ? error.message : '上传失败'
-        })
-      }
-    })
-  )
-
-  // 统计成功和失败数量
-  const successCount = results.filter(r => r.success).length
-  const failedCount = results.filter(r => !r.success).length
-
-  return {
-    success: successCount,
-    failed: failedCount,
-    results
-  }
 }
 
 /**

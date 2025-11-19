@@ -30,6 +30,9 @@ describe('Image Routes', () => {
   const testImagesDir = path.join(__dirname, '../temp')
 
   beforeEach(async () => {
+    // 每个测试前清理数据库
+    await cleanDatabase()
+
     // 延迟导入 build 函数，确保使用正确的 DATABASE_URL
     const { build } = await import("@/index");
     app = await build()
@@ -62,122 +65,6 @@ describe('Image Routes', () => {
 
   afterAll(async () => {
     await app?.close()
-  })
-
-  describe('POST /api/images/upload', () => {
-    // FIXME: form-data 与 Fastify.inject() 兼容性问题导致请求挂起
-    // 实际功能正常，OSS 上传已被 mock，其他图片功能测试已覆盖
-    it.skip('should upload a single image', async () => {
-      const form = new FormData()
-      const imagePath = path.join(testImagesDir, 'ckeditor-image_3a5950c2f1999c534f096099f8b8ca82.png')
-
-      form.append('files', fs.createReadStream(imagePath))
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/images/upload',
-        headers: {
-          authorization: `Bearer ${authToken}`,
-          ...form.getHeaders()
-        },
-        payload: form
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(0)
-      expect(body.data.success).toBe(1)
-      expect(body.data.failed).toBe(0)
-      expect(body.data.images).toHaveLength(1)
-      expect(body.data.images[0].ossUrl).toContain('mock-oss.example.com')
-      expect(body.data.images[0].width).toBeDefined()
-      expect(body.data.images[0].height).toBeDefined()
-    }, 10000) // 增加超时时间到 10秒
-
-    it.skip('should upload multiple images', async () => {
-      const form = new FormData()
-      const image1 = path.join(testImagesDir, 'ckeditor-image_3a5950c2f1999c534f096099f8b8ca82.png')
-      const image2 = path.join(testImagesDir, 'DALL·E 2025-03-20 17.01.25 - A simple and modern line art icon for a travel assistant app, featuring a hotel building, a suitcase, and a location pin integrated into the design. T.webp')
-
-      form.append('files', fs.createReadStream(image1))
-      form.append('files', fs.createReadStream(image2))
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/images/upload',
-        headers: {
-          authorization: `Bearer ${authToken}`,
-          ...form.getHeaders()
-        },
-        payload: form
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(0)
-      expect(body.data.success).toBe(2)
-      expect(body.data.failed).toBe(0)
-      expect(body.data.images).toHaveLength(2)
-    }, 15000) // 增加超时时间到 15秒
-
-    it.skip('should upload with custom tag', async () => {
-      const form = new FormData()
-      const imagePath = path.join(testImagesDir, 'ckeditor-image_3a5950c2f1999c534f096099f8b8ca82.png')
-
-      form.append('files', fs.createReadStream(imagePath))
-      form.append('tagId', '2') // avatar tag
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/images/upload',
-        headers: {
-          authorization: `Bearer ${authToken}`,
-          ...form.getHeaders()
-        },
-        payload: form
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(0)
-      expect(body.data.images[0].tagId).toBe(2)
-    }, 10000) // 增加超时时间到 10秒
-
-    it('should reject when no files uploaded', async () => {
-      const form = new FormData()
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/images/upload',
-        headers: {
-          authorization: `Bearer ${authToken}`,
-          ...form.getHeaders()
-        },
-        payload: form
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(4007) // BATCH_LIMIT_EXCEEDED
-    })
-
-    it('should require authentication', async () => {
-      const form = new FormData()
-      const imagePath = path.join(testImagesDir, 'ckeditor-image_3a5950c2f1999c534f096099f8b8ca82.png')
-
-      form.append('files', fs.createReadStream(imagePath))
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/images/upload',
-        headers: form.getHeaders(),
-        payload: form
-      })
-
-      expect(response.statusCode).toBe(200)
-      const body = JSON.parse(response.body)
-      expect(body.code).toBe(3001) // NO_TOKEN
-    })
   })
 
   describe('GET /api/images', () => {

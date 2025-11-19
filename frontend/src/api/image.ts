@@ -44,20 +44,6 @@ export interface ImageListResponse {
 }
 
 /**
- * 上传结果
- */
-export interface UploadResult {
-  success: Array<{
-    originalName: string
-    image: Image
-  }>
-  failed: Array<{
-    originalName: string
-    error: string
-  }>
-}
-
-/**
  * 修改标签请求参数
  */
 export interface UpdateImageTagRequest {
@@ -71,37 +57,13 @@ export const imageApi = {
   /**
    * 上传单个图片
    */
-  async uploadSingle(file: File, tagId?: number): Promise<Image> {
+  async uploadSingle(file: File, tagId: number): Promise<Image> {
     const formData = new FormData()
     formData.append('file', file)
-
-    if (tagId) {
-      formData.append('tagId', tagId.toString())
-    }
+    formData.append('tagId', tagId.toString())
 
     const response: ApiResponse<Image> = await request.post(
       '/images/upload-single',
-      formData
-    )
-    return response.data!
-  },
-
-  /**
-   * 上传图片（批量）
-   */
-  async upload(files: File[], tagId?: number): Promise<UploadResult> {
-    const formData = new FormData()
-
-    files.forEach(file => {
-      formData.append('files', file)
-    })
-
-    if (tagId) {
-      formData.append('tagId', tagId.toString())
-    }
-
-    const response: ApiResponse<UploadResult> = await request.post(
-      '/images/upload',
       formData
     )
     return response.data!
