@@ -18,6 +18,49 @@ const HalloweenAnchor: React.FC = () => {
   const [loadingImages, setLoadingImages] = useState(false)
 
   /**
+   * 设置移动端安全区域背景色
+   */
+  useEffect(() => {
+    // 保存原始背景色
+    const originalBodyBg = document.body.style.backgroundColor
+    const originalHtmlBg = document.documentElement.style.backgroundColor
+
+    // 设置深色背景
+    const darkBg = '#020617' // slate-950
+    document.body.style.backgroundColor = darkBg
+    document.documentElement.style.backgroundColor = darkBg
+
+    // 动态设置 theme-color meta 标签
+    let themeColorMeta = document.querySelector('meta[name="theme-color"]')
+    const isNewMeta = !themeColorMeta
+
+    if (!themeColorMeta) {
+      themeColorMeta = document.createElement('meta')
+      themeColorMeta.setAttribute('name', 'theme-color')
+      document.head.appendChild(themeColorMeta)
+    }
+
+    const originalThemeColor = themeColorMeta.getAttribute('content')
+    themeColorMeta.setAttribute('content', darkBg)
+
+    // 组件卸载时恢复
+    return () => {
+      document.body.style.backgroundColor = originalBodyBg
+      document.documentElement.style.backgroundColor = originalHtmlBg
+
+      if (isNewMeta && themeColorMeta) {
+        themeColorMeta.remove()
+      } else if (themeColorMeta) {
+        if (originalThemeColor) {
+          themeColorMeta.setAttribute('content', originalThemeColor)
+        } else {
+          themeColorMeta.removeAttribute('content')
+        }
+      }
+    }
+  }, [])
+
+  /**
    * 获取相册列表
    */
   useEffect(() => {
