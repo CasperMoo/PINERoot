@@ -57,6 +57,20 @@ export function error<T = unknown>(
  * - 5004: config 必须是有效的 JSON 对象
  * - 5005: 指定的历史版本不存在（回滚时）
  *
+ * 提醒模块相关 (6xxx):
+ * - 6001: 提醒不存在或已删除
+ * - 6002: title 必填
+ * - 6003: frequency 必填
+ * - 6004: nextTriggerDate 必填
+ * - 6005: EVERY_X_DAYS 需要 interval 参数
+ * - 6006: WEEKLY 需要 weekDays 参数
+ * - 6007: MONTHLY 需要 dayOfMonth 参数
+ * - 6008: 循环提醒需要 startDate 参数
+ * - 6009: interval 必须大于 0
+ * - 6010: dayOfMonth 必须在 1-31 之间
+ * - 6011: weekDays 不能为空
+ * - 6012: 无权限操作此提醒（非创建者）
+ *
  * 系统相关 (9xxx):
  * - 9001: 服务不可用（健康检查失败）
  */
@@ -91,6 +105,20 @@ export const ErrorCode = {
   ACTIVITY_ID_REQUIRED: 5003,
   INVALID_CONFIG_FORMAT: 5004,
   VERSION_NOT_FOUND: 5005,
+
+  // 提醒模块
+  REMINDER_NOT_FOUND: 6001,
+  TITLE_REQUIRED: 6002,
+  FREQUENCY_REQUIRED: 6003,
+  NEXT_TRIGGER_DATE_REQUIRED: 6004,
+  INTERVAL_REQUIRED: 6005,
+  WEEKDAYS_REQUIRED: 6006,
+  DAY_OF_MONTH_REQUIRED: 6007,
+  START_DATE_REQUIRED: 6008,
+  INVALID_INTERVAL: 6009,
+  INVALID_DAY_OF_MONTH: 6010,
+  WEEKDAYS_EMPTY: 6011,
+  REMINDER_NO_PERMISSION: 6012,
 
   // 系统
   SERVICE_UNAVAILABLE: 9001,

@@ -14,6 +14,30 @@ enum UserRole {
   ADMIN // 管理员
 }
 
+enum Frequency {
+  ONCE         // 单次提醒
+  DAILY        // 每天
+  EVERY_X_DAYS // 每隔 x 天
+  WEEKLY       // 每周某天
+  MONTHLY      // 每月某天
+  YEARLY       // 每年某天
+}
+
+enum ReminderStatus {
+  PENDING   // 等待触发或待操作
+  COMPLETED // 用户已确认完成
+}
+
+enum WeekDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -66,4 +90,25 @@ model ActivityConfig {
   @@unique([activityId, version]) // activityId + version 唯一
   @@index([activityId, deletedAt]) // 查询当前生效版本的索引
   @@index([deletedAt])
+}
+
+model Reminder {
+  id                Int             @id @default(autoincrement())
+  userId            Int             // 用户ID
+  title             String          @db.VarChar(255) // 提醒标题
+  description       String?         @db.Text // 提醒描述（可选）
+  frequency         Frequency       // 触发频率
+  interval          Int?            // 循环间隔（用于 EVERY_X_DAYS）
+  weekDays          String?         @db.VarChar(100) // 每周哪些天触发（用于 WEEKLY），JSON 数组字符串
+  dayOfMonth        Int?            // 每月哪一天触发（用于 MONTHLY，1-31）
+  startDate         DateTime?       @db.Date // 循环模式起始日期
+  lastCompletedDate DateTime?       @db.Date // 上次完成日期
+  nextTriggerDate   DateTime        @db.Date // 下一次触发日期
+  status            ReminderStatus  @default(PENDING) // 当前状态
+  deletedAt         DateTime?       // 软删除标志
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([userId, deletedAt])
+  @@index([nextTriggerDate, deletedAt])
 }
