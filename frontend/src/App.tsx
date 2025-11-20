@@ -8,6 +8,7 @@ import Register from '@/pages/Register'
 import HalloweenAnchor from '@/pages/HalloweenAnchor'
 import Super from '@/pages/Super'
 import ImageManage from '@/pages/Super/ImageManage'
+import NotFound from '@/pages/NotFound'
 import PrivateRoute from '@/components/PrivateRoute'
 import AdminRoute from '@/components/AdminRoute'
 import { useAuthStore } from '@/store/auth'
@@ -102,6 +103,9 @@ function App() {
             </AdminRoute>
           }
         />
+
+        {/* 404 页面（捕获所有未匹配的路由）*/}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
       </AntApp>

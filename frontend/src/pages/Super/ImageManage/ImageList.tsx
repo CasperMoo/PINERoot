@@ -110,7 +110,7 @@ export default function ImageList() {
   // 上传单个文件
   const uploadSingleFile = async (
     fileStatus: FileUploadStatus,
-    tagId?: number
+    tagId: number
   ): Promise<void> => {
     // 更新状态为上传中
     setUploadFiles((prev) =>
@@ -179,6 +179,10 @@ export default function ImageList() {
 
       for (const fileStatus of initialUploadFiles) {
         try {
+          // 表单验证确保 tagId 存在
+          if (!values.tagId) {
+            throw new Error('请选择图片标签')
+          }
           await uploadSingleFile(fileStatus, values.tagId)
           successCount++
         } catch (error) {
@@ -211,6 +215,10 @@ export default function ImageList() {
   // 重试上传失败的文件
   const handleRetry = async (fileStatus: FileUploadStatus) => {
     const values = uploadForm.getFieldsValue()
+    if (!values.tagId) {
+      message.error('请先选择图片标签')
+      return
+    }
     try {
       await uploadSingleFile(fileStatus, values.tagId)
       message.success('重试成功')
