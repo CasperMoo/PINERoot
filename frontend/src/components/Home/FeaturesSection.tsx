@@ -5,6 +5,7 @@ import {
   FileTextOutlined,
   BarChartOutlined,
   ToolOutlined,
+  BellOutlined,
 } from '@ant-design/icons';
 import FeatureCard from './FeatureCard';
 
@@ -17,8 +18,15 @@ import FeatureCard from './FeatureCard';
  * - 展示占位卡片（comingSoon=true）
  */
 const FeaturesSection = () => {
-  // 工具列表（占位数据）
+  // 工具列表
   const features = [
+    {
+      icon: <BellOutlined />,
+      title: '提醒事项',
+      description: '设置重要事项提醒，永不错过关键时刻',
+      comingSoon: false,
+      link: '/reminder',
+    },
     {
       icon: <CheckSquareOutlined />,
       title: '任务管理',
@@ -67,6 +75,7 @@ const FeaturesSection = () => {
               title={feature.title}
               description={feature.description}
               comingSoon={feature.comingSoon}
+              link={feature.link}
             />
           ))}
         </div>

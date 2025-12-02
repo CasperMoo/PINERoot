@@ -144,7 +144,74 @@ export function getNextYearDay(
 }
 
 /**
- * 计算下一次触发日期
+ * 计算首次创建时的下次触发日期
+ */
+export function calculateInitialTriggerDate(params: {
+  frequency: Frequency
+  startDate: Date
+  interval?: number | null
+  weekDays?: WeekDay[] | null
+  dayOfMonth?: number | null
+}): Date {
+  const { frequency, startDate, interval, weekDays, dayOfMonth } = params
+  const start = startOfDay(startDate)
+
+  switch (frequency) {
+    case 'ONCE':
+      // 单次提醒：开始日期即为触发日期
+      return start
+
+    case 'DAILY':
+      // 每日提醒：从开始日期开始
+      return start
+
+    case 'EVERY_X_DAYS':
+      // 每隔 x 天：从开始日期开始
+      if (!interval || interval <= 0) {
+        throw new Error('interval is required and must be greater than 0 for EVERY_X_DAYS')
+      }
+      return start
+
+    case 'WEEKLY':
+      // 每周提醒：找到从开始日期起的下一个符合条件的星期几
+      if (!weekDays || weekDays.length === 0) {
+        throw new Error('weekDays is required for WEEKLY')
+      }
+      const targetDays = weekDays.map(day => WEEKDAY_TO_JS_MAP[day])
+      const startDay = getDay(start)
+
+      // 如果开始日期就是目标星期几，就用开始日期
+      if (targetDays.includes(startDay)) {
+        return start
+      }
+
+      // 否则找下一个符合条件的星期几
+      return getNextWeekDay(start, weekDays)
+
+    case 'MONTHLY':
+      // 每月提醒：找到从开始日期起的下一个符合条件的日期
+      if (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31) {
+        throw new Error('dayOfMonth is required and must be between 1 and 31 for MONTHLY')
+      }
+
+      // 如果开始日期就是目标日期，就用开始日期
+      if (start.getDate() === dayOfMonth) {
+        return start
+      }
+
+      return getNextMonthDay(start, dayOfMonth)
+
+    case 'YEARLY':
+      // 每年提醒：使用开始日期作为每年触发的日期
+      return start
+
+    default:
+      throw new Error(`Unsupported frequency: ${frequency}`)
+  }
+}
+
+/**
+ * 计算下一次触发日期(完成后)
  */
 export function calculateNextTriggerDate(params: {
   frequency: Frequency

@@ -1,6 +1,7 @@
 // Step 3: FeatureCard 功能卡片组件
 
 import { Card, Badge } from 'antd';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * FeatureCard Props 接口
@@ -14,6 +15,8 @@ interface FeatureCardProps {
   description: string;
   /** 是否即将推出（显示徽章） */
   comingSoon?: boolean;
+  /** 可选的链接路径（如果提供，卡片可点击跳转） */
+  link?: string;
 }
 
 /**
@@ -25,12 +28,22 @@ interface FeatureCardProps {
  * - 下方：描述文字
  * - comingSoon 时显示"敬请期待"徽章
  * - Hover 效果：轻微上浮 + 阴影加深
+ * - 可选的点击跳转功能
  */
-const FeatureCard = ({ icon, title, description, comingSoon = false }: FeatureCardProps) => {
+const FeatureCard = ({ icon, title, description, comingSoon = false, link }: FeatureCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (link && !comingSoon) {
+      navigate(link);
+    }
+  };
+
   return (
     <Card
       className="h-full transition-all duration-300 hover:-translate-y-2 hover:shadow-xl cursor-pointer border border-gray-200"
       bordered={false}
+      onClick={handleClick}
     >
       <div className="text-center">
         {/* 图标区域 */}

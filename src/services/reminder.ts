@@ -1,6 +1,7 @@
 import { prisma } from '../db'
 import type { Frequency, ReminderStatus, WeekDay } from '@prisma/client'
 import {
+  calculateInitialTriggerDate,
   calculateNextTriggerDate,
   checkTriggerStatus,
   getDaysUntilTrigger,
@@ -8,7 +9,7 @@ import {
   parseWeekDays,
   type TriggerStatus
 } from '../utils/dateHelper'
-import { startOfDay } from 'date-fns'
+import { startOfDay, format } from 'date-fns'
 
 /**
  * 创建提醒参数
@@ -21,8 +22,8 @@ export interface CreateReminderParams {
   interval?: number
   weekDays?: WeekDay[]
   dayOfMonth?: number
-  startDate?: string  // YYYY-MM-DD
-  nextTriggerDate: string  // YYYY-MM-DD
+  startDate?: string  // YYYY-MM-DD (可选,循环提醒默认今天,单次提醒作为触发日期)
+  nextTriggerDate?: string  // YYYY-MM-DD (可选,不传则自动计算)
 }
 
 /**
@@ -31,6 +32,12 @@ export interface CreateReminderParams {
 export interface UpdateReminderParams {
   title?: string
   description?: string
+  frequency?: Frequency
+  interval?: number
+  weekDays?: WeekDay[]
+  dayOfMonth?: number
+  startDate?: string  // YYYY-MM-DD
+  nextTriggerDate?: string  // YYYY-MM-DD (如果修改了频率相关参数,建议重新计算)
 }
 
 /**
@@ -79,7 +86,13 @@ function validateCreateParams(params: CreateReminderParams) {
   // 基础验证
   if (!params.title) errors.push('title is required')
   if (!params.frequency) errors.push('frequency is required')
-  if (!params.nextTriggerDate) errors.push('nextTriggerDate is required')
+
+  // 单次提醒必须提供 startDate(作为触发日期)或 nextTriggerDate
+  if (params.frequency === 'ONCE') {
+    if (!params.startDate && !params.nextTriggerDate) {
+      errors.push('startDate or nextTriggerDate is required for ONCE')
+    }
+  }
 
   // 根据 frequency 验证
   if (params.frequency === 'EVERY_X_DAYS') {
@@ -104,12 +117,6 @@ function validateCreateParams(params: CreateReminderParams) {
     }
   }
 
-  if (params.frequency !== 'ONCE') {
-    if (!params.startDate) {
-      errors.push('startDate is required for recurring reminders')
-    }
-  }
-
   return errors
 }
 
@@ -123,6 +130,34 @@ export async function createReminder(params: CreateReminderParams) {
     throw new Error(errors.join(', '))
   }
 
+  // 确定开始日期
+  let startDate: Date
+  if (params.startDate) {
+    startDate = new Date(params.startDate)
+  } else if (params.frequency === 'ONCE') {
+    // 单次提醒如果没有 startDate,使用 nextTriggerDate
+    startDate = params.nextTriggerDate ? new Date(params.nextTriggerDate) : new Date()
+  } else {
+    // 循环提醒默认今天
+    startDate = startOfDay(new Date())
+  }
+
+  // 计算下次触发日期
+  let nextTriggerDate: Date
+  if (params.nextTriggerDate) {
+    // 如果提供了 nextTriggerDate,使用它
+    nextTriggerDate = new Date(params.nextTriggerDate)
+  } else {
+    // 否则自动计算
+    nextTriggerDate = calculateInitialTriggerDate({
+      frequency: params.frequency,
+      startDate,
+      interval: params.interval,
+      weekDays: params.weekDays || null,
+      dayOfMonth: params.dayOfMonth
+    })
+  }
+
   // 准备数据
   const data: any = {
     userId: params.userId,
@@ -132,8 +167,8 @@ export async function createReminder(params: CreateReminderParams) {
     interval: params.interval || null,
     weekDays: stringifyWeekDays(params.weekDays || null),
     dayOfMonth: params.dayOfMonth || null,
-    startDate: params.startDate ? new Date(params.startDate) : null,
-    nextTriggerDate: new Date(params.nextTriggerDate),
+    startDate: params.frequency !== 'ONCE' ? startDate : null,
+    nextTriggerDate,
     status: 'PENDING'
   }
 
@@ -233,6 +268,45 @@ export async function updateReminder(
   const data: any = {}
   if (params.title !== undefined) data.title = params.title
   if (params.description !== undefined) data.description = params.description
+  if (params.frequency !== undefined) data.frequency = params.frequency
+  if (params.interval !== undefined) data.interval = params.interval
+  if (params.weekDays !== undefined) {
+    data.weekDays = stringifyWeekDays(params.weekDays)
+  }
+  if (params.dayOfMonth !== undefined) data.dayOfMonth = params.dayOfMonth
+  if (params.startDate !== undefined) {
+    data.startDate = params.startDate ? new Date(params.startDate) : null
+  }
+  if (params.nextTriggerDate !== undefined) {
+    data.nextTriggerDate = new Date(params.nextTriggerDate)
+  }
+
+  // 如果修改了频率相关参数但没有提供新的 nextTriggerDate,自动重新计算
+  const frequencyChanged = params.frequency !== undefined && params.frequency !== existing.frequency
+  const intervalChanged = params.interval !== undefined && params.interval !== existing.interval
+  const weekDaysChanged = params.weekDays !== undefined
+  const dayOfMonthChanged = params.dayOfMonth !== undefined && params.dayOfMonth !== existing.dayOfMonth
+  const startDateChanged = params.startDate !== undefined
+
+  if ((frequencyChanged || intervalChanged || weekDaysChanged || dayOfMonthChanged || startDateChanged)
+      && params.nextTriggerDate === undefined) {
+    // 使用新的或现有的参数重新计算
+    const newFrequency = params.frequency ?? existing.frequency
+    const newStartDate = params.startDate
+      ? new Date(params.startDate)
+      : (existing.startDate ?? startOfDay(new Date()))
+    const newInterval = params.interval ?? existing.interval
+    const newWeekDays = params.weekDays ?? parseWeekDays(existing.weekDays)
+    const newDayOfMonth = params.dayOfMonth ?? existing.dayOfMonth
+
+    data.nextTriggerDate = calculateInitialTriggerDate({
+      frequency: newFrequency,
+      startDate: newStartDate,
+      interval: newInterval,
+      weekDays: newWeekDays,
+      dayOfMonth: newDayOfMonth
+    })
+  }
 
   const updated = await prisma.reminder.update({
     where: { id },
