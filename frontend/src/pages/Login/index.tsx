@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -27,6 +27,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
  */
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { message } = App.useApp();
@@ -59,8 +60,27 @@ export default function Login() {
       // 提示成功
       message.success('登录成功');
 
-      // 跳转到工作台
-      navigate('/dashboard');
+      // 获取登录前的重定向路径
+      const getRedirectPath = () => {
+        // 优先使用 location.state 中的路径
+        if (location.state?.from) {
+          return location.state.from;
+        }
+
+        // 其次使用 sessionStorage 中保存的路径
+        const savedPath = sessionStorage.getItem('loginRedirectPath');
+        if (savedPath) {
+          // 清除保存的路径
+          sessionStorage.removeItem('loginRedirectPath');
+          return savedPath;
+        }
+
+        // 默认跳转到工作台
+        return '/dashboard';
+      };
+
+      // 跳转到原始请求的页面或默认页面
+      navigate(getRedirectPath(), { replace: true });
     } catch (error) {
       // 显示错误信息
       const errorMessage = error instanceof Error ? error.message : '登录失败';

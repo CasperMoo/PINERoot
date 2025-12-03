@@ -1,6 +1,6 @@
 // Step 1: Header 组件 - 顶部导航栏
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
@@ -16,6 +16,7 @@ import { useAuthStore } from '@/store/auth';
  */
 const Header = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, token, logout } = useAuthStore();
 
   // 用户菜单项
@@ -80,7 +81,12 @@ const Header = () => {
               // 未登录：显示登录按钮
               <Button
                 type="primary"
-                onClick={() => navigate('/login')}
+                onClick={() => {
+                  // 保存当前页面路径到 sessionStorage
+                  const currentPath = location.pathname + location.search + location.hash;
+                  sessionStorage.setItem('loginRedirectPath', currentPath);
+                  navigate('/login');
+                }}
                 className="transition-transform hover:scale-105"
               >
                 登录

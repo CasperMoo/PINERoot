@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
 
 interface PrivateRouteProps {
@@ -11,6 +11,7 @@ interface PrivateRouteProps {
  */
 export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { token, isLoading } = useAuthStore();
+  const location = useLocation();
 
   // 正在初始化，显示加载状态（避免闪烁跳转）
   if (isLoading) {
@@ -23,9 +24,12 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
     );
   }
 
-  // 没有 token，跳转到登录页
+  // 没有 token，跳转到登录页，并保存当前路径作为登录后的重定向目标
   if (!token) {
-    return <Navigate to="/login" replace />;
+    // 保存当前路径到 sessionStorage，登录成功后可以使用
+    const redirectPath = location.pathname + location.search + location.hash;
+    sessionStorage.setItem('loginRedirectPath', redirectPath);
+    return <Navigate to="/login" replace state={{ from: redirectPath }} />;
   }
 
   // 有 token，渲染子组件
