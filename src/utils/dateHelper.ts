@@ -180,15 +180,15 @@ export function calculateInitialTriggerDate(params: {
         throw new Error('weekDays is required for WEEKLY')
       }
       const targetDays = weekDays.map(day => WEEKDAY_TO_JS_MAP[day])
-      const startDay = getDay(start)
+      const startDay = getDay(startDate)
 
       // 如果开始日期就是目标星期几，就用开始日期
       if (targetDays.includes(startDay)) {
-        return start
+        return startDate
       }
 
       // 否则找下一个符合条件的星期几
-      return getNextWeekDay(start, weekDays)
+      return getNextWeekDay(startDate, weekDays)
 
     case 'MONTHLY':
       // 每月提醒：找到从开始日期起的下一个符合条件的日期
@@ -197,15 +197,15 @@ export function calculateInitialTriggerDate(params: {
       }
 
       // 如果开始日期就是目标日期，就用开始日期
-      if (start.getDate() === dayOfMonth) {
-        return start
+      if (startDate.getDate() === dayOfMonth) {
+        return startDate
       }
 
-      return getNextMonthDay(start, dayOfMonth)
+      return getNextMonthDay(startDate, dayOfMonth)
 
     case 'YEARLY':
       // 每年提醒：使用开始日期作为每年触发的日期
-      return start
+      return startDate
 
     default:
       throw new Error(`Unsupported frequency: ${frequency}`)

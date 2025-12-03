@@ -9,7 +9,9 @@
       "Bash(git push:*)",
       "Bash(pnpm build:*)",
       "Bash(pnpm test:ci:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": []
