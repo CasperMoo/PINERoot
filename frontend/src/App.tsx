@@ -6,6 +6,7 @@ import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import HalloweenAnchor from '@/pages/HalloweenAnchor'
+import Reminder from '@/pages/Reminder'
 import Super from '@/pages/Super'
 import ImageManage from '@/pages/Super/ImageManage'
 import NotFound from '@/pages/NotFound'
@@ -64,6 +65,16 @@ function App() {
 
         {/* Halloween Anchor 页面（无需鉴权）*/}
         <Route path="/anchor/halloween" element={<HalloweenAnchor />} />
+
+        {/* 提醒事项（需要登录）*/}
+        <Route
+          path="/reminder"
+          element={
+            <PrivateRoute>
+              <Reminder />
+            </PrivateRoute>
+          }
+        />
 
         {/* 工作台（需要登录）*/}
         <Route

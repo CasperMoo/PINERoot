@@ -16,8 +16,9 @@ function getTestPrisma() {
 export async function cleanDatabase() {
   const testPrisma = getTestPrisma()
   try {
-    // 先删除图片（有外键依赖）
+    // 先删除有外键依赖的表
     await testPrisma.image.deleteMany()
+    await testPrisma.reminder.deleteMany()
     await testPrisma.imageTag.deleteMany()
     await testPrisma.activityConfig.deleteMany()
     await testPrisma.user.deleteMany()
@@ -109,6 +110,37 @@ export async function createTestActivityConfig(data?: {
         config: data?.config || { enabled: true },
         version: data?.version || 1,
         deletedAt: data?.deletedAt || null
+      }
+    })
+  } finally {
+    await testPrisma.$disconnect()
+  }
+}
+
+// 创建测试提醒
+export async function createTestReminder(data: {
+  userId: number
+  title?: string
+  frequency?: any
+  nextTriggerDate?: Date
+  interval?: number
+  weekDays?: string
+  dayOfMonth?: number
+  startDate?: Date
+}) {
+  const testPrisma = getTestPrisma()
+  try {
+    return testPrisma.reminder.create({
+      data: {
+        userId: data.userId,
+        title: data.title || 'Test Reminder',
+        frequency: data.frequency || 'ONCE',
+        nextTriggerDate: data.nextTriggerDate || new Date('2025-12-25'),
+        interval: data.interval || null,
+        weekDays: data.weekDays || null,
+        dayOfMonth: data.dayOfMonth || null,
+        startDate: data.startDate || null,
+        status: 'PENDING'
       }
     })
   } finally {

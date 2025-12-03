@@ -184,6 +184,41 @@
 - 测试覆盖：6 个集成测试用例全部通过
 - **状态**：开发中，允许修改和扩展
 
+### 🚧 提醒模块（Reminder）
+
+- 文件：`src/routes/reminder.ts`
+- 服务层：`src/services/reminder.ts`
+- 辅助工具：`src/utils/dateHelper.ts`
+- 功能：事项提醒面板，支持一次性提醒和多种循环提醒
+  - **创建提醒**：POST /api/reminders - 创建提醒事项（所有认证用户）
+  - **提醒列表**：GET /api/reminders - 分页查询提醒列表，支持按 frequency、status 过滤（所有认证用户）
+  - **提醒详情**：GET /api/reminders/:id - 获取单个提醒详情（所有认证用户）
+  - **更新提醒**：PUT /api/reminders/:id - 更新提醒信息（所有认证用户）
+  - **删除提醒**：DELETE /api/reminders/:id - 软删除提醒（所有认证用户）
+  - **标记完成**：POST /api/reminders/:id/complete - 标记提醒完成，自动计算下次触发日期（所有认证用户）
+- 数据库：Reminder 表
+  - 支持触发频率：ONCE（单次）、DAILY（每天）、EVERY_X_DAYS（每隔 x 天）、WEEKLY（每周某天）、MONTHLY（每月某天）、YEARLY（每年某天）
+  - 核心字段：nextTriggerDate（下次触发日期）、lastCompletedDate（上次完成日期）、status（PENDING/COMPLETED）
+  - 软删除：使用 deletedAt 字段
+- 核心特性：
+  - **被动触发模式**：查询时判断触发状态，无需后台定时任务
+  - **只到天维度**：不涉及具体小时分钟，仅按日期触发
+  - **循环提醒自动计算**：完成后自动计算下次触发日期
+  - **权限隔离**：用户只能操作自己的提醒项
+- 触发状态判断：
+  - TRIGGER_TODAY：今日需触发
+  - OVERDUE：已逾期但未完成
+  - PENDING：等待触发
+- 权限控制：
+  - 所有接口需要 JWT 认证（authMiddleware + requireUser）
+  - 用户只能查看和操作自己创建的提醒
+- 技术要点：
+  - 使用 date-fns 进行日期计算
+  - 索引优化：userId + deletedAt、nextTriggerDate + deletedAt
+  - 分页查询（默认 20 条，最大 100 条）
+- 详细设计文档：`REMINDER_MODULE.md`
+- **状态**：开发中，允许修改和扩展
+
 ## 模块间依赖关系
 
 ```

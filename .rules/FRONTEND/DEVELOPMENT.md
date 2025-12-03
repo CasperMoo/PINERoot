@@ -274,6 +274,40 @@ const handleSubmit = async () => {
 }
 ```
 
+### 日期时区处理 ⚠️ 重要
+
+**规则**：处理 API 返回的日期时，**从 ISO 字符串提取日期部分**，避免时区转换。
+
+#### 工具函数（`src/utils/dateUtils.ts`）
+
+| 函数 | 用途 |
+|------|------|
+| `parseISODate(iso)` | 提取日期部分 `{year, month, day}` |
+| `isSameDay(d1, d2)` | 比较是否同一天 |
+| `getDaysUntil(iso, current)` | 计算天数差 |
+
+#### ✅ 正确做法
+
+```typescript
+import { parseISODate, isSameDay } from '@/utils/dateUtils'
+
+// API 返回: nextTriggerDate = "2025-12-02T00:00:00.000Z"
+const { year, month, day } = parseISODate(reminder.nextTriggerDate)
+// → {year: 2025, month: 12, day: 2} ✅ 不受时区影响
+
+const isToday = isSameDay(reminder.nextTriggerDate, new Date())
+```
+
+#### ❌ 错误做法
+
+```typescript
+// ❌ 直接转换为 Date（西半球时区会偏移）
+const date = new Date(reminder.nextTriggerDate)
+const day = date.getDate()  // PST 时区会变成前一天
+```
+
+**详细文档**：见 `.rules/ASSERTIONS_GUIDE.md`
+
 ### 状态管理规范
 
 #### 全局状态（Zustand）
