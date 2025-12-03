@@ -373,12 +373,8 @@ export async function completeReminder(id: number, userId: number) {
 
   const now = new Date()
 
-  // 获取今天的日期（YYYY-MM-DD 格式）
-  const todayStr = format(now, 'yyyy-MM-DD')
-  const [year, month, day] = todayStr.split('-').map(Number)
-
-  // 创建 UTC 午夜的 Date 对象，确保 @db.Date 存储正确的日期
-  const todayUTC = new Date(Date.UTC(year, month - 1, day))
+  // 获取今天的 UTC 午夜（使用工具函数）
+  const todayUTC = getTodayUTC()
 
   // 用于计算下次触发日期的本地时间
   const todayLocal = startOfDay(now)
