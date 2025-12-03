@@ -1,6 +1,5 @@
 import type { Reminder, ReminderFrequency, ReminderStatus } from '@/api/reminder'
 import {
-  parseISODate,
   isSameDay as isSameDayUtil,
   getDaysUntil as getDaysUntilUtil,
   formatDaysText as formatDaysTextUtil,
