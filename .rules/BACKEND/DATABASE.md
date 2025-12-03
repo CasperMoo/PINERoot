@@ -419,7 +419,46 @@ await prisma.myTable.update({
 | 布尔值 | Boolean | true/false |
 | JSON 数据 | Json | 灵活配置数据 |
 | 时间戳 | DateTime | 使用 @default(now()) |
+| **日期（无时间）** | **DateTime @db.Date** | **存储纯日期（YYYY-MM-DD）** |
 | 枚举 | enum UserRole | 限定值范围 |
+
+### 日期时区处理 ⚠️ 重要
+
+**规则**：对于 `@db.Date` 字段，**必须存储 UTC 午夜时间**。
+
+#### 工具函数（`src/utils/dateUtils.ts`）
+
+| 函数 | 用途 |
+|------|------|
+| `parseDateString(str)` | 将 "YYYY-MM-DD" 解析为 UTC 午夜 |
+| `assertUTCMidnight(date, field)` | 断言必须是 UTC 午夜 |
+| `getTodayUTC()` | 获取今天的 UTC 午夜 |
+
+#### ✅ 正确做法
+
+```typescript
+import { parseDateString, getTodayUTC } from '../utils/dateUtils'
+
+// 解析用户输入的日期
+const startDate = parseDateString("2025-12-02")  // → 2025-12-02T00:00:00.000Z
+
+// 获取今天
+const today = getTodayUTC()  // → 今天的 UTC 午夜
+
+await prisma.reminder.create({
+  data: { startDate, nextTriggerDate: today }
+})
+```
+
+#### ❌ 错误做法
+
+```typescript
+// ❌ 使用本地时区（会导致日期偏移）
+const [y, m, d] = "2025-12-02".split('-').map(Number)
+const date = new Date(y, m - 1, d)  // CST 时区会变成 2025-12-01T16:00:00.000Z
+```
+
+**详细文档**：见 `.rules/ASSERTIONS_GUIDE.md`
 
 ### 性能优化
 

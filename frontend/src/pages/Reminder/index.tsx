@@ -32,6 +32,10 @@ import {
   type ReminderFrequency,
   type ReminderStatus
 } from '@/api/reminder'
+import {
+  getReminderDisplayInfo,
+  type DisplayStatus
+} from '@/utils/reminderHelper'
 import dayjs from 'dayjs'
 
 const { Title } = Typography
@@ -64,20 +68,15 @@ const WEEKDAY_OPTIONS = [
 ]
 
 /**
- * 状态标签颜色
+ * 显示状态筛选选项
  */
-const STATUS_COLORS: Record<ReminderStatus, string> = {
-  PENDING: 'blue',
-  COMPLETED: 'green'
-}
-
-/**
- * 状态标签文本
- */
-const STATUS_LABELS: Record<ReminderStatus, string> = {
-  PENDING: '待处理',
-  COMPLETED: '已完成'
-}
+const DISPLAY_STATUS_OPTIONS = [
+  { label: '今日待完成', value: 'TRIGGER_TODAY' },
+  { label: '已过期', value: 'OVERDUE' },
+  { label: '今日已完成', value: 'COMPLETED_TODAY' },
+  { label: '未开始', value: 'NOT_STARTED' },
+  { label: '已完成', value: 'COMPLETED' }
+]
 
 /**
  * 提醒事项页面
@@ -98,6 +97,7 @@ export default function ReminderPage() {
   const [limit, setLimit] = useState(20)
   const [frequencyFilter, setFrequencyFilter] = useState<ReminderFrequency | undefined>()
   const [statusFilter, setStatusFilter] = useState<ReminderStatus | undefined>()
+  const [displayStatusFilter, setDisplayStatusFilter] = useState<DisplayStatus | undefined>()
 
   // 表单状态
   const [selectedFrequency, setSelectedFrequency] = useState<ReminderFrequency>('ONCE')
@@ -112,8 +112,18 @@ export default function ReminderPage() {
         frequency: frequencyFilter,
         status: statusFilter
       })
-      setReminders(data.items)
-      setTotal(data.total)
+
+      // 如果有显示状态筛选，进行前端过滤
+      let filteredItems = data.items
+      if (displayStatusFilter) {
+        filteredItems = data.items.filter(item => {
+          const displayInfo = getReminderDisplayInfo(item)
+          return displayInfo.displayStatus === displayStatusFilter
+        })
+      }
+
+      setReminders(filteredItems)
+      setTotal(displayStatusFilter ? filteredItems.length : data.total)
     } catch (error: any) {
       message.error(error.message || '加载失败')
     } finally {
@@ -124,7 +134,7 @@ export default function ReminderPage() {
   // 初始化加载
   useEffect(() => {
     loadReminders()
-  }, [page, limit, frequencyFilter, statusFilter])
+  }, [page, limit, frequencyFilter, statusFilter, displayStatusFilter])
 
   // 打开创建/编辑弹窗
   const openModal = (reminder?: Reminder) => {
@@ -299,53 +309,75 @@ export default function ReminderPage() {
       dataIndex: 'nextTriggerDate',
       key: 'nextTriggerDate',
       width: 120,
-      render: (text: string) => dayjs(text).format('YYYY-MM-DD')
+      render: (text: string, record: Reminder) => {
+        const displayInfo = getReminderDisplayInfo(record)
+        return (
+          <div>
+            <div>{dayjs(text).format('YYYY-MM-DD')}</div>
+            <div className="text-xs text-gray-500">{displayInfo.daysText}</div>
+          </div>
+        )
+      }
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 100,
-      render: (status: ReminderStatus) => (
-        <Tag color={STATUS_COLORS[status]}>{STATUS_LABELS[status]}</Tag>
-      )
+      width: 130,
+      render: (_: any, record: Reminder) => {
+        const displayInfo = getReminderDisplayInfo(record)
+        const { statusConfig } = displayInfo
+        return (
+          <Tag color={statusConfig.color} title={statusConfig.description}>
+            {statusConfig.text}
+          </Tag>
+        )
+      }
     },
     {
       title: '操作',
       key: 'action',
       width: 200,
       fixed: 'right' as const,
-      render: (_: any, record: Reminder) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<CheckOutlined />}
-            onClick={() => handleComplete(record.id)}
-            disabled={record.status === 'COMPLETED' && record.frequency === 'ONCE'}
-          >
-            完成
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openModal(record)}
-          >
-            编辑
-          </Button>
-          <Popconfirm
-            title="确定要删除这个提醒吗?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
-          >
-            <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-              删除
+      render: (_: any, record: Reminder) => {
+        const displayInfo = getReminderDisplayInfo(record)
+        // 只有"今日待完成"和"已过期"状态才能点击完成按钮
+        const canComplete = displayInfo.displayStatus === 'TRIGGER_TODAY'
+                         || displayInfo.displayStatus === 'OVERDUE'
+
+        return (
+          <Space size="small">
+            <Button
+              type="link"
+              size="small"
+              icon={<CheckOutlined />}
+              onClick={() => handleComplete(record.id)}
+              disabled={!canComplete}
+              title={canComplete ? '标记完成' : '只有今日待完成或已过期的提醒才能标记完成'}
+            >
+              完成
             </Button>
-          </Popconfirm>
-        </Space>
-      )
+            <Button
+              type="link"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => openModal(record)}
+            >
+              编辑
+            </Button>
+            <Popconfirm
+              title="确定要删除这个提醒吗?"
+              onConfirm={() => handleDelete(record.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link" danger size="small" icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        )
+      }
     }
   ]
 
@@ -394,14 +426,30 @@ export default function ReminderPage() {
               </Col>
               <Col xs={24} sm={12} md={6}>
                 <Select
-                  placeholder="筛选状态"
+                  placeholder="筛选数据库状态"
                   allowClear
                   value={statusFilter}
                   onChange={setStatusFilter}
                   style={{ width: '100%' }}
+                  className="mb-2 md:mb-0"
                 >
                   <Option value="PENDING">待处理</Option>
                   <Option value="COMPLETED">已完成</Option>
+                </Select>
+              </Col>
+              <Col xs={24} sm={12} md={6}>
+                <Select
+                  placeholder="筛选显示状态"
+                  allowClear
+                  value={displayStatusFilter}
+                  onChange={setDisplayStatusFilter}
+                  style={{ width: '100%' }}
+                >
+                  {DISPLAY_STATUS_OPTIONS.map(opt => (
+                    <Option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </Option>
+                  ))}
                 </Select>
               </Col>
             </Row>

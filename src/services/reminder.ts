@@ -10,6 +10,12 @@ import {
   type TriggerStatus
 } from '../utils/dateHelper'
 import { startOfDay, format } from 'date-fns'
+import {
+  parseDateString,
+  assertUTCMidnight,
+  getTodayUTC,
+  validateDateFields
+} from '../utils/dateUtils'
 
 /**
  * 创建提醒参数
@@ -133,20 +139,29 @@ export async function createReminder(params: CreateReminderParams) {
   // 确定开始日期
   let startDate: Date
   if (params.startDate) {
-    startDate = new Date(params.startDate)
+    // ✅ 使用工具函数解析为 UTC 午夜
+    startDate = parseDateString(params.startDate)
+    assertUTCMidnight(startDate, 'startDate')
   } else if (params.frequency === 'ONCE') {
     // 单次提醒如果没有 startDate,使用 nextTriggerDate
-    startDate = params.nextTriggerDate ? new Date(params.nextTriggerDate) : new Date()
+    if (params.nextTriggerDate) {
+      startDate = parseDateString(params.nextTriggerDate)
+      assertUTCMidnight(startDate, 'startDate (from nextTriggerDate)')
+    } else {
+      startDate = new Date()
+    }
   } else {
     // 循环提醒默认今天
-    startDate = startOfDay(new Date())
+    startDate = getTodayUTC()
+    assertUTCMidnight(startDate, 'startDate (today)')
   }
 
   // 计算下次触发日期
   let nextTriggerDate: Date
   if (params.nextTriggerDate) {
-    // 如果提供了 nextTriggerDate,使用它
-    nextTriggerDate = new Date(params.nextTriggerDate)
+    // ✅ 使用工具函数解析为 UTC 午夜
+    nextTriggerDate = parseDateString(params.nextTriggerDate)
+    assertUTCMidnight(nextTriggerDate, 'nextTriggerDate')
   } else {
     // 否则自动计算
     nextTriggerDate = calculateInitialTriggerDate({
@@ -156,6 +171,8 @@ export async function createReminder(params: CreateReminderParams) {
       weekDays: params.weekDays || null,
       dayOfMonth: params.dayOfMonth
     })
+    // 验证计算结果
+    assertUTCMidnight(nextTriggerDate, 'nextTriggerDate (calculated)')
   }
 
   // 准备数据
@@ -275,10 +292,18 @@ export async function updateReminder(
   }
   if (params.dayOfMonth !== undefined) data.dayOfMonth = params.dayOfMonth
   if (params.startDate !== undefined) {
-    data.startDate = params.startDate ? new Date(params.startDate) : null
+    if (params.startDate) {
+      // ✅ 使用工具函数解析为 UTC 午夜
+      data.startDate = parseDateString(params.startDate)
+      assertUTCMidnight(data.startDate, 'startDate')
+    } else {
+      data.startDate = null
+    }
   }
   if (params.nextTriggerDate !== undefined) {
-    data.nextTriggerDate = new Date(params.nextTriggerDate)
+    // ✅ 使用工具函数解析为 UTC 午夜
+    data.nextTriggerDate = parseDateString(params.nextTriggerDate)
+    assertUTCMidnight(data.nextTriggerDate, 'nextTriggerDate')
   }
 
   // 如果修改了频率相关参数但没有提供新的 nextTriggerDate,自动重新计算
@@ -296,7 +321,9 @@ export async function updateReminder(
       ? new Date(params.startDate)
       : (existing.startDate ?? startOfDay(new Date()))
     const newInterval = params.interval ?? existing.interval
-    const newWeekDays = params.weekDays ?? parseWeekDays(existing.weekDays)
+    const newWeekDays = params.weekDays !== undefined
+      ? params.weekDays
+      : existing.weekDays
     const newDayOfMonth = params.dayOfMonth ?? existing.dayOfMonth
 
     data.nextTriggerDate = calculateInitialTriggerDate({
@@ -345,7 +372,21 @@ export async function completeReminder(id: number, userId: number) {
   }
 
   const now = new Date()
-  const today = startOfDay(now)
+
+  // 获取今天的日期（YYYY-MM-DD 格式）
+  const todayStr = format(now, 'yyyy-MM-DD')
+  const [year, month, day] = todayStr.split('-').map(Number)
+
+  // 创建 UTC 午夜的 Date 对象，确保 @db.Date 存储正确的日期
+  const todayUTC = new Date(Date.UTC(year, month - 1, day))
+
+  // 用于计算下次触发日期的本地时间
+  const todayLocal = startOfDay(now)
+
+  // 业务校验：只有"今日待完成"和"已过期"状态才能标记完成
+  if (existing.triggerStatus !== 'TRIGGER_TODAY' && existing.triggerStatus !== 'OVERDUE') {
+    throw new Error('只有今日待完成或已过期的提醒才能标记完成')
+  }
 
   // 如果是单次提醒，直接标记为完成
   if (existing.frequency === 'ONCE') {
@@ -353,7 +394,7 @@ export async function completeReminder(id: number, userId: number) {
       where: { id },
       data: {
         status: 'COMPLETED',
-        lastCompletedDate: today
+        lastCompletedDate: todayUTC
       }
     })
     return formatReminder(updated)
@@ -362,7 +403,7 @@ export async function completeReminder(id: number, userId: number) {
   // 循环提醒：计算下一次触发日期
   const nextTriggerDate = calculateNextTriggerDate({
     frequency: existing.frequency,
-    completedDate: today,
+    completedDate: todayLocal,
     interval: existing.interval,
     weekDays: stringifyWeekDays(existing.weekDays),
     dayOfMonth: existing.dayOfMonth,
@@ -372,7 +413,7 @@ export async function completeReminder(id: number, userId: number) {
   const updated = await prisma.reminder.update({
     where: { id },
     data: {
-      lastCompletedDate: today,
+      lastCompletedDate: todayUTC,
       nextTriggerDate,
       status: 'PENDING'
     }
@@ -385,6 +426,9 @@ export async function completeReminder(id: number, userId: number) {
  * 格式化提醒项（添加计算字段）
  */
 function formatReminder(reminder: any): ReminderWithStatus {
+  // 开发环境验证日期字段
+  validateDateFields(reminder, ['startDate', 'nextTriggerDate', 'lastCompletedDate'])
+
   const triggerStatus = checkTriggerStatus({
     nextTriggerDate: reminder.nextTriggerDate,
     status: reminder.status,
