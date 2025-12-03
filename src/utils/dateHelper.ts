@@ -154,23 +154,25 @@ export function calculateInitialTriggerDate(params: {
   dayOfMonth?: number | null
 }): Date {
   const { frequency, startDate, interval, weekDays, dayOfMonth } = params
-  const start = startOfDay(startDate)
+
+  // ⚠️ 不使用 startOfDay()，因为传入的 startDate 已经是 UTC 午夜
+  // startOfDay() 会转换成本地时区，导致日期偏移
 
   switch (frequency) {
     case 'ONCE':
       // 单次提醒：开始日期即为触发日期
-      return start
+      return startDate
 
     case 'DAILY':
       // 每日提醒：从开始日期开始
-      return start
+      return startDate
 
     case 'EVERY_X_DAYS':
       // 每隔 x 天：从开始日期开始
       if (!interval || interval <= 0) {
         throw new Error('interval is required and must be greater than 0 for EVERY_X_DAYS')
       }
-      return start
+      return startDate
 
     case 'WEEKLY':
       // 每周提醒：找到从开始日期起的下一个符合条件的星期几
