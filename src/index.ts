@@ -13,6 +13,7 @@ import reminderRoutes from './routes/reminder'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
+import { parseAcceptLanguage, createTranslator } from './utils/i18n'
 
 // 导出build函数供测试使用
 export async function build() {
@@ -37,6 +38,21 @@ export async function build() {
       fileSize: 5 * 1024 * 1024, // 5MB per file
       files: 10 // Max 10 files per request
     }
+  });
+
+  // Add i18n support - detect language and inject translator
+  app.addHook('onRequest', async (request, reply) => {
+    // 1. 尝试从 query parameter 获取语言
+    const queryLang = request.query as any
+    let lang = queryLang?.lang
+
+    // 2. 如果没有 query parameter，从 Accept-Language header 获取
+    if (!lang) {
+      lang = parseAcceptLanguage(request.headers['accept-language'])
+    }
+
+    // 3. 创建翻译函数并注入到 request
+    request.t = createTranslator(lang)
   });
 
   // Health check endpoint

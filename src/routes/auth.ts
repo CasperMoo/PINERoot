@@ -23,14 +23,15 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       // Validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return error(reply, 1001, "Invalid email format");
+        return error(reply, 1001, request.t('auth.invalidEmail'), 400);
       }
 
       if (password.length < 6) {
         return error(
           reply,
           1002,
-          "Password must be at least 6 characters long"
+          request.t('auth.passwordTooShort'),
+          400
         );
       }
 
@@ -40,7 +41,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       });
 
       if (existingUser) {
-        return error(reply, 1003, "Email already in use");
+        return error(reply, 1003, request.t('auth.emailInUse'), 400);
       }
 
       // Hash password
@@ -67,7 +68,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       });
     } catch (err) {
       request.log.error(err);
-      return error(reply, 1000, "Internal server error");
+      return error(reply, 1000, request.t('common.internalError'));
     }
   });
 
@@ -77,7 +78,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       const { email, password } = request.body;
 
       if (!email || !password) {
-        return error(reply, 1004, "Email and password are required");
+        return error(reply, 1004, request.t('auth.emailPasswordRequired'), 400);
       }
 
       // Find user
@@ -86,14 +87,14 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       });
 
       if (!user) {
-        return error(reply, 2001, "Invalid credentials");
+        return error(reply, 2001, request.t('auth.invalidCredentials'), 400);
       }
 
       // Verify password
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return error(reply, 2001, "Invalid credentials");
+        return error(reply, 2001, request.t('auth.invalidCredentials'), 400);
       }
 
       // Generate JWT token
@@ -108,7 +109,7 @@ const authRoutes: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       });
     } catch (err) {
       request.log.error(err);
-      return error(reply, 1000, "Internal server error");
+      return error(reply, 1000, request.t('common.internalError'));
     }
   });
 };

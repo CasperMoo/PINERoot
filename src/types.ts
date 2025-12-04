@@ -10,9 +10,14 @@ export interface UserPayload {
   createdAt: Date
 }
 
+// 翻译函数类型
+export type TranslateFunction = (key: string, defaultValue?: string) => string
+
 // 使用 TypeScript 的声明合并来扩展 FastifyRequest
 declare module 'fastify' {
   interface FastifyRequest {
     currentUser?: UserPayload
+    // i18n support
+    t: TranslateFunction
   }
 }

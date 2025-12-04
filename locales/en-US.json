@@ -1,0 +1,19 @@
+{
+  "auth": {
+    "invalidEmail": "Invalid email format",
+    "passwordTooShort": "Password must be at least 6 characters long",
+    "emailInUse": "Email already in use",
+    "emailPasswordRequired": "Email and password are required",
+    "invalidCredentials": "Invalid credentials",
+    "loginSuccess": "Login successful",
+    "registerSuccess": "Registration successful"
+  },
+  "common": {
+    "success": "Success",
+    "failed": "Operation failed",
+    "internalError": "Internal server error",
+    "notFound": "Resource not found",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Forbidden"
+  }
+}

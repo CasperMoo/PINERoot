@@ -87,6 +87,33 @@
   - 5005 指定的历史版本不存在
   - 9001 服务不可用（健康检查失败）
 
+### ✅ 国际化（i18n）模块
+
+- 位置：`src/utils/i18n.ts`
+- 翻译文件：`locales/en-US.json`, `locales/zh-CN.json`
+- 集成：`src/index.ts:43-56` (Fastify onRequest hook)
+- 功能：自动根据客户端语言偏好返回对应语言的 API 响应消息
+  - **语言检测**：支持 Query Parameter (`?lang=zh-CN`) 和 Accept-Language Header
+  - **优先级**：Query Parameter > Accept-Language > 默认语言 (en-US)
+  - **翻译 API**：在任何路由中通过 `request.t('key')` 使用翻译
+  - **支持语言**：en-US (英文，默认), zh-CN (简体中文)
+- 技术方案：
+  - 自定义轻量级实现（~140行代码，零外部依赖）
+  - 文件配置管理（JSON 格式）
+  - 预加载 + 内存缓存（高性能）
+  - Accept-Language header 智能解析
+- 使用示例：
+  ```typescript
+  // 在路由中使用翻译
+  return error(reply, 1001, request.t('auth.invalidEmail'), 400)
+  ```
+- 已迁移模块：
+  - ✅ Auth 模块（所有错误消息）
+  - ✅ Common 通用消息
+- 测试覆盖：9 个集成测试用例全部通过
+- 详细文档：`I18N_MODULE.md`
+- **状态**：已完成测试，禁止修改核心实现
+
 ### ✅ 图片管理模块
 
 - 文件：`src/routes/image.ts`, `src/routes/imageTag.ts`
