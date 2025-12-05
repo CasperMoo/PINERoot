@@ -1,0 +1,20 @@
+{
+  "title": "Dashboard",
+  "welcome": "Welcome, {{name}}!",
+  "subtitle": "Here's what's happening with your application today.",
+  "stats": {
+    "totalImages": "Total Images",
+    "totalTags": "Total Tags",
+    "recentActivity": "Recent Activity"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "manageImages": "Manage Images",
+    "manageTags": "Manage Tags",
+    "viewProfile": "View Profile"
+  },
+  "emptyState": {
+    "title": "No data yet",
+    "description": "Start by uploading some images or creating tags."
+  }
+}

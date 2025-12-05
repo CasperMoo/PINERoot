@@ -4,28 +4,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Card, App } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/auth';
-
-/**
- * 注册表单验证 schema
- */
-const registerSchema = z.object({
-  email: z
-    .string()
-    .min(1, '请输入邮箱')
-    .email('请输入有效的邮箱地址'),
-  password: z
-    .string()
-    .min(6, '密码至少6个字符'),
-  nickname: z
-    .string()
-    .min(2, '昵称至少2个字符')
-    .optional()
-    .or(z.literal('')),
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 /**
  * 注册页面
@@ -35,6 +17,27 @@ export default function Register() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { message } = App.useApp();
+  const { t } = useTranslation(['auth', 'validation', 'common']);
+
+  /**
+   * 注册表单验证 schema
+   */
+  const registerSchema = z.object({
+    email: z
+      .string()
+      .min(1, t('validation:required'))
+      .email(t('validation:emailInvalid')),
+    password: z
+      .string()
+      .min(6, t('validation:passwordTooShort')),
+    nickname: z
+      .string()
+      .min(2, t('validation:minLength', { count: 2 }))
+      .optional()
+      .or(z.literal('')),
+  });
+
+  type RegisterFormData = z.infer<typeof registerSchema>;
 
   const {
     control,
@@ -63,7 +66,7 @@ export default function Register() {
       setAuth(response.user, response.token);
 
       // 提示成功
-      message.success('注册成功');
+      message.success(t('common:action.operationSuccess'));
 
       // 跳转到工作台
       navigate('/dashboard');
@@ -77,7 +80,12 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8 relative">
+      {/* 语言切换器 */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <Card
         className="w-full max-w-md shadow-xl rounded-2xl"
         variant="borderless"
@@ -85,10 +93,10 @@ export default function Register() {
         {/* 标题区域 */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            欢迎注册
+            {t('auth:register.title')}
           </h1>
           <p className="text-gray-500">
-            创建您的账号
+            {t('auth:register.termsAndPrivacy')}
           </p>
         </div>
 
@@ -97,7 +105,7 @@ export default function Register() {
           {/* 邮箱输入 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              邮箱
+              {t('auth:register.emailLabel')}
             </label>
             <Controller
               name="email"
@@ -106,7 +114,7 @@ export default function Register() {
                 <Input
                   {...field}
                   size="large"
-                  placeholder="请输入邮箱"
+                  placeholder={t('auth:register.emailPlaceholder')}
                   status={errors.email ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
@@ -123,7 +131,7 @@ export default function Register() {
           {/* 密码输入 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              密码
+              {t('auth:register.passwordLabel')}
             </label>
             <Controller
               name="password"
@@ -132,7 +140,7 @@ export default function Register() {
                 <Input.Password
                   {...field}
                   size="large"
-                  placeholder="请输入密码（至少6个字符）"
+                  placeholder={t('auth:register.passwordPlaceholder')}
                   status={errors.password ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
@@ -149,7 +157,7 @@ export default function Register() {
           {/* 昵称输入（可选）*/}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              昵称（可选）
+              {t('auth:register.nicknameLabel')}
             </label>
             <Controller
               name="nickname"
@@ -158,7 +166,7 @@ export default function Register() {
                 <Input
                   {...field}
                   size="large"
-                  placeholder="请输入昵称"
+                  placeholder={t('auth:register.nicknamePlaceholder')}
                   status={errors.nickname ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
@@ -180,18 +188,18 @@ export default function Register() {
             loading={isSubmitting}
             className="w-full rounded-lg h-12 text-base font-medium"
           >
-            注册
+            {t('auth:register.submitButton')}
           </Button>
         </form>
 
         {/* 登录链接 */}
         <div className="text-center mt-6 text-sm text-gray-600">
-          已有账号？
+          {t('auth:register.loginLink')}
           <Link
             to="/login"
             className="text-blue-600 hover:text-blue-700 font-medium ml-1"
           >
-            去登录
+            {t('auth:login.title')}
           </Link>
         </div>
       </Card>

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/auth';
+import { useTranslation } from 'react-i18next';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -12,13 +13,14 @@ interface PrivateRouteProps {
 export default function PrivateRoute({ children }: PrivateRouteProps) {
   const { token, isLoading } = useAuthStore();
   const location = useLocation();
+  const { t } = useTranslation('common');
 
   // 正在初始化，显示加载状态（避免闪烁跳转）
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
-          <div className="text-2xl text-gray-600">验证登录状态...</div>
+          <div className="text-2xl text-gray-600">{t('status.loading')}</div>
         </div>
       </div>
     );

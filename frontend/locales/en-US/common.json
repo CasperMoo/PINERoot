@@ -1,0 +1,47 @@
+{
+  "button": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "back": "Back",
+    "confirm": "Confirm",
+    "upload": "Upload",
+    "create": "Create",
+    "close": "Close",
+    "search": "Search",
+    "reset": "Reset"
+  },
+  "status": {
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed"
+  },
+  "action": {
+    "confirmDelete": "Are you sure you want to delete?",
+    "operationSuccess": "Operation successful",
+    "operationFailed": "Operation failed",
+    "deleteSuccess": "Delete successful",
+    "createSuccess": "Create successful",
+    "updateSuccess": "Update successful",
+    "uploadSuccess": "Upload successful",
+    "noData": "No data"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "admin": "Admin",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "language": {
+    "switch": "Language",
+    "english": "English",
+    "chinese": "简体中文"
+  }
+}

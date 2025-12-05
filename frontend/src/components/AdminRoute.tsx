@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth'
 import { UserRole } from '@/api/types'
 import { Result, Button } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 interface AdminRouteProps {
   children: React.ReactNode
@@ -13,13 +14,14 @@ interface AdminRouteProps {
  */
 export default function AdminRoute({ children }: AdminRouteProps) {
   const { user, token, isLoading } = useAuthStore()
+  const { t } = useTranslation(['common', 'auth'])
 
   // 初始化中，显示加载状态
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="text-center">
-          <div className="text-2xl text-gray-600">加载中...</div>
+          <div className="text-2xl text-gray-600">{t('common:status.loading')}</div>
         </div>
       </div>
     )
@@ -40,7 +42,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
           subTitle="抱歉，您没有权限访问此页面"
           extra={
             <Button type="primary" onClick={() => window.history.back()}>
-              返回
+              {t('common:button.back')}
             </Button>
           }
         />

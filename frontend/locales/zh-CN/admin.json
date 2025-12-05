@@ -1,0 +1,65 @@
+{
+  "title": "管理后台",
+  "dashboard": {
+    "welcome": "欢迎来到管理后台",
+    "description": "在这里管理您的应用程序",
+    "stats": {
+      "totalUsers": "用户总数",
+      "totalImages": "图片总数",
+      "totalTags": "标签总数"
+    }
+  },
+  "imageManage": {
+    "title": "图片管理",
+    "tabs": {
+      "imageList": "图片列表",
+      "tagManagement": "标签管理"
+    },
+    "table": {
+      "columns": {
+        "id": "ID",
+        "name": "名称",
+        "url": "地址",
+        "tags": "标签",
+        "status": "状态",
+        "createdAt": "创建时间",
+        "actions": "操作"
+      },
+      "noData": "暂无图片"
+    },
+    "upload": {
+      "title": "上传图片",
+      "description": "点击或拖拽文件到此处上传",
+      "hint": "支持单个或批量上传，最多 10 个文件。",
+      "button": "选择文件",
+      "batchUpload": "批量上传"
+    },
+    "tag": {
+      "title": "标签管理",
+      "create": "创建标签",
+      "edit": "编辑标签",
+      "delete": "删除标签",
+      "tagName": "标签名称",
+      "deleteConfirm": "确定要删除此标签吗？",
+      "defaultTagWarning": "不能删除默认标签"
+    },
+    "actions": {
+      "view": "查看",
+      "edit": "编辑",
+      "delete": "删除",
+      "changeTag": "更改标签"
+    },
+    "status": {
+      "active": "启用",
+      "inactive": "禁用"
+    }
+  },
+  "form": {
+    "create": "创建{{type}}",
+    "edit": "编辑{{type}}",
+    "name": "名称",
+    "description": "描述",
+    "save": "保存",
+    "cancel": "取消"
+  }
+}

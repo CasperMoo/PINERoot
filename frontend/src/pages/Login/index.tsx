@@ -4,23 +4,10 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Input, Card, App } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/auth';
-
-/**
- * 登录表单验证 schema
- */
-const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, '请输入邮箱')
-    .email('请输入有效的邮箱地址'),
-  password: z
-    .string()
-    .min(6, '密码至少6个字符'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 /**
  * 登录页面
@@ -31,6 +18,22 @@ export default function Login() {
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { message } = App.useApp();
+  const { t } = useTranslation(['auth', 'validation', 'common']);
+
+  /**
+   * 登录表单验证 schema
+   */
+  const loginSchema = z.object({
+    email: z
+      .string()
+      .min(1, t('validation:required'))
+      .email(t('validation:emailInvalid')),
+    password: z
+      .string()
+      .min(6, t('validation:passwordTooShort')),
+  });
+
+  type LoginFormData = z.infer<typeof loginSchema>;
 
   const {
     control,
@@ -58,7 +61,7 @@ export default function Login() {
       setAuth(response.user, response.token);
 
       // 提示成功
-      message.success('登录成功');
+      message.success(t('common:action.operationSuccess'));
 
       // 获取登录前的重定向路径
       const getRedirectPath = () => {
@@ -91,7 +94,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8 relative">
+      {/* 语言切换器 */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
       <Card
         className="w-full max-w-md shadow-xl rounded-2xl"
         variant="borderless"
@@ -99,10 +107,10 @@ export default function Login() {
         {/* 标题区域 */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            欢迎回来
+            {t('auth:login.title')}
           </h1>
           <p className="text-gray-500">
-            登录您的账号
+            {t('auth:login.emailPlaceholder')}
           </p>
         </div>
 
@@ -111,7 +119,7 @@ export default function Login() {
           {/* 邮箱输入 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              邮箱
+              {t('auth:login.emailLabel')}
             </label>
             <Controller
               name="email"
@@ -120,7 +128,7 @@ export default function Login() {
                 <Input
                   {...field}
                   size="large"
-                  placeholder="请输入邮箱"
+                  placeholder={t('auth:login.emailPlaceholder')}
                   status={errors.email ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
@@ -137,7 +145,7 @@ export default function Login() {
           {/* 密码输入 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              密码
+              {t('auth:login.passwordLabel')}
             </label>
             <Controller
               name="password"
@@ -146,7 +154,7 @@ export default function Login() {
                 <Input.Password
                   {...field}
                   size="large"
-                  placeholder="请输入密码"
+                  placeholder={t('auth:login.passwordPlaceholder')}
                   status={errors.password ? 'error' : ''}
                   disabled={isSubmitting}
                   className="rounded-lg"
@@ -168,18 +176,18 @@ export default function Login() {
             loading={isSubmitting}
             className="w-full rounded-lg h-12 text-base font-medium"
           >
-            登录
+            {t('auth:login.submitButton')}
           </Button>
         </form>
 
         {/* 注册链接 */}
         <div className="text-center mt-6 text-sm text-gray-600">
-          还没账号？
+          {t('auth:login.registerLink')}
           <Link
             to="/register"
             className="text-blue-600 hover:text-blue-700 font-medium ml-1"
           >
-            去注册
+            {t('auth:register.title')}
           </Link>
         </div>
       </Card>

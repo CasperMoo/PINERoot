@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { App as AntApp, ConfigProvider } from 'antd'
+import enUS from 'antd/locale/en_US'
 import zhCN from 'antd/locale/zh_CN'
+import { useTranslation } from 'react-i18next'
 import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
@@ -16,17 +18,21 @@ import { useAuthStore } from '@/store/auth'
 
 function App() {
   const { isLoading, initAuth } = useAuthStore()
+  const { i18n } = useTranslation()
 
   // 初始化认证状态（从 localStorage 恢复）
   useEffect(() => {
     initAuth()
   }, [initAuth])
 
+  // 根据当前语言选择 Ant Design locale
+  const antdLocale = i18n.language === 'zh-CN' ? zhCN : enUS
+
   // 初始化中，显示加载状态
   if (isLoading) {
     return (
       <ConfigProvider
-        locale={zhCN}
+        locale={antdLocale}
         theme={{
           cssVar: true,
         }}
@@ -35,7 +41,7 @@ function App() {
         <AntApp>
           <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="text-center">
-              <div className="text-2xl text-gray-600">加载中...</div>
+              <div className="text-2xl text-gray-600">Loading...</div>
             </div>
           </div>
         </AntApp>
@@ -45,7 +51,7 @@ function App() {
 
   return (
     <ConfigProvider
-      locale={zhCN}
+      locale={antdLocale}
       theme={{
         cssVar: true,
       }}

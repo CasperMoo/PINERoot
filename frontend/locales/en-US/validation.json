@@ -1,0 +1,17 @@
+{
+  "required": "This field is required",
+  "emailInvalid": "Invalid email format",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "passwordTooWeak": "Password must contain letters and numbers",
+  "passwordMismatch": "Passwords do not match",
+  "emailExists": "Email already exists",
+  "loginFailed": "Invalid email or password",
+  "networkError": "Network error, please try again",
+  "serverError": "Server error, please try again later",
+  "fileTooLarge": "File size exceeds limit",
+  "fileTypeNotSupported": "File type not supported",
+  "minLength": "Must be at least {{count}} characters",
+  "maxLength": "Must not exceed {{count}} characters",
+  "min": "Must be at least {{count}}",
+  "max": "Must not exceed {{count}}"
+}

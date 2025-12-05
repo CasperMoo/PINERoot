@@ -18,8 +18,13 @@ const request = axios.create({
 const TOKEN_KEY = 'auth_token';
 
 /**
+ * localStorage language key (与 i18n 保持一致)
+ */
+const LANGUAGE_KEY = 'user_language';
+
+/**
  * 请求拦截器
- * 自动添加 token 到请求头
+ * 自动添加 token 和 Accept-Language 到请求头
  */
 request.interceptors.request.use(
   (config) => {
@@ -27,6 +32,10 @@ request.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // 注入 Accept-Language header
+    const currentLanguage = localStorage.getItem(LANGUAGE_KEY) || 'en-US';
+    config.headers['Accept-Language'] = currentLanguage;
 
     // 如果是 FormData，删除 Content-Type 让浏览器自动设置
     if (config.data instanceof FormData) {

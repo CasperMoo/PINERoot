@@ -261,6 +261,35 @@
 - **设计**：简约现代，微动效
 - **状态**：即将开始
 
+### 🚧 国际化（i18n）模块
+
+- **位置**：`src/i18n/index.ts`, `src/components/LanguageSwitcher.tsx`
+- **翻译文件**：`frontend/locales/en-US/*.json`, `frontend/locales/zh-CN/*.json`
+- **功能**：前端 UI 文字、表单验证、页面内容的多语言支持
+  - **技术方案**：react-i18next（React 生态标准）
+  - **语言检测**：URL query > localStorage > 浏览器语言 > 默认(en-US)
+  - **命名空间**：common（通用）、auth（认证）、admin（管理后台）、validation（表单验证）
+  - **语言切换器**：Dropdown 组件，支持手动切换语言
+  - **Ant Design 集成**：ConfigProvider 自动切换组件库语言
+  - **API 联动**：自动注入 Accept-Language header，与后端 i18n 协同
+- **翻译范围**：
+  - ✅ UI 文字（按钮、标题、导航）
+  - ✅ 表单验证消息
+  - ✅ Toast 提示消息
+  - ✅ 页面内容（介绍、说明）
+  - ❌ 不包括：后端 API 错误消息（由后端 i18n 处理）
+- **支持语言**：
+  - en-US（英文，默认）
+  - zh-CN（简体中文）
+- **localStorage key**：`user_language`（用户语言偏好）
+- **实施阶段**：
+  1. 基础设施（安装依赖、配置 i18n）
+  2. 核心功能（语言切换器、Ant Design 集成）
+  3. 内容迁移（登录、注册、管理后台）
+  4. 测试文档（语言切换测试、文档编写）
+- **详细文档**：`I18N_MODULE.md`
+- **状态**：📋 规划中，方案设计完成，待实施
+
 ## 模块间依赖关系
 
 ```
@@ -278,6 +307,7 @@ API 封装层（request.ts, auth.ts 等）
 ### localStorage 键名统一
 
 - **Token 存储 key**: `auth_token`
+- **用户语言偏好 key**: `user_language`（i18n 模块使用）
 - ⚠️ 所有地方必须一致，禁止使用其他 key 名
 
 ### 刷新页面保持登录的机制
