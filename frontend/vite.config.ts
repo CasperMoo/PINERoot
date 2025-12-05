@@ -10,4 +10,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // 确保 JSON 文件可以被正确导入
+  assetsInclude: ['**/*.json'],
 })
