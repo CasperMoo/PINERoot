@@ -182,6 +182,38 @@ export const resources = {
         title: "No data yet",
         description: "Start by uploading some images or creating tags."
       }
+    },
+    home: {
+      hero: {
+        title: "Welcome to the Tool Collection Platform",
+        subtitle: "Efficient, concise, and modern tool experience",
+        getStarted: "Get Started",
+        enterDashboard: "Enter Dashboard"
+      },
+      features: {
+      title: "Our Tools",
+      subtitle: "More tools are under development, stay tuned",
+      reminder: {
+        title: "Reminders",
+        description: "Set important reminders and never miss critical moments"
+      },
+      tasks: {
+        title: "Task Management",
+        description: "Efficiently manage your to-do items and plan your work and life"
+      },
+      notes: {
+        title: "Notes Tool",
+        description: "Record your inspirations anytime with rich text and Markdown support"
+      },
+      analytics: {
+        title: "Data Analytics",
+        description: "Visualize your data and generate professional charts and reports"
+      },
+      utilities: {
+        title: "Utilities",
+        description: "More practical utilities to boost your work efficiency"
+      }
+    }
     }
   },
   'zh-CN': {
@@ -364,6 +396,38 @@ export const resources = {
       emptyState: {
         title: "暂无数据",
         description: "开始上传一些图片或创建标签吧。"
+      }
+    },
+    home: {
+      hero: {
+        title: "欢迎使用工具集合平台",
+        subtitle: "高效、简洁、现代化的工具体验",
+        getStarted: "立即开始",
+        enterDashboard: "进入工作台"
+      },
+      features: {
+        title: "我们的工具",
+        subtitle: "更多工具正在开发中，敬请期待",
+        reminder: {
+          title: "提醒事项",
+          description: "设置重要事项提醒，永不错过关键时刻"
+        },
+        tasks: {
+          title: "任务管理",
+          description: "高效管理您的待办事项，轻松规划工作和生活"
+        },
+        notes: {
+          title: "笔记工具",
+          description: "随时记录您的灵感，支持富文本和 Markdown"
+        },
+        analytics: {
+          title: "数据分析",
+          description: "可视化您的数据，生成专业的图表和报表"
+        },
+        utilities: {
+          title: "实用工具",
+          description: "更多实用小工具，提升您的工作效率"
+        }
       }
     }
   }

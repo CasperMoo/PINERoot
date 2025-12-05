@@ -12,7 +12,7 @@ i18n
     debug: import.meta.env.DEV,
     resources,
     defaultNS: 'common',
-    ns: ['common', 'auth', 'validation', 'admin', 'dashboard'],
+    ns: ['common', 'auth', 'validation', 'admin', 'dashboard', 'home'],
     interpolation: {
       escapeValue: false, // React 已经默认转义
     },

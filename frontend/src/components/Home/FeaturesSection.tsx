@@ -7,6 +7,7 @@ import {
   ToolOutlined,
   BellOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import FeatureCard from './FeatureCard';
 
 /**
@@ -18,37 +19,39 @@ import FeatureCard from './FeatureCard';
  * - 展示占位卡片（comingSoon=true）
  */
 const FeaturesSection = () => {
+  const { t } = useTranslation('home');
+
   // 工具列表
   const features = [
     {
       icon: <BellOutlined />,
-      title: '提醒事项',
-      description: '设置重要事项提醒，永不错过关键时刻',
+      title: t('features.reminder.title'),
+      description: t('features.reminder.description'),
       comingSoon: false,
       link: '/reminder',
     },
     {
       icon: <CheckSquareOutlined />,
-      title: '任务管理',
-      description: '高效管理您的待办事项，轻松规划工作和生活',
+      title: t('features.tasks.title'),
+      description: t('features.tasks.description'),
       comingSoon: true,
     },
     {
       icon: <FileTextOutlined />,
-      title: '笔记工具',
-      description: '随时记录您的灵感，支持富文本和 Markdown',
+      title: t('features.notes.title'),
+      description: t('features.notes.description'),
       comingSoon: true,
     },
     {
       icon: <BarChartOutlined />,
-      title: '数据分析',
-      description: '可视化您的数据，生成专业的图表和报表',
+      title: t('features.analytics.title'),
+      description: t('features.analytics.description'),
       comingSoon: true,
     },
     {
       icon: <ToolOutlined />,
-      title: '实用工具',
-      description: '更多实用小工具，提升您的工作效率',
+      title: t('features.utilities.title'),
+      description: t('features.utilities.description'),
       comingSoon: true,
     },
   ];
@@ -59,10 +62,10 @@ const FeaturesSection = () => {
         {/* 标题区 */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            我们的工具
+            {t('features.title')}
           </h2>
           <p className="text-lg text-gray-600">
-            更多工具正在开发中，敬请期待
+            {t('features.subtitle')}
           </p>
         </div>
 

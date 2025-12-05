@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
+import { useTranslation } from 'react-i18next';
 
 /**
  * HeroSection 主视觉区组件
@@ -17,6 +18,7 @@ import { useAuthStore } from '@/store/auth';
 const HeroSection = () => {
   const navigate = useNavigate();
   const { token } = useAuthStore();
+  const { t } = useTranslation('home');
 
   return (
     <section className="relative h-[60vh] md:h-[70vh] bg-gradient-to-br from-blue-50 via-indigo-50 to-white overflow-hidden">
@@ -35,12 +37,12 @@ const HeroSection = () => {
         <div className="text-center max-w-4xl mx-auto">
           {/* 主标题 - 渐入动画 */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 mb-6 animate-fade-in-up">
-            欢迎使用工具集合平台
+            {t('hero.title')}
           </h1>
 
           {/* 副标题 - 延迟渐入 */}
           <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 animate-fade-in-up animation-delay-200">
-            高效、简洁、现代化的工具体验
+            {t('hero.subtitle')}
           </p>
 
           {/* CTA 按钮 - 根据登录状态显示 */}
@@ -54,7 +56,7 @@ const HeroSection = () => {
                 onClick={() => navigate('/dashboard')}
                 className="h-12 px-8 text-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
               >
-                进入工作台
+                {t('hero.enterDashboard')}
               </Button>
             ) : (
               // 未登录：立即开始
@@ -65,7 +67,7 @@ const HeroSection = () => {
                 onClick={() => navigate('/register')}
                 className="h-12 px-8 text-lg font-medium transition-all hover:scale-105 hover:shadow-lg"
               >
-                立即开始
+                {t('hero.getStarted')}
               </Button>
             )}
           </div>
