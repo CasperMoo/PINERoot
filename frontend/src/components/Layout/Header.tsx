@@ -5,12 +5,14 @@ import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 /**
  * Header 组件
  * 功能：
  * - 左侧：Logo + 网站名称
- * - 右侧：未登录显示"登录"按钮，已登录显示用户菜单
+ * - 右侧：未登录显示"登录"按钮+语言切换，已登录显示用户菜单
  * - 固定在顶部（sticky）
  * - 响应式适配
  */
@@ -18,14 +20,23 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, token, logout } = useAuthStore();
+  const { t } = useTranslation(['common', 'auth']);
 
   // 用户菜单项
   const userMenuItems: MenuProps['items'] = [
     {
       key: 'dashboard',
       icon: <UserOutlined />,
-      label: '工作台',
+      label: t('navigation.dashboard'),
       onClick: () => navigate('/dashboard'),
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'language',
+      label: <LanguageSwitcher />,
+      disabled: true,
     },
     {
       type: 'divider',
@@ -33,7 +44,7 @@ const Header = () => {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: t('navigation.logout'),
       onClick: () => {
         logout();
         navigate('/');
@@ -65,7 +76,7 @@ const Header = () => {
           </div>
 
           {/* 右侧：登录状态 */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-2">
             {token && user ? (
               // 已登录：显示用户下拉菜单
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
@@ -78,19 +89,22 @@ const Header = () => {
                 </Button>
               </Dropdown>
             ) : (
-              // 未登录：显示登录按钮
-              <Button
-                type="primary"
-                onClick={() => {
-                  // 保存当前页面路径到 sessionStorage
-                  const currentPath = location.pathname + location.search + location.hash;
-                  sessionStorage.setItem('loginRedirectPath', currentPath);
-                  navigate('/login');
-                }}
-                className="transition-transform hover:scale-105"
-              >
-                登录
-              </Button>
+              // 未登录：显示语言切换 + 登录按钮
+              <>
+                <LanguageSwitcher />
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    // 保存当前页面路径到 sessionStorage
+                    const currentPath = location.pathname + location.search + location.hash;
+                    sessionStorage.setItem('loginRedirectPath', currentPath);
+                    navigate('/login');
+                  }}
+                  className="transition-transform hover:scale-105"
+                >
+                  {t('auth:login.submitButton')}
+                </Button>
+              </>
             )}
           </div>
         </div>
