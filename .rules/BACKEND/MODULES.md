@@ -211,40 +211,46 @@
 - 测试覆盖：6 个集成测试用例全部通过
 - **状态**：开发中，允许修改和扩展
 
-### 🚧 提醒模块（Reminder）
+### ✅ AI Workflow 模块
 
-- 文件：`src/routes/reminder.ts`
-- 服务层：`src/services/reminder.ts`
-- 辅助工具：`src/utils/dateHelper.ts`
-- 功能：事项提醒面板，支持一次性提醒和多种循环提醒
-  - **创建提醒**：POST /api/reminders - 创建提醒事项（所有认证用户）
-  - **提醒列表**：GET /api/reminders - 分页查询提醒列表，支持按 frequency、status 过滤（所有认证用户）
-  - **提醒详情**：GET /api/reminders/:id - 获取单个提醒详情（所有认证用户）
-  - **更新提醒**：PUT /api/reminders/:id - 更新提醒信息（所有认证用户）
-  - **删除提醒**：DELETE /api/reminders/:id - 软删除提醒（所有认证用户）
-  - **标记完成**：POST /api/reminders/:id/complete - 标记提醒完成，自动计算下次触发日期（所有认证用户）
-- 数据库：Reminder 表
-  - 支持触发频率：ONCE（单次）、DAILY（每天）、EVERY_X_DAYS（每隔 x 天）、WEEKLY（每周某天）、MONTHLY（每月某天）、YEARLY（每年某天）
-  - 核心字段：nextTriggerDate（下次触发日期）、lastCompletedDate（上次完成日期）、status（PENDING/COMPLETED）
-  - 软删除：使用 deletedAt 字段
-- 核心特性：
-  - **被动触发模式**：查询时判断触发状态，无需后台定时任务
-  - **只到天维度**：不涉及具体小时分钟，仅按日期触发
-  - **循环提醒自动计算**：完成后自动计算下次触发日期
-  - **权限隔离**：用户只能操作自己的提醒项
-- 触发状态判断：
-  - TRIGGER_TODAY：今日需触发
-  - OVERDUE：已逾期但未完成
-  - PENDING：等待触发
-- 权限控制：
-  - 所有接口需要 JWT 认证（authMiddleware + requireUser）
-  - 用户只能查看和操作自己创建的提醒
-- 技术要点：
-  - 使用 date-fns 进行日期计算
-  - 索引优化：userId + deletedAt、nextTriggerDate + deletedAt
-  - 分页查询（默认 20 条，最大 100 条）
-- 详细设计文档：`REMINDER_MODULE.md`
-- **状态**：开发中，允许修改和扩展
+- 文件：`src/modules/ai-workflow/`（完整模块目录）
+- 配置：`src/config/ai-workflows.config.ts`
+- 测试路由：`src/routes/test-ai-workflow.ts`
+- 功能：AI 工作流管理系统，支持多提供商和流式响应
+  - **工作流执行**：支持配置化的 AI 工作流执行（如翻译、问答等）
+  - **流式响应**：通过 SSE (Server-Sent Events) 实时返回 AI 生成内容
+  - **提供商模式**：支持多个 AI 提供商（当前实现 Coze）
+  - **Token 统计**：精确记录输入、输出和总 Token 使用量
+  - **执行日志**：详细记录每次执行的参数、结果和性能指标
+  - **错误处理**：完善的错误分类和重试机制
+  - **测试接口**：提供测试路由验证工作流功能
+- 核心组件：
+  - **Service Layer** (`ai-workflow.service.ts`)：业务逻辑层，提供流式和非流式执行接口
+  - **Provider Layer** (`providers/`)：AI 提供商抽象层
+    - `AbstractAIProvider`：抽象基类
+    - `CozeProvider`：Coze API 实现，支持流式调用
+  - **Factory Pattern** (`ai-workflow.factory.ts`)：提供商工厂模式
+  - **Logger System** (`ai-workflow.logger.ts`)：双重日志系统
+  - **Utilities**：SSE 解析器、重试机制、错误类型定义
+- 数据库：AiWorkflowLog 表
+  - 记录字段：workflowName、provider、requestParams、responseStatus
+  - Token 统计：tokenInput、tokenOutput、tokenTotal
+  - 性能指标：durationMs（响应耗时）
+  - 错误追踪：errorCode、errorMessage
+  - 索引优化：workflowName + createdAt、responseStatus、createdAt
+- 测试验证：
+  - ✅ Coze API 集成测试通过
+  - ✅ 流式响应功能正常
+  - ✅ Token 统计准确记录
+  - ✅ 数据库日志记录完整
+  - ✅ 错误处理机制有效
+- 技术特点：
+  - **模块化架构**：清晰的分层设计，易于扩展
+  - **流式处理**：支持大文本实时流式输出
+  - **异步生成器**：使用 Async Generator 实现流式控制
+  - **类型安全**：完整的 TypeScript 类型定义
+  - **配置驱动**：通过配置文件管理工作流
+- **状态**：已完成测试并部署，禁止修改
 
 ## 模块间依赖关系
 
