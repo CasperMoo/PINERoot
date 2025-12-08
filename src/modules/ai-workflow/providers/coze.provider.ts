@@ -60,11 +60,14 @@ export class CozeProvider extends AbstractAIProvider {
     }
 
     for await (const event of this.sseParser.parse(response.body)) {
-      if (event.event === 'message' && event.data.usage) {
+      // 事件类型不区分大小写
+      const eventType = event.event.toLowerCase();
+
+      if (eventType === 'message' && event.data.usage) {
         this.collectedTokenUsage = event.data.usage;
       }
 
-      if (event.event === 'interrupt') {
+      if (eventType === 'interrupt') {
         throw new InterruptError(
           params.workflowName,
           event.data.interrupt_data?.event_id || 'unknown',
@@ -72,7 +75,7 @@ export class CozeProvider extends AbstractAIProvider {
         );
       }
 
-      if (event.event === 'error') {
+      if (eventType === 'error') {
         throw new APIError(
           event.data.error_code || 500,
           event.data.error_message || 'Unknown error',
@@ -81,7 +84,7 @@ export class CozeProvider extends AbstractAIProvider {
 
       yield event;
 
-      if (event.event === 'done') {
+      if (eventType === 'done') {
         break;
       }
     }
