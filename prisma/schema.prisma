@@ -112,3 +112,37 @@ model Reminder {
   @@index([userId, deletedAt])
   @@index([nextTriggerDate, deletedAt])
 }
+
+model AiWorkflowLog {
+  id             Int      @id @default(autoincrement())
+
+  // 工作流标识
+  workflowName   String   // 对应配置文件中的 key（如 "translation"）
+  provider       String   // 提供商类型（如 "coze"）
+
+  // 请求信息
+  requestParams  Json     // 请求参数（存储用户输入）
+
+  // 响应信息
+  responseStatus String   // success | error | interrupted | timeout
+
+  // Token 统计
+  tokenInput     Int?     // 输入 Token 数
+  tokenOutput    Int?     // 输出 Token 数
+  tokenTotal     Int?     // 总 Token 数
+
+  // 错误信息
+  errorCode      Int?     // 错误码
+  errorMessage   String?  @db.Text  // 错误详情
+
+  // 性能指标
+  durationMs     Int      // 响应耗时（毫秒）
+
+  // 时间戳
+  createdAt      DateTime @default(now())
+
+  @@index([workflowName, createdAt])
+  @@index([responseStatus])
+  @@index([createdAt])
+  @@map("ai_workflow_logs")
+}

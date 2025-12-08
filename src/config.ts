@@ -12,6 +12,8 @@ interface Config {
     BUCKET: string
     ENDPOINT: string
   }
+  COZE_API_TOKEN: string
+  COZE_API_BASE_URL: string
 }
 
 const requiredEnvVars = [
@@ -42,4 +44,6 @@ export const config: Config = {
     BUCKET: process.env.OSS_BUCKET!,
     ENDPOINT: process.env.OSS_ENDPOINT!,
   },
+  COZE_API_TOKEN: process.env.COZE_API_TOKEN || '',
+  COZE_API_BASE_URL: process.env.COZE_API_BASE_URL || 'https://api.coze.cn',
 }

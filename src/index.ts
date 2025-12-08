@@ -14,6 +14,8 @@ import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
 import { parseAcceptLanguage, createTranslator } from './utils/i18n'
+import { initAIWorkflowModule } from './modules/ai-workflow'
+import testAIWorkflowRoutes from './routes/test-ai-workflow'
 
 // 导出build函数供测试使用
 export async function build() {
@@ -92,6 +94,15 @@ export async function build() {
 
   // Register reminder routes
   await app.register(reminderRoutes, { prefix: "/api" });
+
+  // Initialize AI Workflow module
+  const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
+
+  // 将服务挂载到 app 实例（便于在路由中使用）
+  app.decorate('aiWorkflow', aiWorkflowModule.service);
+
+  // Register test AI workflow routes
+  await app.register(testAIWorkflowRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(

@@ -1,5 +1,6 @@
 import { FastifyRequest } from 'fastify'
 import { UserRole } from '@prisma/client'
+import { AIWorkflowService } from './modules/ai-workflow'
 
 // 定义用户负载类型（不含密码）
 export interface UserPayload {
@@ -19,5 +20,9 @@ declare module 'fastify' {
     currentUser?: UserPayload
     // i18n support
     t: TranslateFunction
+  }
+
+  interface FastifyInstance {
+    aiWorkflow: AIWorkflowService
   }
 }
