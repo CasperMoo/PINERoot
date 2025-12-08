@@ -1,8 +1,12 @@
 # AI Workflow 模块设计文档
 
-## 模块状态：📋 待实现
+## 模块状态：✅ 已完成实现
 
-最后更新：2025-12-05
+最后更新：2025-12-08
+
+**实施日期**: 2025-12-05 ~ 2025-12-08
+**修复日期**: 2025-12-08
+**测试状态**: 全部通过 ✅
 
 ---
 
@@ -91,36 +95,18 @@ AI_WORKFLOW_LOG_RETENTION_DAYS=30
 **层级 2：工作流配置（src/config/ai-workflows.config.ts）** - 业务配置
 
 ```typescript
+// 工作流配置示例
 export const AI_WORKFLOWS = {
-  // 翻译工作流
   translation: {
     provider: 'coze',
-    workflowId: '7577000053669462058',
-    appId: '7576960422717767743',
+    workflowId: 'xxx',      // Coze 工作流 ID
+    appId: 'yyy',           // Coze 应用 ID
     description: '文本翻译',
-    timeout: 60000, // 60秒
+    timeout: 60000,         // 超时时间(ms)
   },
-
-  // 未来扩展：内容生成工作流
-  contentGeneration: {
-    provider: 'coze',
-    workflowId: 'xxx',
-    appId: 'yyy',
-    description: '内容生成',
-    timeout: 120000, // 120秒
-  },
-
-  // 未来扩展：内容摘要工作流
-  summarization: {
-    provider: 'coze',
-    workflowId: 'zzz',
-    appId: 'aaa',
-    description: '内容摘要',
-    timeout: 60000,
-  },
+  // ... 其他工作流
 } as const;
 
-// 类型推断
 export type WorkflowName = keyof typeof AI_WORKFLOWS;
 ```
 
@@ -298,151 +284,62 @@ const RETRY_CONFIG = {
 
 ### 1. 抽象提供商接口
 
+**核心类型定义**：
 ```typescript
-// types/provider.types.ts
-
-export abstract class BaseAIProvider {
-  /**
-   * 执行工作流（流式响应）
-   * @param params 执行参数
-   * @returns 异步生成器，逐个返回事件
-   */
+// Provider 抽象基类
+abstract class BaseAIProvider {
   abstract streamRun(params: StreamRunParams): AsyncGenerator<AIEvent>;
-
-  /**
-   * 验证配置是否有效
-   */
   abstract validateConfig(): boolean;
 }
 
-export interface StreamRunParams {
+// 流式运行参数
+interface StreamRunParams {
   workflowName: WorkflowName;      // 工作流名称
-  parameters: Record<string, any>;  // 动态参数
+  parameters: Record<string, any>;  // 输入参数
   ext?: Record<string, string>;     // 扩展字段
 }
 
-export interface AIEvent {
-  id: number;                       // 事件 ID
-  event: AIEventType;               // 事件类型
-  data: any;                        // 事件数据
+// AI 事件（支持大小写）
+type AIEventType = 'message' | 'error' | 'done' | 'interrupt' | 'ping';
+interface AIEvent {
+  id: number;
+  event: AIEventType;
+  data: any;
 }
-
-export type AIEventType =
-  | 'message'    // 消息事件（输出节点、结束节点）
-  | 'error'      // 错误事件
-  | 'done'       // 完成事件
-  | 'interrupt'  // 中断事件
-  | 'ping';      // 心跳事件
 ```
 
 ### 2. Coze Provider 实现
 
+**核心实现逻辑**：
 ```typescript
-// providers/coze.provider.ts
-
-export class CozeProvider extends BaseAIProvider {
-  async *streamRun(params: StreamRunParams): AsyncGenerator<AIEvent> {
-    // 1. 加载配置
-    const config = AI_WORKFLOWS[params.workflowName];
-
-    // 2. 构建请求
-    const response = await this.fetchWithRetry({
-      url: `${process.env.COZE_API_BASE_URL}/v1/workflow/stream_run`,
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.COZE_API_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        workflow_id: config.workflowId,
-        app_id: config.appId,
-        parameters: params.parameters,
-        ext: params.ext,
-      }),
-      timeout: config.timeout,
-    });
-
-    // 3. 解析 SSE 流
-    const sseParser = new SSEParser(response.body);
-
-    for await (const event of sseParser) {
-      yield event;
-
-      // 4. 提取 Token 统计
-      if (event.event === 'message' && event.data.usage) {
-        this.collectTokenUsage(event.data.usage);
-      }
-    }
-  }
-
-  private async fetchWithRetry(options: FetchOptions) {
-    // 实现重试逻辑
+class CozeProvider extends BaseAIProvider {
+  // 调用 Coze API，返回 SSE 流
+  async *streamRun(params): AsyncGenerator<AIEvent> {
+    // 1. 构建请求体（workflow_id, app_id, parameters）
+    // 2. 发起 POST 请求到 /v1/workflow/stream_run
+    // 3. 解析 SSE 流，逐个返回事件
+    // 4. 收集 Token 使用统计
   }
 }
 ```
 
 ### 3. 业务服务层
 
+**Service 核心功能**：
 ```typescript
-// ai-workflow.service.ts
+class AIWorkflowService {
+  // 执行工作流（流式）
+  async *execute(workflowName, parameters): AsyncGenerator<AIEvent> {
+    // 1. 获取 Provider 实例
+    // 2. 记录开始日志
+    // 3. 执行 Provider.streamRun()
+    // 4. 收集 Token 统计
+    // 5. 记录成功/失败日志
+  }
 
-export class AIWorkflowService {
-  constructor(
-    private readonly providerFactory: ProviderFactory,
-    private readonly logger: AIWorkflowLogger,
-  ) {}
-
-  /**
-   * 执行工作流
-   * @param workflowName 工作流名称
-   * @param parameters 输入参数
-   * @returns 异步生成器，逐个返回事件
-   */
-  async *execute(
-    workflowName: WorkflowName,
-    parameters: Record<string, any>
-  ): AsyncGenerator<AIEvent> {
-    const startTime = Date.now();
-    const config = AI_WORKFLOWS[workflowName];
-    const provider = this.providerFactory.create(config.provider);
-
-    // Console 日志：开始
-    this.logger.logStart(workflowName, parameters);
-
-    try {
-      // 执行流式调用
-      let tokenUsage: TokenUsage | null = null;
-
-      for await (const event of provider.streamRun({ workflowName, parameters })) {
-        yield event;
-
-        // 收集 Token 统计
-        if (event.event === 'message' && event.data.usage) {
-          tokenUsage = event.data.usage;
-        }
-      }
-
-      // 数据库日志：成功
-      await this.logger.logSuccess({
-        workflowName,
-        provider: config.provider,
-        requestParams: parameters,
-        tokenUsage,
-        durationMs: Date.now() - startTime,
-      });
-
-    } catch (error) {
-      // 数据库日志：失败
-      await this.logger.logError({
-        workflowName,
-        provider: config.provider,
-        requestParams: parameters,
-        error,
-        durationMs: Date.now() - startTime,
-      });
-
-      throw error;
-    }
+  // 执行并收集结果（非流式）
+  async executeAndCollect(workflowName, parameters): Promise<string> {
+    // 调用 execute() 并收集所有 message 事件内容
   }
 }
 ```
@@ -451,63 +348,32 @@ export class AIWorkflowService {
 
 ## 使用示例
 
-### 场景 1：翻译文本
-
+**1. 翻译文本**：
 ```typescript
-import { aiWorkflowService } from '@/modules/ai-workflow';
+// 非流式调用
+const result = await aiWorkflowService.executeAndCollect('translation', {
+  input: 'Hello World',
+});
 
-async function translateText(text: string): Promise<string> {
-  const results: string[] = [];
-
-  for await (const event of aiWorkflowService.execute('translation', {
-    input: text,
-  })) {
-    if (event.event === 'message') {
-      results.push(event.data.content);
-    }
+// 流式调用
+for await (const event of aiWorkflowService.execute('translation', {
+  input: 'Hello World'
+})) {
+  if (event.event === 'message') {
+    console.log(event.data.content);
   }
-
-  return results.join('');
-}
-
-// 调用
-const translated = await translateText('Hello World');
-console.log(translated); // "你好，世界"
-```
-
-### 场景 2：内容生成（未来扩展）
-
-```typescript
-async function generateContent(prompt: string): Promise<string> {
-  const results: string[] = [];
-
-  for await (const event of aiWorkflowService.execute('contentGeneration', {
-    prompt,
-    style: 'professional',
-  })) {
-    if (event.event === 'message') {
-      results.push(event.data.content);
-    }
-  }
-
-  return results.join('');
 }
 ```
 
-### 场景 3：错误处理
-
+**2. 错误处理**：
 ```typescript
-import { TimeoutError, InterruptError } from '@/modules/ai-workflow';
-
 try {
   const result = await translateText('Hello');
 } catch (error) {
   if (error instanceof TimeoutError) {
-    console.error('请求超时，请稍后重试');
+    // 处理超时
   } else if (error instanceof InterruptError) {
-    console.error('工作流中断', error.eventId);
-  } else {
-    console.error('未知错误', error.message);
+    // 处理中断
   }
 }
 ```
@@ -822,16 +688,74 @@ translation: {
 
 ---
 
-## 变更记录
-
-| 日期 | 版本 | 变更内容 | 作者 |
-|------|------|---------|------|
-| 2025-12-05 | v1.0 | 初始设计方案 | Claude |
 
 ---
 
-**下一步**：
-1. 实现核心 Provider 和 Service 层
-2. 创建数据库迁移
-3. 编写单元测试
-4. 集成到现有业务模块
+---
+
+## 实际实现记录
+
+### 当前状态
+- ✅ 模块已完成实现并测试通过
+- ✅ 支持 Coze API 流式响应
+- ✅ Token 使用量统计正常
+- ✅ 错误处理和重试机制完备
+
+### 文件结构
+```
+src/modules/ai-workflow/
+├── types/
+│   ├── provider.types.ts      # 提供商接口（已实现）
+│   ├── coze.types.ts          # Coze 类型（已实现）
+│   └── event.types.ts         # 事件类型（已实现，支持大小写）
+├── providers/
+│   ├── base.provider.ts       # 抽象基类（已实现）
+│   └── coze.provider.ts       # Coze 实现（已实现）
+├── utils/
+│   ├── sse-parser.ts          # SSE 解析器（已修复）
+│   ├── retry.ts               # 重试逻辑（已实现）
+│   └── errors.ts              # 错误类型（已实现）
+├── ai-workflow.service.ts     # 业务服务层（已实现）
+├── ai-workflow.logger.ts      # 日志记录器（已实现）
+├── ai-workflow.factory.ts     # Provider 工厂（已实现）
+└── index.ts                   # 模块导出（已实现）
+```
+
+### 数据库表
+- `ai_workflow_logs` - 已创建，包含所有必要字段和索引
+
+### 测试接口（临时）
+- `/api/test-translation` - 非流式翻译测试
+- `/api/test-translation-stream` - 流式翻译测试
+- `/api/test-logs` - 查看执行日志
+
+### 配置文件
+- `src/config/ai-workflows.config.ts` - 工作流配置
+- `.env` - API Token（已配置）
+
+---
+
+## 使用指南
+
+### 基本使用
+```typescript
+// 导入服务
+import { aiWorkflowService } from '@/modules/ai-workflow';
+
+// 翻译文本
+const result = await aiWorkflowService.executeAndCollect('translation', {
+  input: 'Hello World',
+});
+```
+
+### 查看日志
+```sql
+-- 查看最近记录
+SELECT * FROM ai_workflow_logs ORDER BY createdAt DESC LIMIT 10;
+
+-- 统计消耗
+SELECT workflowName, COUNT(*), SUM(tokenTotal)
+FROM ai_workflow_logs
+WHERE responseStatus = 'success'
+GROUP BY workflowName;
+```
