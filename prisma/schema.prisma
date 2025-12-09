@@ -46,6 +46,9 @@ model User {
   role      UserRole @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // 关联关系
+  vocabularies UserVocabulary[]
 }
 
 model Image {
@@ -145,4 +148,73 @@ model AiWorkflowLog {
   @@index([responseStatus])
   @@index([createdAt])
   @@map("ai_workflow_logs")
+}
+
+// 单词本相关枚举
+enum Language {
+  CHINESE
+  JAPANESE
+}
+
+enum VocabularyStatus {
+  NEW        // 新学习
+  LEARNING   // 学习中
+  MASTERED   // 已掌握
+}
+
+// 词库总表（全局缓存）
+model WordLibrary {
+  id              Int      @id @default(autoincrement())
+
+  // 原文（唯一键，用于缓存查询）
+  originalText    String   @unique @db.VarChar(500)
+
+  // 语言类型
+  language        Language // 'CHINESE' | 'JAPANESE'
+
+  // 翻译结果（完整的 JSON 数据）
+  translationData Json     // 存储 AI 返回的完整结构
+
+  // 统计信息
+  queryCount      Int      @default(1)  // 查询次数（热度统计）
+
+  // 时间戳
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 关联关系
+  userVocabularies UserVocabulary[]
+
+  @@index([language])
+  @@index([queryCount])  // 用于"热门单词"查询
+  @@index([createdAt])
+  @@map("word_library")
+}
+
+// 用户单词本关联表
+model UserVocabulary {
+  id        Int      @id @default(autoincrement())
+
+  // 关联用户
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // 关联单词
+  wordId    Int
+  word      WordLibrary @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  // 用户自定义笔记
+  note      String?  @db.Text
+
+  // 学习状态（可选，未来扩展）
+  status    VocabularyStatus @default(NEW)
+
+  // 时间戳
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, wordId])  // 防止重复收藏
+  @@index([userId, createdAt])
+  @@index([userId, status])   // 按状态筛选
+  @@map("user_vocabulary")
 }

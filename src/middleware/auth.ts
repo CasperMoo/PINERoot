@@ -49,3 +49,12 @@ export async function authMiddleware(
     return error(reply, 3003, "Unauthorized: Invalid token");
   }
 }
+
+export function requireUser(roles?: string[]) {
+  return async function(request: FastifyRequest, reply: FastifyReply) {
+    // authMiddleware already attached the user to the request
+    if (!request.currentUser) {
+      return error(reply, 3001, "Unauthorized: No token provided");
+    }
+  };
+}

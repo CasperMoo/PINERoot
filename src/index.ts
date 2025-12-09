@@ -10,6 +10,7 @@ import imageTagRoutes from './routes/imageTag'
 import activityConfigRoutes from './routes/activityConfig'
 import halloweenRoutes from './routes/anchor/halloween'
 import reminderRoutes from './routes/reminder'
+import vocabularyRoutes from './routes/vocabulary'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -95,14 +96,13 @@ export async function build() {
   // Register reminder routes
   await app.register(reminderRoutes, { prefix: "/api" });
 
-  // Initialize AI Workflow module
-  const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
+  // Register vocabulary routes
+  await app.register(vocabularyRoutes, { prefix: "/api" });
 
-  // 将服务挂载到 app 实例（便于在路由中使用）
-  app.decorate('aiWorkflow', aiWorkflowModule.service);
-
-  // Register test AI workflow routes
-  await app.register(testAIWorkflowRoutes, { prefix: "/api" });
+  // TODO: Fix AI workflow module import issues
+  // const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
+  // app.decorate('aiWorkflow', aiWorkflowModule.service);
+  // await app.register(testAIWorkflowRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(
