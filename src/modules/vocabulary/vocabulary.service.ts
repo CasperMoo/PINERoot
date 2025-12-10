@@ -5,11 +5,20 @@ import {
   TranslateResponse,
   CollectRequest,
   CollectResponse,
+  UpdateWordRequest,
   MyWordsQuery,
   MyWordsResponse,
   VocabularyItem,
   WordItem
 } from './types/vocabulary.types';
+import { BusinessError, ValidationError, NotFoundError } from '../../utils/errors';
+
+// 常量定义
+const MAX_TEXT_LENGTH = 500;
+const MAX_NOTE_LENGTH = 1000;
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 20;
+const MAX_PAGE_SIZE = 100;
 
 export class VocabularyService {
   constructor(
@@ -25,10 +34,10 @@ export class VocabularyService {
 
     // 1. 校验参数
     if (!text || text.trim().length === 0) {
-      throw new Error('输入文本不能为空');
+      throw new ValidationError('输入文本不能为空');
     }
-    if (text.length > 500) {
-      throw new Error('输入文本长度不能超过500字符');
+    if (text.length > MAX_TEXT_LENGTH) {
+      throw new ValidationError(`输入文本长度不能超过${MAX_TEXT_LENGTH}字符`);
     }
 
     // 2. 检测语言类型
@@ -63,7 +72,7 @@ export class VocabularyService {
         data: {
           originalText: text.trim(),
           language,
-          translationData: translation,
+          translationData: translation as any,
           queryCount: 1,
         },
       });
@@ -86,7 +95,7 @@ export class VocabularyService {
       originalText: wordLibrary.originalText,
       language: wordLibrary.language as Language,
       fromCache,
-      translation: wordLibrary.translationData as WordItem[],
+      translation: wordLibrary.translationData as unknown as WordItem[],
       isCollected: !!isCollected,
     };
   }
@@ -103,7 +112,7 @@ export class VocabularyService {
     });
 
     if (!word) {
-      throw new Error('单词不存在');
+      throw new NotFoundError('单词不存在');
     }
 
     // 2. 检查是否已收藏
@@ -117,10 +126,15 @@ export class VocabularyService {
     });
 
     if (existing) {
-      throw new Error('该单词已在单词本中');
+      throw new BusinessError('该单词已在单词本中');
     }
 
-    // 3. 创建收藏记录
+    // 3. 校验 note 长度
+    if (note && note.length > MAX_NOTE_LENGTH) {
+      throw new ValidationError(`笔记长度不能超过${MAX_NOTE_LENGTH}字符`);
+    }
+
+    // 4. 创建收藏记录
     const userVocabulary = await this.prisma.userVocabulary.create({
       data: {
         userId,
@@ -140,7 +154,10 @@ export class VocabularyService {
    * 获取我的单词本列表
    */
   async getMyWords(userId: number, query: MyWordsQuery): Promise<MyWordsResponse> {
-    const { page = 1, pageSize = 20, status } = query;
+    const { page = DEFAULT_PAGE, pageSize = DEFAULT_PAGE_SIZE, status } = query;
+
+    // 限制分页大小
+    const validPageSize = Math.min(pageSize, MAX_PAGE_SIZE);
 
     // 构建查询条件
     const where: any = { userId };
@@ -165,8 +182,8 @@ export class VocabularyService {
         },
       },
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
+      skip: (page - 1) * validPageSize,
+      take: validPageSize,
     });
 
     // 转换响应数据
@@ -175,7 +192,7 @@ export class VocabularyService {
       wordId: v.wordId,
       originalText: v.word.originalText,
       language: v.word.language as Language,
-      translation: v.word.translationData as WordItem[],
+      translation: v.word.translationData as unknown as WordItem[],
       note: v.note || undefined,
       status: v.status as VocabularyStatus,
       createdAt: v.createdAt.toISOString(),
@@ -184,7 +201,7 @@ export class VocabularyService {
     return {
       total,
       page,
-      pageSize,
+      pageSize: validPageSize,
       items,
     };
   }
@@ -199,7 +216,7 @@ export class VocabularyService {
     });
 
     if (!vocabulary) {
-      throw new Error('记录不存在或无权限删除');
+      throw new NotFoundError('记录不存在或无权限删除');
     }
 
     // 2. 删除记录
@@ -211,7 +228,7 @@ export class VocabularyService {
   /**
    * 更新单词状态和笔记
    */
-  async updateWordStatus(userId: number, id: number, params: Partial<CollectRequest>): Promise<void> {
+  async updateWordStatus(userId: number, id: number, params: UpdateWordRequest): Promise<void> {
     const { note, status } = params;
 
     // 1. 查询记录是否存在且属于当前用户
@@ -220,10 +237,15 @@ export class VocabularyService {
     });
 
     if (!vocabulary) {
-      throw new Error('记录不存在或无权限修改');
+      throw new NotFoundError('记录不存在或无权限修改');
     }
 
-    // 2. 构建更新数据
+    // 2. 校验 note 长度
+    if (note && note.length > MAX_NOTE_LENGTH) {
+      throw new ValidationError(`笔记长度不能超过${MAX_NOTE_LENGTH}字符`);
+    }
+
+    // 3. 构建更新数据
     const updateData: any = {};
     if (note !== undefined) {
       updateData.note = note.trim() || null;
@@ -232,7 +254,7 @@ export class VocabularyService {
       updateData.status = status;
     }
 
-    // 3. 更新记录
+    // 4. 更新记录
     await this.prisma.userVocabulary.update({
       where: { id },
       data: updateData,
@@ -283,7 +305,7 @@ export class VocabularyService {
 
       return parsed as WordItem[];
     } catch (error) {
-      throw new Error(`Failed to parse translation result: ${error.message}`);
+      throw new Error(`Failed to parse translation result: ${(error as Error).message}`);
     }
   }
 }

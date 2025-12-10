@@ -4,6 +4,7 @@ import {
   TranslateResponse,
   CollectRequest,
   CollectResponse,
+  UpdateWordRequest,
   MyWordsQuery,
   MyWordsResponse,
   VocabularyItem,
@@ -103,7 +104,7 @@ export class VocabularyService {
         data: {
           originalText: text.trim(),
           language,
-          translationData: translation,
+          translationData: translation as any,
           queryCount: 1,
         },
       });
@@ -126,7 +127,7 @@ export class VocabularyService {
       originalText: wordLibrary.originalText,
       language: wordLibrary.language as Language,
       fromCache,
-      translation: wordLibrary.translationData as WordItem[],
+      translation: wordLibrary.translationData as unknown as WordItem[],
       isCollected: !!isCollected,
     };
   }
@@ -215,7 +216,7 @@ export class VocabularyService {
       wordId: v.wordId,
       originalText: v.word.originalText,
       language: v.word.language as Language,
-      translation: v.word.translationData as WordItem[],
+      translation: v.word.translationData as unknown as WordItem[],
       note: v.note || undefined,
       status: v.status as VocabularyStatus,
       createdAt: v.createdAt.toISOString(),
@@ -251,7 +252,7 @@ export class VocabularyService {
   /**
    * 更新单词状态和笔记
    */
-  async updateWordStatus(userId: number, id: number, params: Partial<CollectRequest>): Promise<void> {
+  async updateWordStatus(userId: number, id: number, params: UpdateWordRequest): Promise<void> {
     const { note, status } = params;
 
     // 1. 查询记录是否存在且属于当前用户
@@ -323,7 +324,7 @@ export class VocabularyService {
 
       return parsed as WordItem[];
     } catch (error) {
-      throw new Error(`Failed to parse translation result: ${error.message}`);
+      throw new Error(`Failed to parse translation result: ${(error as Error).message}`);
     }
   }
 }

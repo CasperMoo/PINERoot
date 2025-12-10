@@ -1,5 +1,5 @@
 import { config } from '../../../config';
-import { AI_WORKFLOWS } from '../../../config/ai-workflows.config.ts';
+import { AI_WORKFLOWS } from '../../../config/ai-workflows.config';
 import { AbstractAIProvider } from './base.provider';
 import { StreamRunParams } from '../types/provider.types';
 import { AIEvent, TokenUsage } from '../types/event.types';

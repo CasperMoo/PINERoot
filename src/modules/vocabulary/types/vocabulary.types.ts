@@ -43,6 +43,12 @@ export interface CollectRequest {
   note?: string;                     // 可选，用户笔记
 }
 
+// 更新单词请求参数
+export interface UpdateWordRequest {
+  note?: string;                     // 用户笔记
+  status?: VocabularyStatus;         // 学习状态
+}
+
 // 收藏响应数据
 export interface CollectResponse {
   id: number;                        // user_vocabulary 记录 ID

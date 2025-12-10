@@ -1,18 +1,23 @@
 import { FastifyPluginAsync } from 'fastify';
 import { authMiddleware, requireUser } from '../middleware/auth';
-import { VocabularyService } from '../modules/vocabulary/vocabulary.service.mock';
+import { VocabularyService } from '../modules/vocabulary/vocabulary.service';
 import { ok, error } from '../utils/response';
+import { BusinessError } from '../utils/errors';
 import {
   TranslateRequest,
   TranslateResponse,
   CollectRequest,
   CollectResponse,
+  UpdateWordRequest,
   MyWordsQuery,
   MyWordsResponse
 } from '../modules/vocabulary/types/vocabulary.types';
 
 const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
-  const vocabularyService = new VocabularyService(fastify.prisma);
+  const vocabularyService = new VocabularyService(
+    fastify.prisma,
+    fastify.aiWorkflow
+  );
 
   /**
    * 翻译查询单词
@@ -31,6 +36,9 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
         return ok(reply, result);
       } catch (err: any) {
         fastify.log.error(err);
+        if (err instanceof BusinessError) {
+          return error(reply, err.code, err.message);
+        }
         return error(reply, 500, err.message || '翻译失败');
       }
     }
@@ -53,8 +61,8 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
         return ok(reply, result);
       } catch (err: any) {
         fastify.log.error(err);
-        if (err.message === '该单词已在单词本中') {
-          return error(reply, 400, err.message);
+        if (err instanceof BusinessError) {
+          return error(reply, err.code, err.message);
         }
         return error(reply, 500, err.message || '收藏失败');
       }
@@ -78,6 +86,9 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
         return ok(reply, result);
       } catch (err: any) {
         fastify.log.error(err);
+        if (err instanceof BusinessError) {
+          return error(reply, err.code, err.message);
+        }
         return error(reply, 500, err.message || '获取单词本失败');
       }
     }
@@ -95,11 +106,20 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
         const userId = request.currentUser!.id;
         const { id } = request.params as { id: string };
 
-        await vocabularyService.removeFromMyWords(userId, parseInt(id, 10));
+        // 验证 ID 参数
+        const idNum = parseInt(id, 10);
+        if (isNaN(idNum) || idNum <= 0) {
+          return error(reply, 400, '无效的ID');
+        }
+
+        await vocabularyService.removeFromMyWords(userId, idNum);
 
         return ok(reply, null, '已移除');
       } catch (err: any) {
         fastify.log.error(err);
+        if (err instanceof BusinessError) {
+          return error(reply, err.code, err.message);
+        }
         return error(reply, 500, err.message || '移除失败');
       }
     }
@@ -116,13 +136,22 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       try {
         const userId = request.currentUser!.id;
         const { id } = request.params as { id: string };
-        const params = request.body as Partial<CollectRequest>;
+        const params = request.body as UpdateWordRequest;
 
-        await vocabularyService.updateWordStatus(userId, parseInt(id, 10), params);
+        // 验证 ID 参数
+        const idNum = parseInt(id, 10);
+        if (isNaN(idNum) || idNum <= 0) {
+          return error(reply, 400, '无效的ID');
+        }
+
+        await vocabularyService.updateWordStatus(userId, idNum, params);
 
         return ok(reply, null, '更新成功');
       } catch (err: any) {
         fastify.log.error(err);
+        if (err instanceof BusinessError) {
+          return error(reply, err.code, err.message);
+        }
         return error(reply, 500, err.message || '更新失败');
       }
     }

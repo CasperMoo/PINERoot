@@ -1,5 +1,5 @@
 import { FastifyRequest } from 'fastify'
-import { UserRole } from '@prisma/client'
+import { UserRole, PrismaClient } from '@prisma/client'
 import { AIWorkflowService } from './modules/ai-workflow'
 
 // 定义用户负载类型（不含密码）
@@ -23,6 +23,7 @@ declare module 'fastify' {
   }
 
   interface FastifyInstance {
+    prisma: PrismaClient
     aiWorkflow: AIWorkflowService
   }
 }

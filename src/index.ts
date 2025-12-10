@@ -43,6 +43,9 @@ export async function build() {
     }
   });
 
+  // Decorate prisma instance
+  app.decorate('prisma', prisma);
+
   // Add i18n support - detect language and inject translator
   app.addHook('onRequest', async (request, reply) => {
     // 1. 尝试从 query parameter 获取语言
@@ -96,13 +99,13 @@ export async function build() {
   // Register reminder routes
   await app.register(reminderRoutes, { prefix: "/api" });
 
-  // Register vocabulary routes
-  await app.register(vocabularyRoutes, { prefix: "/api" });
+  // Initialize AI Workflow module
+  const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
+  app.decorate('aiWorkflow', aiWorkflowModule.service);
+  await app.register(testAIWorkflowRoutes, { prefix: "/api" });
 
-  // TODO: Fix AI workflow module import issues
-  // const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
-  // app.decorate('aiWorkflow', aiWorkflowModule.service);
-  // await app.register(testAIWorkflowRoutes, { prefix: "/api" });
+  // Register vocabulary routes (must be after AI Workflow initialization)
+  await app.register(vocabularyRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(

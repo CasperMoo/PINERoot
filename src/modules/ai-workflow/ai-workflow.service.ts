@@ -1,4 +1,4 @@
-import { AI_WORKFLOWS, WorkflowName } from '../../../config/ai-workflows.config.ts';
+import { AI_WORKFLOWS, WorkflowName } from '../../config/ai-workflows.config';
 import { AIEvent } from './types/event.types';
 import { ProviderFactory } from './ai-workflow.factory';
 import { AIWorkflowLogger } from './ai-workflow.logger';
