@@ -12,13 +12,17 @@ import {
   WordItem
 } from './types/vocabulary.types';
 import { BusinessError, ValidationError, NotFoundError } from '../../utils/errors';
-
-// 常量定义
-const MAX_TEXT_LENGTH = 500;
-const MAX_NOTE_LENGTH = 1000;
-const DEFAULT_PAGE = 1;
-const DEFAULT_PAGE_SIZE = 20;
-const MAX_PAGE_SIZE = 100;
+import { toPrismaJson, fromPrismaJson } from './utils/type-helpers';
+import {
+  MAX_TEXT_LENGTH,
+  MAX_NOTE_LENGTH,
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  MAX_PAGE_SIZE,
+  JAPANESE_REGEX,
+  CHINESE_REGEX,
+  REQUIRED_TRANSLATION_FIELDS,
+} from './vocabulary.constants';
 
 export class VocabularyService {
   constructor(
@@ -72,7 +76,7 @@ export class VocabularyService {
         data: {
           originalText: text.trim(),
           language,
-          translationData: translation as any,
+          translationData: toPrismaJson(translation),
           queryCount: 1,
         },
       });
@@ -95,7 +99,7 @@ export class VocabularyService {
       originalText: wordLibrary.originalText,
       language: wordLibrary.language as Language,
       fromCache,
-      translation: wordLibrary.translationData as unknown as WordItem[],
+      translation: fromPrismaJson<WordItem[]>(wordLibrary.translationData),
       isCollected: !!isCollected,
     };
   }
@@ -192,7 +196,7 @@ export class VocabularyService {
       wordId: v.wordId,
       originalText: v.word.originalText,
       language: v.word.language as Language,
-      translation: v.word.translationData as unknown as WordItem[],
+      translation: fromPrismaJson<WordItem[]>(v.word.translationData),
       note: v.note || undefined,
       status: v.status as VocabularyStatus,
       createdAt: v.createdAt.toISOString(),
@@ -266,14 +270,12 @@ export class VocabularyService {
    */
   private detectLanguage(text: string): Language {
     // 检测日文（平假名、片假名、汉字混合）
-    const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/;
-    if (japaneseRegex.test(text)) {
+    if (JAPANESE_REGEX.test(text)) {
       return Language.JAPANESE;
     }
 
     // 检测中文（简体/繁体）
-    const chineseRegex = /[\u4E00-\u9FFF]/;
-    if (chineseRegex.test(text)) {
+    if (CHINESE_REGEX.test(text)) {
       return Language.CHINESE;
     }
 
@@ -295,8 +297,7 @@ export class VocabularyService {
 
       // 验证每个单词的必填字段
       parsed.forEach((item, index) => {
-        const requiredFields = ['kanji', 'kana', 'meaning', 'pos'];
-        requiredFields.forEach((field) => {
+        REQUIRED_TRANSLATION_FIELDS.forEach((field) => {
           if (!item[field]) {
             throw new Error(`Missing field "${field}" at index ${index}`);
           }

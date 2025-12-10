@@ -10,6 +10,13 @@ import {
   VocabularyItem,
   WordItem
 } from './types/vocabulary.types';
+import {
+  MAX_TEXT_LENGTH,
+  DEFAULT_PAGE,
+  DEFAULT_PAGE_SIZE,
+  JAPANESE_REGEX,
+  CHINESE_REGEX,
+} from './vocabulary.constants';
 
 // Mock AI Workflow Service
 class MockAIWorkflowService {
@@ -68,8 +75,8 @@ export class VocabularyService {
     if (!text || text.trim().length === 0) {
       throw new Error('输入文本不能为空');
     }
-    if (text.length > 500) {
-      throw new Error('输入文本长度不能超过500字符');
+    if (text.length > MAX_TEXT_LENGTH) {
+      throw new Error(`输入文本长度不能超过${MAX_TEXT_LENGTH}字符`);
     }
 
     // 2. 检测语言类型
@@ -181,7 +188,7 @@ export class VocabularyService {
    * 获取我的单词本列表
    */
   async getMyWords(userId: number, query: MyWordsQuery): Promise<MyWordsResponse> {
-    const { page = 1, pageSize = 20, status } = query;
+    const { page = DEFAULT_PAGE, pageSize = DEFAULT_PAGE_SIZE, status } = query;
 
     // 构建查询条件
     const where: any = { userId };
@@ -285,14 +292,12 @@ export class VocabularyService {
    */
   private detectLanguage(text: string): Language {
     // 检测日文（平假名、片假名、汉字混合）
-    const japaneseRegex = /[\u3040-\u309F\u30A0-\u30FF]/;
-    if (japaneseRegex.test(text)) {
+    if (JAPANESE_REGEX.test(text)) {
       return Language.JAPANESE;
     }
 
     // 检测中文（简体/繁体）
-    const chineseRegex = /[\u4E00-\u9FFF]/;
-    if (chineseRegex.test(text)) {
+    if (CHINESE_REGEX.test(text)) {
       return Language.CHINESE;
     }
 

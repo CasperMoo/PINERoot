@@ -1,4 +1,6 @@
-import { MultipartFile } from '@fastify/multipart'
+import { MultipartFile } from '@fastify/multipart';
+import { ZodSchema, ZodError } from 'zod';
+import { ValidationError } from './errors';
 
 // 允许的图片类型
 export const ALLOWED_MIME_TYPES = [
@@ -62,4 +64,52 @@ export function getExtensionFromMimeType(mimetype: string): string {
     'image/webp': 'webp'
   }
   return map[mimetype] || 'jpg'
+}
+
+/**
+ * 验证数据并返回解析后的结果
+ * @param schema Zod Schema
+ * @param data 待验证的数据
+ * @returns 解析后的数据
+ * @throws ValidationError 当验证失败时
+ */
+export function validateData<T>(schema: ZodSchema<T>, data: unknown): T {
+  try {
+    return schema.parse(data);
+  } catch (error) {
+    if (error instanceof ZodError) {
+      // 格式化 Zod 错误信息
+      const messages = error.issues.map((err: any) => {
+        const path = err.path.join('.');
+        return path ? `${path}: ${err.message}` : err.message;
+      });
+      throw new ValidationError(messages.join('; '));
+    }
+    throw error;
+  }
+}
+
+/**
+ * 安全验证数据，返回结果或错误
+ * @param schema Zod Schema
+ * @param data 待验证的数据
+ * @returns 包含成功或失败结果的对象
+ */
+export function safeValidateData<T>(
+  schema: ZodSchema<T>,
+  data: unknown
+): { success: true; data: T } | { success: false; error: string } {
+  try {
+    const result = schema.parse(data);
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof ZodError) {
+      const messages = error.issues.map((err: any) => {
+        const path = err.path.join('.');
+        return path ? `${path}: ${err.message}` : err.message;
+      });
+      return { success: false, error: messages.join('; ') };
+    }
+    return { success: false, error: '验证失败' };
+  }
 }

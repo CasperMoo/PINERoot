@@ -3,6 +3,14 @@ import { authMiddleware, requireUser } from '../middleware/auth';
 import { VocabularyService } from '../modules/vocabulary/vocabulary.service';
 import { ok, error } from '../utils/response';
 import { BusinessError } from '../utils/errors';
+import { validateData } from '../utils/validation';
+import {
+  translateRequestSchema,
+  collectRequestSchema,
+  updateWordRequestSchema,
+  myWordsQuerySchema,
+  idParamSchema,
+} from '../modules/vocabulary/vocabulary.schemas';
 import {
   TranslateRequest,
   TranslateResponse,
@@ -29,16 +37,17 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       try {
         const userId = request.currentUser!.id;
-        const params = request.body as TranslateRequest;
+        const params = validateData(translateRequestSchema, request.body);
 
         const result = await vocabularyService.translate(userId, params);
 
         return ok(reply, result);
       } catch (err: any) {
-        fastify.log.error(err);
         if (err instanceof BusinessError) {
+          fastify.log.warn(`Business error in translate: ${err.message}`);
           return error(reply, err.code, err.message);
         }
+        fastify.log.error(err, 'System error in translate');
         return error(reply, 500, err.message || '翻译失败');
       }
     }
@@ -54,16 +63,17 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       try {
         const userId = request.currentUser!.id;
-        const params = request.body as CollectRequest;
+        const params = validateData(collectRequestSchema, request.body);
 
         const result = await vocabularyService.collect(userId, params);
 
         return ok(reply, result);
       } catch (err: any) {
-        fastify.log.error(err);
         if (err instanceof BusinessError) {
+          fastify.log.warn(`Business error in collect: ${err.message}`);
           return error(reply, err.code, err.message);
         }
+        fastify.log.error(err, 'System error in collect');
         return error(reply, 500, err.message || '收藏失败');
       }
     }
@@ -79,16 +89,17 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       try {
         const userId = request.currentUser!.id;
-        const query = request.query as MyWordsQuery;
+        const query = validateData(myWordsQuerySchema, request.query);
 
         const result: MyWordsResponse = await vocabularyService.getMyWords(userId, query);
 
         return ok(reply, result);
       } catch (err: any) {
-        fastify.log.error(err);
         if (err instanceof BusinessError) {
+          fastify.log.warn(`Business error in getMyWords: ${err.message}`);
           return error(reply, err.code, err.message);
         }
+        fastify.log.error(err, 'System error in getMyWords');
         return error(reply, 500, err.message || '获取单词本失败');
       }
     }
@@ -104,22 +115,17 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       try {
         const userId = request.currentUser!.id;
-        const { id } = request.params as { id: string };
+        const { id } = validateData(idParamSchema, request.params);
 
-        // 验证 ID 参数
-        const idNum = parseInt(id, 10);
-        if (isNaN(idNum) || idNum <= 0) {
-          return error(reply, 400, '无效的ID');
-        }
-
-        await vocabularyService.removeFromMyWords(userId, idNum);
+        await vocabularyService.removeFromMyWords(userId, id);
 
         return ok(reply, null, '已移除');
       } catch (err: any) {
-        fastify.log.error(err);
         if (err instanceof BusinessError) {
+          fastify.log.warn(`Business error in removeFromMyWords: ${err.message}`);
           return error(reply, err.code, err.message);
         }
+        fastify.log.error(err, 'System error in removeFromMyWords');
         return error(reply, 500, err.message || '移除失败');
       }
     }
@@ -135,23 +141,18 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
     async (request, reply) => {
       try {
         const userId = request.currentUser!.id;
-        const { id } = request.params as { id: string };
-        const params = request.body as UpdateWordRequest;
+        const { id } = validateData(idParamSchema, request.params);
+        const params = validateData(updateWordRequestSchema, request.body);
 
-        // 验证 ID 参数
-        const idNum = parseInt(id, 10);
-        if (isNaN(idNum) || idNum <= 0) {
-          return error(reply, 400, '无效的ID');
-        }
-
-        await vocabularyService.updateWordStatus(userId, idNum, params);
+        await vocabularyService.updateWordStatus(userId, id, params);
 
         return ok(reply, null, '更新成功');
       } catch (err: any) {
-        fastify.log.error(err);
         if (err instanceof BusinessError) {
+          fastify.log.warn(`Business error in updateWordStatus: ${err.message}`);
           return error(reply, err.code, err.message);
         }
+        fastify.log.error(err, 'System error in updateWordStatus');
         return error(reply, 500, err.message || '更新失败');
       }
     }
