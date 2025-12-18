@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Typography, Card, Tabs, Empty, Skeleton, message, Pagination, Spin, Tag } from 'antd';
+import { Typography, Card, Tabs, Empty, Skeleton, Pagination, Spin } from 'antd';
 import { App } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,6 @@ import {
   collectWord,
   getMyWords,
   removeWord,
-  type WordInfo,
   type MyWordItem,
   type TranslateResponse,
 } from '@/api/vocabulary';

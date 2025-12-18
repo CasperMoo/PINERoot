@@ -19,7 +19,7 @@ import { useAuthStore } from '@/store/auth'
 
 function App() {
   const { isLoading, initAuth } = useAuthStore()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   // 初始化认证状态（从 localStorage 恢复）
   useEffect(() => {
@@ -42,7 +42,7 @@ function App() {
         <AntApp>
           <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
             <div className="text-center">
-              <div className="text-2xl text-gray-600">Loading...</div>
+              <div className="text-2xl text-gray-600">{t('status.loading')}</div>
             </div>
           </div>
         </AntApp>
@@ -101,10 +101,10 @@ function App() {
               <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
                 <div className="text-center">
                   <h1 className="text-4xl font-bold text-gray-800 mb-4">
-                    工作台开发中
+                    {t('vocabulary:development.underDevelopment')}
                   </h1>
                   <p className="text-gray-600">
-                    敬请期待...
+                    {t('vocabulary:development.comingSoon')}
                   </p>
                 </div>
               </div>

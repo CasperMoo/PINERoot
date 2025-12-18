@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   Table,
@@ -42,48 +43,42 @@ const { Title } = Typography
 const { TextArea } = Input
 const { Option } = Select
 
-/**
- * 频率选项
- */
-const FREQUENCY_OPTIONS = [
-  { label: '单次', value: 'ONCE' },
-  { label: '每天', value: 'DAILY' },
-  { label: '每隔 X 天', value: 'EVERY_X_DAYS' },
-  { label: '每周', value: 'WEEKLY' },
-  { label: '每月', value: 'MONTHLY' },
-  { label: '每年', value: 'YEARLY' }
-]
-
-/**
- * 星期选项
- */
-const WEEKDAY_OPTIONS = [
-  { label: '周日', value: 'SUNDAY' },
-  { label: '周一', value: 'MONDAY' },
-  { label: '周二', value: 'TUESDAY' },
-  { label: '周三', value: 'WEDNESDAY' },
-  { label: '周四', value: 'THURSDAY' },
-  { label: '周五', value: 'FRIDAY' },
-  { label: '周六', value: 'SATURDAY' }
-]
-
-/**
- * 显示状态筛选选项
- */
-const DISPLAY_STATUS_OPTIONS = [
-  { label: '今日待完成', value: 'TRIGGER_TODAY' },
-  { label: '已过期', value: 'OVERDUE' },
-  { label: '今日已完成', value: 'COMPLETED_TODAY' },
-  { label: '未开始', value: 'NOT_STARTED' },
-  { label: '已完成', value: 'COMPLETED' }
-]
 
 /**
  * 提醒事项页面
  */
 export default function ReminderPage() {
+  const { t } = useTranslation('reminder')
   const { message } = App.useApp()
   const [form] = Form.useForm()
+
+  // 动态选项
+  const frequencyOptions = [
+    { label: t('frequency.once'), value: 'ONCE' },
+    { label: t('frequency.daily'), value: 'DAILY' },
+    { label: t('frequency.everyXDays'), value: 'EVERY_X_DAYS' },
+    { label: t('frequency.weekly'), value: 'WEEKLY' },
+    { label: t('frequency.monthly'), value: 'MONTHLY' },
+    { label: t('frequency.yearly'), value: 'YEARLY' }
+  ]
+
+  const weekDayOptions = [
+    { label: t('weekDays.sunday'), value: 'SUNDAY' },
+    { label: t('weekDays.monday'), value: 'MONDAY' },
+    { label: t('weekDays.tuesday'), value: 'TUESDAY' },
+    { label: t('weekDays.wednesday'), value: 'WEDNESDAY' },
+    { label: t('weekDays.thursday'), value: 'THURSDAY' },
+    { label: t('weekDays.friday'), value: 'FRIDAY' },
+    { label: t('weekDays.saturday'), value: 'SATURDAY' }
+  ]
+
+  const displayStatusOptions = [
+    { label: t('status.triggerToday'), value: 'TRIGGER_TODAY' },
+    { label: t('status.overdue'), value: 'OVERDUE' },
+    { label: t('status.completedToday'), value: 'COMPLETED_TODAY' },
+    { label: t('status.notStarted'), value: 'NOT_STARTED' },
+    { label: t('status.completed'), value: 'COMPLETED' }
+  ]
 
   // 状态管理
   const [reminders, setReminders] = useState<Reminder[]>([])
@@ -125,7 +120,7 @@ export default function ReminderPage() {
       setReminders(filteredItems)
       setTotal(displayStatusFilter ? filteredItems.length : data.total)
     } catch (error: any) {
-      message.error(error.message || '加载失败')
+      message.error(error.message || t('action.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -210,7 +205,7 @@ export default function ReminderPage() {
         }
 
         await reminderApi.update(editingReminder.id, updatePayload)
-        message.success('提醒更新成功')
+        message.success(t('action.updateSuccess'))
       } else {
         // 创建提醒 - 转换日期格式
         const payload: CreateReminderRequest = {
@@ -236,7 +231,7 @@ export default function ReminderPage() {
         }
 
         await reminderApi.create(payload)
-        message.success('提醒创建成功')
+        message.success(t('action.createSuccess'))
       }
 
       setModalVisible(false)
@@ -247,7 +242,7 @@ export default function ReminderPage() {
       if (error.errorFields) {
         return
       }
-      message.error(error.message || '操作失败')
+      message.error(error.message || t('action.operationFailed'))
     }
   }
 
@@ -255,10 +250,10 @@ export default function ReminderPage() {
   const handleDelete = async (id: number) => {
     try {
       await reminderApi.delete(id)
-      message.success('提醒删除成功')
+      message.success(t('action.deleteSuccess'))
       loadReminders()
     } catch (error: any) {
-      message.error(error.message || '删除失败')
+      message.error(error.message || t('action.deleteFailed'))
     }
   }
 
@@ -266,10 +261,10 @@ export default function ReminderPage() {
   const handleComplete = async (id: number) => {
     try {
       await reminderApi.complete(id)
-      message.success('已标记完成')
+      message.success(t('action.markCompletedSuccess'))
       loadReminders()
     } catch (error: any) {
-      message.error(error.message || '操作失败')
+      message.error(error.message || t('action.operationFailed'))
     }
   }
 
@@ -281,31 +276,31 @@ export default function ReminderPage() {
   // 表格列定义
   const columns = [
     {
-      title: '标题',
+      title: t('table.title'),
       dataIndex: 'title',
       key: 'title',
       width: 200,
       ellipsis: true
     },
     {
-      title: '描述',
+      title: t('table.description'),
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
       render: (text: string | null) => text || '-'
     },
     {
-      title: '频率',
+      title: t('table.frequency'),
       dataIndex: 'frequency',
       key: 'frequency',
       width: 120,
       render: (frequency: ReminderFrequency) => {
-        const option = FREQUENCY_OPTIONS.find(opt => opt.value === frequency)
+        const option = frequencyOptions.find(opt => opt.value === frequency)
         return option?.label || frequency
       }
     },
     {
-      title: '下次触发',
+      title: t('table.nextTrigger'),
       dataIndex: 'nextTriggerDate',
       key: 'nextTriggerDate',
       width: 120,
@@ -320,7 +315,7 @@ export default function ReminderPage() {
       }
     },
     {
-      title: '状态',
+      title: t('table.status'),
       dataIndex: 'status',
       key: 'status',
       width: 130,
@@ -335,7 +330,7 @@ export default function ReminderPage() {
       }
     },
     {
-      title: '操作',
+      title: t('table.actions'),
       key: 'action',
       width: 200,
       fixed: 'right' as const,
@@ -353,9 +348,9 @@ export default function ReminderPage() {
               icon={<CheckOutlined />}
               onClick={() => handleComplete(record.id)}
               disabled={!canComplete}
-              title={canComplete ? '标记完成' : '只有今日待完成或已过期的提醒才能标记完成'}
+              title={canComplete ? t('action.markComplete') : t('action.cannotComplete')}
             >
-              完成
+              {t('action.markComplete')}
             </Button>
             <Button
               type="link"
@@ -363,16 +358,16 @@ export default function ReminderPage() {
               icon={<EditOutlined />}
               onClick={() => openModal(record)}
             >
-              编辑
+              {t('common.button.edit')}
             </Button>
             <Popconfirm
-              title="确定要删除这个提醒吗?"
+              title={t('action.confirmDelete')}
               onConfirm={() => handleDelete(record.id)}
-              okText="确定"
-              cancelText="取消"
+              okText={t('form.ok')}
+              cancelText={t('form.cancel')}
             >
               <Button type="link" danger size="small" icon={<DeleteOutlined />}>
-                删除
+                {t('common.button.delete')}
               </Button>
             </Popconfirm>
           </Space>
@@ -388,7 +383,7 @@ export default function ReminderPage() {
         <div className="mb-6">
           <Title level={2} className="!mb-4 flex items-center">
             <BellOutlined className="mr-2" />
-            提醒事项
+            {t('title')}
           </Title>
         </div>
 
@@ -405,19 +400,19 @@ export default function ReminderPage() {
                   block
                   className="mb-2 md:mb-0"
                 >
-                  创建提醒
+                  {t('form.createReminder')}
                 </Button>
               </Col>
               <Col xs={24} sm={12} md={6}>
                 <Select
-                  placeholder="筛选频率"
+                  placeholder={t('placeholder.filterFrequency')}
                   allowClear
                   value={frequencyFilter}
                   onChange={setFrequencyFilter}
                   style={{ width: '100%' }}
                   className="mb-2 md:mb-0"
                 >
-                  {FREQUENCY_OPTIONS.map(opt => (
+                  {frequencyOptions.map(opt => (
                     <Option key={opt.value} value={opt.value}>
                       {opt.label}
                     </Option>
@@ -426,26 +421,26 @@ export default function ReminderPage() {
               </Col>
               <Col xs={24} sm={12} md={6}>
                 <Select
-                  placeholder="筛选数据库状态"
+                  placeholder={t('placeholder.filterDatabaseStatus')}
                   allowClear
                   value={statusFilter}
                   onChange={setStatusFilter}
                   style={{ width: '100%' }}
                   className="mb-2 md:mb-0"
                 >
-                  <Option value="PENDING">待处理</Option>
-                  <Option value="COMPLETED">已完成</Option>
+                  <Option value="PENDING">{t('status.notStarted')}</Option>
+                  <Option value="COMPLETED">{t('status.completed')}</Option>
                 </Select>
               </Col>
               <Col xs={24} sm={12} md={6}>
                 <Select
-                  placeholder="筛选显示状态"
+                  placeholder={t('placeholder.filterDisplayStatus')}
                   allowClear
                   value={displayStatusFilter}
                   onChange={setDisplayStatusFilter}
                   style={{ width: '100%' }}
                 >
-                  {DISPLAY_STATUS_OPTIONS.map(opt => (
+                  {displayStatusOptions.map(opt => (
                     <Option key={opt.value} value={opt.value}>
                       {opt.label}
                     </Option>
@@ -467,7 +462,7 @@ export default function ReminderPage() {
               pageSize: limit,
               total: total,
               showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (total) => t('pagination.total', { count: total }),
               pageSizeOptions: ['10', '20', '50', '100'],
               onChange: (page, pageSize) => {
                 setPage(page)
@@ -479,7 +474,7 @@ export default function ReminderPage() {
 
         {/* 创建/编辑弹窗 */}
         <Modal
-          title={editingReminder ? '编辑提醒' : '创建提醒'}
+          title={editingReminder ? t('form.editReminder') : t('form.createReminder')}
           open={modalVisible}
           onOk={handleSubmit}
           onCancel={() => {
@@ -488,32 +483,32 @@ export default function ReminderPage() {
             setEditingReminder(null)
           }}
           width={600}
-          okText="确定"
-          cancelText="取消"
+          okText={t('form.ok')}
+          cancelText={t('form.cancel')}
         >
           <Form form={form} layout="vertical" className="mt-4">
             <Form.Item
               name="title"
-              label="标题"
-              rules={[{ required: true, message: '请输入标题' }]}
+              label={t('form.title')}
+              rules={[{ required: true, message: t('validation.titleRequired') }]}
             >
-              <Input placeholder="请输入提醒标题" />
+              <Input placeholder={t('placeholder.title')} />
             </Form.Item>
 
-            <Form.Item name="description" label="描述">
-              <TextArea rows={3} placeholder="请输入描述(可选)" />
+            <Form.Item name="description" label={t('form.description')}>
+              <TextArea rows={3} placeholder={t('placeholder.description')} />
             </Form.Item>
 
             <Form.Item
               name="frequency"
-              label="频率"
-              rules={[{ required: true, message: '请选择频率' }]}
+              label={t('form.frequency')}
+              rules={[{ required: true, message: t('validation.frequencyRequired') }]}
             >
               <Select
-                placeholder="请选择频率"
+                placeholder={t('placeholder.frequency')}
                 onChange={handleFrequencyChange}
               >
-                {FREQUENCY_OPTIONS.map(opt => (
+                {frequencyOptions.map(opt => (
                   <Option key={opt.value} value={opt.value}>
                     {opt.label}
                   </Option>
@@ -525,10 +520,10 @@ export default function ReminderPage() {
             {selectedFrequency === 'EVERY_X_DAYS' && (
               <Form.Item
                 name="interval"
-                label="间隔天数"
-                rules={[{ required: true, message: '请输入间隔天数' }]}
+                label={t('form.intervalDays')}
+                rules={[{ required: true, message: t('validation.intervalDaysRequired') }]}
               >
-                <InputNumber min={1} max={365} style={{ width: '100%' }} />
+                <InputNumber min={1} max={365} style={{ width: '100%' }} placeholder={t('placeholder.intervalDays')} />
               </Form.Item>
             )}
 
@@ -536,11 +531,11 @@ export default function ReminderPage() {
             {selectedFrequency === 'WEEKLY' && (
               <Form.Item
                 name="weekDays"
-                label="星期"
-                rules={[{ required: true, message: '请选择星期' }]}
+                label={t('form.weekDays')}
+                rules={[{ required: true, message: t('validation.weekDaysRequired') }]}
               >
-                <Select mode="multiple" placeholder="请选择星期">
-                  {WEEKDAY_OPTIONS.map(opt => (
+                <Select mode="multiple" placeholder={t('placeholder.weekDays')}>
+                  {weekDayOptions.map(opt => (
                     <Option key={opt.value} value={opt.value}>
                       {opt.label}
                     </Option>
@@ -553,14 +548,14 @@ export default function ReminderPage() {
             {selectedFrequency === 'MONTHLY' && (
               <Form.Item
                 name="dayOfMonth"
-                label="每月日期"
-                rules={[{ required: true, message: '请输入日期' }]}
+                label={t('form.dayOfMonth')}
+                rules={[{ required: true, message: t('validation.dayOfMonthRequired') }]}
               >
                 <InputNumber
                   min={1}
                   max={31}
                   style={{ width: '100%' }}
-                  placeholder="1-31"
+                  placeholder={t('placeholder.dayOfMonth')}
                 />
               </Form.Item>
             )}
@@ -569,10 +564,10 @@ export default function ReminderPage() {
             {!editingReminder && selectedFrequency === 'ONCE' && (
               <Form.Item
                 name="startDate"
-                label="触发日期"
-                rules={[{ required: true, message: '请选择触发日期' }]}
+                label={t('form.triggerDate')}
+                rules={[{ required: true, message: t('validation.triggerDateRequired') }]}
               >
-                <DatePicker style={{ width: '100%' }} placeholder="请选择触发日期" />
+                <DatePicker style={{ width: '100%' }} placeholder={t('placeholder.triggerDate')} />
               </Form.Item>
             )}
 
@@ -580,10 +575,10 @@ export default function ReminderPage() {
             {!editingReminder && selectedFrequency !== 'ONCE' && (
               <Form.Item
                 name="startDate"
-                label="开始日期"
-                tooltip="提醒从哪一天开始生效,默认今天"
+                label={t('form.startDate')}
+                tooltip={t('tooltip.startDate')}
               >
-                <DatePicker style={{ width: '100%' }} placeholder="默认今天" />
+                <DatePicker style={{ width: '100%' }} placeholder={t('placeholder.startDate')} />
               </Form.Item>
             )}
 
@@ -593,17 +588,17 @@ export default function ReminderPage() {
                 {selectedFrequency !== 'ONCE' && (
                   <Form.Item
                     name="startDate"
-                    label="开始日期"
+                    label={t('form.startDate')}
                   >
                     <DatePicker style={{ width: '100%' }} />
                   </Form.Item>
                 )}
                 <Form.Item
                   name="nextTriggerDate"
-                  label="下次触发日期"
-                  tooltip="留空则根据频率参数自动重新计算"
+                  label={t('form.nextTriggerDate')}
+                  tooltip={t('tooltip.nextTriggerDate')}
                 >
-                  <DatePicker style={{ width: '100%' }} placeholder="留空自动计算" />
+                  <DatePicker style={{ width: '100%' }} placeholder={t('placeholder.nextTriggerDate')} />
                 </Form.Item>
               </>
             )}

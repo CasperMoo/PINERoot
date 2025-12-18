@@ -15,5 +15,70 @@
     "notFound": "Resource not found",
     "unauthorized": "Unauthorized access",
     "forbidden": "Forbidden"
+  },
+  "translation": {
+    "missingEnvVar": "Missing required environment variable",
+    "unknownProvider": "Unknown translation provider",
+    "responseBodyNull": "Translation service response is empty",
+    "resultNotArray": "Translation result must be an array",
+    "failedToParse": "Failed to parse translation result"
+  },
+  "oss": {
+    "uploadFailed": "File upload failed"
+  },
+  "date": {
+    "invalidMonth": "Month must be between 1-12",
+    "invalidDay": "Day must be between 1-31",
+    "invalidWeekDays": "Invalid weekdays configuration",
+    "weekDaysEmpty": "Weekdays cannot be empty",
+    "invalidDayOfMonth": "Day of month must be between 1-31",
+    "invalidInterval": "Interval must be greater than 0",
+    "unsupportedFrequency": "Unsupported frequency type",
+    "startDateRequired": "Start date is required"
+  },
+  "vocabulary": {
+    "textRequired": "Input text cannot be empty",
+    "textTooLong": "Text cannot exceed {{max}} characters",
+    "wordNotFound": "Word not found",
+    "wordAlreadyCollected": "Word already added",
+    "recordNotFoundOrNoPermission": "Record not found or permission denied",
+    "recordNotFoundOrNoPermissionToUpdate": "Record not found or permission denied",
+    "selectedIndexInvalid": "Invalid translation index",
+    "removed": "Removed",
+    "updateSuccess": "Updated successfully"
+  },
+  "reminder": {
+    "onlyTodayOrOverdueCanComplete": "Only pending or overdue reminders for today can be completed",
+    "titleRequired": "Title is required",
+    "frequencyRequired": "Frequency is required",
+    "startDateOrNextTriggerRequired": "Start date or next trigger date is required",
+    "intervalRequired": "Interval is required",
+    "intervalMustBePositive": "Interval must be greater than 0",
+    "weekDaysRequired": "Weekdays are required",
+    "dayOfMonthRequired": "Day of month is required",
+    "dayOfMonthRange": "Day of month must be between 1-31",
+    "createSuccess": "Reminder created successfully",
+    "updateSuccess": "Reminder updated successfully"
+  },
+  "config": {
+    "tagNameRequired": "Tag name is required",
+    "galleryNotFound": "Gallery not found",
+    "invalidConfigFormat": "Invalid configuration format",
+    "createSuccess": "Created successfully",
+    "updateSuccess": "Updated successfully",
+    "deleteSuccess": "Deleted successfully"
+  },
+  "image": {
+    "fileParseFailed": "File parse failed",
+    "pleaseUploadImage": "Please upload an image",
+    "pleaseSelectImageTag": "Please select an image tag",
+    "tagNotFound": "Tag not found",
+    "deleteSuccess": "Deleted successfully",
+    "tagCreateSuccess": "Tag created successfully",
+    "tagUpdateSuccess": "Tag updated successfully",
+    "tagDeleteSuccess": "Tag deleted successfully"
+  },
+  "coze": {
+    "responseBodyNull": "Response body is null"
   }
 }

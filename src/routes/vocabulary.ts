@@ -119,7 +119,7 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
 
         await vocabularyService.removeFromMyWords(userId, id);
 
-        return ok(reply, null, '已移除');
+        return ok(reply, null, request.t('vocabulary.removed'));
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in removeFromMyWords: ${err.message}`);

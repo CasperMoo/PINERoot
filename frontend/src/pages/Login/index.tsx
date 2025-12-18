@@ -86,7 +86,7 @@ export default function Login() {
       navigate(getRedirectPath(), { replace: true });
     } catch (error) {
       // 显示错误信息
-      const errorMessage = error instanceof Error ? error.message : '登录失败';
+      const errorMessage = error instanceof Error ? error.message : t('validation.loginFailed');
       message.error(errorMessage);
     } finally {
       setIsSubmitting(false);

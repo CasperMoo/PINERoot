@@ -4,11 +4,10 @@ import {
   PlusOutlined,
   CheckOutlined,
   DeleteOutlined,
-  BookOutlined,
-  SoundOutlined
+  BookOutlined
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import type { WordInfo, MyWordItem } from '@/api/vocabulary';
+import type { WordInfo } from '@/api/vocabulary';
 import { getPosColor, formatFrequency, getStatusLabel, getStatusColor } from '@/utils/vocabularyHelper';
 
 const { Panel } = Collapse;
@@ -48,7 +47,7 @@ const WordCard: React.FC<WordCardProps> = ({
     }
   };
 
-  const handleRemove = (e: React.MouseEvent) => {
+  const handleRemove = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (onRemove && collectionId) {
       onRemove(collectionId);

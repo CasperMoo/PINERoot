@@ -39,7 +39,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         }
 
         const reminder = await createReminder(params)
-        return ok(reply, reminder, '提醒创建成功')
+        return ok(reply, reminder, request.t('reminder.createSuccess'))
       } catch (err: any) {
         console.error('Create reminder error:', err)
         // 解析错误信息
@@ -182,7 +182,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
           return error(reply, ErrorCode.REMINDER_NOT_FOUND, '提醒不存在或已删除')
         }
 
-        return ok(reply, updated, '提醒更新成功')
+        return ok(reply, updated, request.t('reminder.updateSuccess'))
       } catch (err) {
         console.error('Update reminder error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '更新提醒失败', 500)

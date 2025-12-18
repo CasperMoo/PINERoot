@@ -50,7 +50,7 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
         }
 
         const tag = await createTag(name.trim())
-        return ok(reply, tag, '标签创建成功')
+        return ok(reply, tag, request.t('image.tagCreateSuccess'))
       } catch (err) {
         console.error('Create tag error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '创建标签失败', 500)
@@ -88,7 +88,7 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
         }
 
         const tag = await updateTag(tagId, name.trim())
-        return ok(reply, tag, '标签修改成功')
+        return ok(reply, tag, request.t('image.tagUpdateSuccess'))
       } catch (err) {
         console.error('Update tag error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '修改标签失败', 500)
@@ -116,7 +116,7 @@ export default async function imageTagRoutes(fastify: FastifyInstance) {
         }
 
         await deleteTag(tagId)
-        return ok(reply, null, '标签删除成功')
+        return ok(reply, null, request.t('image.tagDeleteSuccess'))
       } catch (err) {
         console.error('Delete tag error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '删除标签失败', 500)

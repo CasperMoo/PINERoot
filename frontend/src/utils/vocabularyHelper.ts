@@ -94,11 +94,11 @@ export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
-  let timeout: NodeJS.Timeout;
+  let timeout: number;
 
   const debounced = (...args: Parameters<T>) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
+    timeout = setTimeout(() => func(...args), wait) as unknown as number;
   };
 
   debounced.cancel = () => {
@@ -138,7 +138,8 @@ export function calculateProgress(words: { status: string }[]): {
   const total = words.length;
   const counts = words.reduce(
     (acc, word) => {
-      acc[word.status.toLowerCase()]++;
+      const status = word.status.toLowerCase() as 'new' | 'learning' | 'mastered';
+      acc[status]++;
       return acc;
     },
     { new: 0, learning: 0, mastered: 0 }

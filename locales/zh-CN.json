@@ -15,5 +15,70 @@
     "notFound": "资源不存在",
     "unauthorized": "未授权访问",
     "forbidden": "禁止访问"
+  },
+  "translation": {
+    "missingEnvVar": "缺少必需的环境变量",
+    "unknownProvider": "未知的翻译服务提供者",
+    "responseBodyNull": "翻译服务响应体为空",
+    "resultNotArray": "翻译结果不是数组格式",
+    "failedToParse": "解析翻译结果失败"
+  },
+  "oss": {
+    "uploadFailed": "文件上传失败"
+  },
+  "date": {
+    "invalidMonth": "月份必须在 1-12 之间",
+    "invalidDay": "日期必须在 1-31 之间",
+    "invalidWeekDays": "星期配置无效",
+    "weekDaysEmpty": "星期不能为空",
+    "invalidDayOfMonth": "月份中的日期必须在 1-31 之间",
+    "invalidInterval": "间隔必须大于 0",
+    "unsupportedFrequency": "不支持的频率类型",
+    "startDateRequired": "开始日期是必需的"
+  },
+  "vocabulary": {
+    "textRequired": "输入文本不能为空",
+    "textTooLong": "输入文本长度不能超过 {{max}} 个字符",
+    "wordNotFound": "单词不存在",
+    "wordAlreadyCollected": "该单词已在单词本中",
+    "recordNotFoundOrNoPermission": "记录不存在或无权限删除",
+    "recordNotFoundOrNoPermissionToUpdate": "记录不存在或无权限修改",
+    "selectedIndexInvalid": "选择的翻译索引无效",
+    "removed": "已移除",
+    "updateSuccess": "更新成功"
+  },
+  "reminder": {
+    "onlyTodayOrOverdueCanComplete": "只有今日待完成或已过期的提醒才能标记完成",
+    "titleRequired": "标题是必需的",
+    "frequencyRequired": "频率是必需的",
+    "startDateOrNextTriggerRequired": "开始日期或下次触发日期是必需的",
+    "intervalRequired": "间隔是必需的",
+    "intervalMustBePositive": "间隔必须大于 0",
+    "weekDaysRequired": "星期是必需的",
+    "dayOfMonthRequired": "月份中的日期是必需的",
+    "dayOfMonthRange": "月份中的日期必须在 1-31 之间",
+    "createSuccess": "提醒创建成功",
+    "updateSuccess": "提醒更新成功"
+  },
+  "config": {
+    "tagNameRequired": "标签名称是必需的",
+    "galleryNotFound": "相册不存在",
+    "invalidConfigFormat": "配置格式无效",
+    "createSuccess": "创建成功",
+    "updateSuccess": "更新成功",
+    "deleteSuccess": "删除成功"
+  },
+  "image": {
+    "fileParseFailed": "文件解析失败",
+    "pleaseUploadImage": "请上传一张图片",
+    "pleaseSelectImageTag": "请选择图片标签",
+    "tagNotFound": "标签不存在",
+    "deleteSuccess": "删除成功",
+    "tagCreateSuccess": "标签创建成功",
+    "tagUpdateSuccess": "标签修改成功",
+    "tagDeleteSuccess": "标签删除成功"
+  },
+  "coze": {
+    "responseBodyNull": "响应体为空"
   }
 }

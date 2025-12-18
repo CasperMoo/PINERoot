@@ -15,7 +15,8 @@
     "test:coverage": "vitest --coverage",
     "test:ci": "vitest run",
     "test:sync-db": "tsx scripts/sync-test-db.ts",
-    "test:full": "pnpm test:sync-db && pnpm test:ci"
+    "test:full": "pnpm test:sync-db && pnpm test:ci",
+    "i18n:check": "node scripts/check-i18n.js"
   },
   "keywords": [],
   "author": "",

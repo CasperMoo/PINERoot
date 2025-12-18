@@ -178,7 +178,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
           }
         })
 
-        return ok(reply, newConfig, '创建成功')
+        return ok(reply, newConfig, request.t('config.createSuccess'))
       } catch (err) {
         console.error('Create activity config error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '创建活动配置失败', 500)
@@ -235,7 +235,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
           })
         })
 
-        return ok(reply, newConfig, '更新成功')
+        return ok(reply, newConfig, request.t('config.updateSuccess'))
       } catch (err) {
         console.error('Update activity config error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '更新活动配置失败', 500)
@@ -333,7 +333,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
           data: { deletedAt: new Date() }
         })
 
-        return ok(reply, null, '删除成功')
+        return ok(reply, null, request.t('config.deleteSuccess'))
       } catch (err) {
         console.error('Delete activity config error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '删除活动配置失败', 500)

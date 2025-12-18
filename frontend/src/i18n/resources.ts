@@ -191,8 +191,8 @@ export const resources = {
         enterDashboard: "Enter Dashboard"
       },
       features: {
-      title: "Our Tools",
-      subtitle: "More tools are under development, stay tuned",
+        title: "Our Tools",
+        subtitle: "More tools are under development, stay tuned",
       vocabulary: {
         title: "Vocabulary Book",
         description: "Search and save Japanese/Chinese words with detailed meanings and examples"
@@ -272,8 +272,103 @@ export const resources = {
         adjective: "Adjective",
         adverb: "Adverb",
         particle: "Particle"
+      },
+      development: {
+        underDevelopment: "Under Development",
+        comingSoon: "Coming Soon..."
+      },
+      reminder: {
+        title: "Reminders",
+        frequency: {
+          once: "Once",
+          daily: "Daily",
+          everyXDays: "Every X Days",
+          weekly: "Weekly",
+          monthly: "Monthly",
+          yearly: "Yearly"
+        },
+        weekDays: {
+          sunday: "Sunday",
+          monday: "Monday",
+          tuesday: "Tuesday",
+          wednesday: "Wednesday",
+          thursday: "Thursday",
+          friday: "Friday",
+          saturday: "Saturday"
+        },
+        status: {
+          triggerToday: "Pending Today",
+          overdue: "Overdue",
+          completedToday: "Completed Today",
+          notStarted: "Not Started",
+          completed: "Completed",
+          deleted: "Deleted"
+        },
+        table: {
+          title: "Title",
+          description: "Description",
+          frequency: "Frequency",
+          nextTrigger: "Next Trigger",
+          status: "Status",
+          actions: "Actions"
+        },
+        form: {
+          createReminder: "Create Reminder",
+          editReminder: "Edit Reminder",
+          title: "Title",
+          description: "Description",
+          frequency: "Frequency",
+          intervalDays: "Interval Days",
+          weekDays: "Week Days",
+          dayOfMonth: "Day of Month",
+          triggerDate: "Trigger Date",
+          startDate: "Start Date",
+          nextTriggerDate: "Next Trigger Date",
+          ok: "OK",
+          cancel: "Cancel"
+        },
+        placeholder: {
+          title: "Enter reminder title",
+          description: "Enter description (optional)",
+          frequency: "Select frequency",
+          intervalDays: "Enter interval days",
+          weekDays: "Select week days",
+          dayOfMonth: "Enter day of month",
+          triggerDate: "Select trigger date",
+          startDate: "Default today",
+          nextTriggerDate: "Leave empty to auto calculate",
+          filterFrequency: "Filter frequency",
+          filterDatabaseStatus: "Filter database status",
+          filterDisplayStatus: "Filter display status"
+        },
+        validation: {
+          titleRequired: "Please enter title",
+          frequencyRequired: "Please select frequency",
+          intervalDaysRequired: "Please enter interval days",
+          weekDaysRequired: "Please select week days",
+          dayOfMonthRequired: "Please enter day of month",
+          triggerDateRequired: "Please select trigger date"
+        },
+        action: {
+          markComplete: "Mark Complete",
+          cannotComplete: "Only pending today or overdue reminders can be marked as complete",
+          confirmDelete: "Are you sure you want to delete this reminder?",
+          deleteSuccess: "Reminder deleted successfully",
+          deleteFailed: "Delete failed",
+          loadFailed: "Load failed",
+          operationFailed: "Operation failed",
+          updateSuccess: "Reminder updated successfully",
+          createSuccess: "Reminder created successfully",
+          markCompletedSuccess: "Marked as completed"
+        },
+        pagination: {
+          total: "Total {{count}} items"
+        },
+        tooltip: {
+          startDate: "The date from which the reminder takes effect, default today",
+          nextTriggerDate: "Leave empty to auto calculate based on frequency parameters"
+        }
       }
-    }
     }
   },
   'zh-CN': {
@@ -548,7 +643,104 @@ export const resources = {
         adjective: "形容词",
         adverb: "副词",
         particle: "助词"
+      },
+      development: {
+        underDevelopment: "功能开发中",
+        comingSoon: "敬请期待..."
+      },
+      reminder: {
+        title: "提醒事项",
+        frequency: {
+          once: "单次",
+          daily: "每天",
+          everyXDays: "每隔 X 天",
+          weekly: "每周",
+          monthly: "每月",
+          yearly: "每年"
+        },
+        weekDays: {
+          sunday: "周日",
+          monday: "周一",
+          tuesday: "周二",
+          wednesday: "周三",
+          thursday: "周四",
+          friday: "周五",
+          saturday: "周六"
+        },
+        status: {
+          triggerToday: "今日待完成",
+          overdue: "已过期",
+          completedToday: "今日已完成",
+          notStarted: "未开始",
+          completed: "已完成",
+          deleted: "已删除"
+        },
+        table: {
+          title: "标题",
+          description: "描述",
+          frequency: "频率",
+          nextTrigger: "下次触发",
+          status: "状态",
+          actions: "操作"
+        },
+        form: {
+          createReminder: "创建提醒",
+          editReminder: "编辑提醒",
+          title: "标题",
+          description: "描述",
+          frequency: "频率",
+          intervalDays: "间隔天数",
+          weekDays: "星期",
+          dayOfMonth: "每月日期",
+          triggerDate: "触发日期",
+          startDate: "开始日期",
+          nextTriggerDate: "下次触发日期",
+          ok: "确定",
+          cancel: "取消"
+        },
+        placeholder: {
+          title: "请输入提醒标题",
+          description: "请输入描述(可选)",
+          frequency: "请选择频率",
+          intervalDays: "请输入间隔天数",
+          weekDays: "请选择星期",
+          dayOfMonth: "请输入日期",
+          triggerDate: "请选择触发日期",
+          startDate: "默认今天",
+          nextTriggerDate: "留空自动计算",
+          filterFrequency: "筛选频率",
+          filterDatabaseStatus: "筛选数据库状态",
+          filterDisplayStatus: "筛选显示状态"
+        },
+        validation: {
+          titleRequired: "请输入标题",
+          frequencyRequired: "请选择频率",
+          intervalDaysRequired: "请输入间隔天数",
+          weekDaysRequired: "请选择星期",
+          dayOfMonthRequired: "请输入日期",
+          triggerDateRequired: "请选择触发日期"
+        },
+        action: {
+          markComplete: "标记完成",
+          cannotComplete: "只有今日待完成或已过期的提醒才能标记完成",
+          confirmDelete: "确定要删除这个提醒吗?",
+          deleteSuccess: "提醒删除成功",
+          deleteFailed: "删除失败",
+          loadFailed: "加载失败",
+          operationFailed: "操作失败",
+          updateSuccess: "提醒更新成功",
+          createSuccess: "提醒创建成功",
+          markCompletedSuccess: "已标记完成"
+        },
+        pagination: {
+          total: "共 {{count}} 条"
+        },
+        tooltip: {
+          startDate: "提醒从哪一天开始生效,默认今天",
+          nextTriggerDate: "留空则根据频率参数自动重新计算"
+        }
       }
     }
+  }
   }
 } as const

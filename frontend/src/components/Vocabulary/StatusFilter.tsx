@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { Segmented, Space, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { getStatusLabel, getStatusColor } from '@/utils/vocabularyHelper';
+import { getStatusColor } from '@/utils/vocabularyHelper';
 
 type VocabularyStatus = 'NEW' | 'LEARNING' | 'MASTERED';
 

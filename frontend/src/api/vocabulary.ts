@@ -23,6 +23,7 @@ export interface WordInfo {
   note?: string;         // 用法说明
   synonyms?: SynonymInfo[]; // 同义词
   fromCache?: boolean;   // 是否来自缓存
+  isCollected?: boolean; // 是否已收藏（前端临时属性）
 }
 
 /**
@@ -117,7 +118,7 @@ export interface ApiResponse<T = any> {
  */
 export async function translate(params: TranslateRequest): Promise<TranslateResponse> {
   const response = await request.post<ApiResponse<TranslateResponse>>('/vocabulary/translate', params);
-  return response.data;
+  return response.data.data;
 }
 
 /**
@@ -134,7 +135,7 @@ export async function getMyWords(params: GetMyWordsRequest = {}): Promise<Pagina
   const response = await request.get<ApiResponse<PaginatedResponse<MyWordItem>>>('/vocabulary/my-words', {
     params,
   });
-  return response.data;
+  return response.data.data;
 }
 
 /**
@@ -156,20 +157,5 @@ export async function removeWord(id: number): Promise<void> {
  */
 export async function getWordDetail(id: number): Promise<MyWordItem> {
   const response = await request.get<ApiResponse<MyWordItem>>(`/vocabulary/my-words/${id}`);
-  return response.data;
+  return response.data.data;
 }
-
-// 导出所有类型，方便其他组件使用
-export type {
-  TranslateRequest,
-  TranslateResponse,
-  WordInfo,
-  PosInfo,
-  SynonymInfo,
-  CollectRequest,
-  UpdateWordRequest,
-  GetMyWordsRequest,
-  MyWordItem,
-  PaginatedResponse,
-  ApiResponse,
-};

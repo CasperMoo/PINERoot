@@ -228,7 +228,7 @@ export default async function imageRoutes(fastify: FastifyInstance) {
           return error(reply, ErrorCode.NO_PERMISSION, '图片不存在或无权限操作')
         }
 
-        return ok(reply, null, '删除成功')
+        return ok(reply, null, request.t('image.deleteSuccess'))
       } catch (err) {
         console.error('Delete image error:', err)
         return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '删除失败', 500)
