@@ -93,13 +93,20 @@ export class VocabularyService {
       },
     });
 
-    // 5. 返回结果
+    // 5. 为每个翻译结果生成临时 ID
+    const translations = fromPrismaJson<WordItem[]>(wordLibrary.translationData);
+    const translationsWithId = translations.map((item, index) => ({
+      ...item,
+      id: wordLibrary.id * 1000 + index,  // 生成临时ID：wordId * 1000 + index
+    }));
+
+    // 6. 返回结果
     return {
       wordId: wordLibrary.id,
       originalText: wordLibrary.originalText,
       language: wordLibrary.language as Language,
       fromCache,
-      translation: fromPrismaJson<WordItem[]>(wordLibrary.translationData),
+      translation: translationsWithId,
       isCollected: !!isCollected,
     };
   }
@@ -108,9 +115,13 @@ export class VocabularyService {
    * 收藏单词到单词本
    */
   async collect(userId: number, params: CollectRequest): Promise<CollectResponse> {
-    const { wordId, note } = params;
+    const { wordId: tempId, note } = params;
 
-    // 1. 检查单词是否存在
+    // 1. 解析临时ID，获取真实的 wordId 和 selectedIndex
+    const wordId = Math.floor(tempId / 1000);
+    const selectedIndex = tempId % 1000;
+
+    // 2. 检查单词是否存在
     const word = await this.prisma.wordLibrary.findUnique({
       where: { id: wordId },
     });
@@ -119,7 +130,13 @@ export class VocabularyService {
       throw new NotFoundError('单词不存在');
     }
 
-    // 2. 检查是否已收藏
+    // 3. 验证 selectedIndex 是否有效
+    const translations = fromPrismaJson<WordItem[]>(word.translationData);
+    if (selectedIndex < 0 || selectedIndex >= translations.length) {
+      throw new ValidationError('选择的翻译索引无效');
+    }
+
+    // 4. 检查是否已收藏（同一个单词只能收藏一次）
     const existing = await this.prisma.userVocabulary.findUnique({
       where: {
         userId_wordId: {
@@ -133,16 +150,17 @@ export class VocabularyService {
       throw new BusinessError('该单词已在单词本中');
     }
 
-    // 3. 校验 note 长度
+    // 5. 校验 note 长度
     if (note && note.length > MAX_NOTE_LENGTH) {
       throw new ValidationError(`笔记长度不能超过${MAX_NOTE_LENGTH}字符`);
     }
 
-    // 4. 创建收藏记录
+    // 6. 创建收藏记录
     const userVocabulary = await this.prisma.userVocabulary.create({
       data: {
         userId,
         wordId,
+        selectedIndex,  // 保存用户选择的翻译索引
         note: note?.trim() || null,
       },
     });
@@ -190,17 +208,22 @@ export class VocabularyService {
       take: validPageSize,
     });
 
-    // 转换响应数据
-    const items: VocabularyItem[] = vocabularies.map((v) => ({
-      id: v.id,
-      wordId: v.wordId,
-      originalText: v.word.originalText,
-      language: v.word.language as Language,
-      translation: fromPrismaJson<WordItem[]>(v.word.translationData),
-      note: v.note || undefined,
-      status: v.status as VocabularyStatus,
-      createdAt: v.createdAt.toISOString(),
-    }));
+    // 转换响应数据，只返回用户选择的翻译
+    const items: VocabularyItem[] = vocabularies.map((v) => {
+      const allTranslations = fromPrismaJson<WordItem[]>(v.word.translationData);
+      const selectedTranslation = allTranslations[v.selectedIndex] || allTranslations[0];
+
+      return {
+        id: v.id,
+        wordId: v.wordId,
+        originalText: v.word.originalText,
+        language: v.word.language as Language,
+        translation: [selectedTranslation],  // 只返回用户选择的那个翻译
+        note: v.note || undefined,
+        status: v.status as VocabularyStatus,
+        createdAt: v.createdAt.toISOString(),
+      };
+    });
 
     return {
       total,

@@ -6,6 +6,7 @@ import { Language, VocabularyStatus } from '@prisma/client';
 
 // 翻译结果中的单个单词项
 export interface WordItem {
+  id?: number;                      // 临时ID（用于前端收藏，格式：wordId * 1000 + index）
   kanji: string;                    // 汉字（关键字段）
   kana: string;                     // 假名
   meaning: string;                   // 中文含义
@@ -39,7 +40,7 @@ export interface TranslateResponse {
 
 // 收藏请求参数
 export interface CollectRequest {
-  wordId: number;                   // 词库 ID
+  wordId: number;                   // 临时ID（格式：wordLibraryId * 1000 + selectedIndex）
   note?: string;                     // 可选，用户笔记
 }
 

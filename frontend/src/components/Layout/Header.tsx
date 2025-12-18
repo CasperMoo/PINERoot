@@ -3,7 +3,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { UserOutlined, LogoutOutlined, BookOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/auth';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -20,7 +20,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, token, logout } = useAuthStore();
-  const { t } = useTranslation(['common', 'auth']);
+  const { t } = useTranslation(['common', 'auth', 'vocabulary']);
 
   // 用户菜单项
   const userMenuItems: MenuProps['items'] = [
@@ -29,6 +29,12 @@ const Header = () => {
       icon: <UserOutlined />,
       label: t('navigation.dashboard'),
       onClick: () => navigate('/dashboard'),
+    },
+    {
+      key: 'vocabulary',
+      icon: <BookOutlined />,
+      label: t('vocabulary:title'),
+      onClick: () => navigate('/vocabulary'),
     },
     {
       type: 'divider',

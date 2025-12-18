@@ -203,6 +203,9 @@ model UserVocabulary {
   wordId    Int
   word      WordLibrary @relation(fields: [wordId], references: [id], onDelete: Cascade)
 
+  // 用户选择的翻译索引（支持单个翻译收藏）
+  selectedIndex Int   @default(0)  // 对应 translationData 数组的索引
+
   // 用户自定义笔记
   note      String?  @db.Text
 

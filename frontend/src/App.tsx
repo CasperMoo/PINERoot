@@ -9,6 +9,7 @@ import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import HalloweenAnchor from '@/pages/HalloweenAnchor'
 import Reminder from '@/pages/Reminder'
+import Vocabulary from '@/pages/Vocabulary'
 import Super from '@/pages/Super'
 import ImageManage from '@/pages/Super/ImageManage'
 import NotFound from '@/pages/NotFound'
@@ -78,6 +79,16 @@ function App() {
           element={
             <PrivateRoute>
               <Reminder />
+            </PrivateRoute>
+          }
+        />
+
+        {/* 单词本（需要登录）*/}
+        <Route
+          path="/vocabulary"
+          element={
+            <PrivateRoute>
+              <Vocabulary />
             </PrivateRoute>
           }
         />

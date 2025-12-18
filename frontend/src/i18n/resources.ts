@@ -193,6 +193,10 @@ export const resources = {
       features: {
       title: "Our Tools",
       subtitle: "More tools are under development, stay tuned",
+      vocabulary: {
+        title: "Vocabulary Book",
+        description: "Search and save Japanese/Chinese words with detailed meanings and examples"
+      },
       reminder: {
         title: "Reminders",
         description: "Set important reminders and never miss critical moments"
@@ -212,6 +216,62 @@ export const resources = {
       utilities: {
         title: "Utilities",
         description: "More practical utilities to boost your work efficiency"
+      }
+    },
+    vocabulary: {
+      title: "Vocabulary Book",
+      tabs: {
+        search: "Search Words",
+        myWords: "My Vocabulary"
+      },
+      search: {
+        placeholder: "Enter Chinese or Japanese word",
+        button: "Search",
+        searching: "Searching...",
+        notFound: "No results found",
+        tryAgain: "Try a different word",
+        fromCache: "From cache"
+      },
+      word: {
+        frequency: "Frequency",
+        example: "Example",
+        usage: "Usage",
+        synonyms: "Synonyms",
+        collect: "Add to Vocabulary",
+        collected: "Already Added",
+        remove: "Remove",
+        myNote: "My Note",
+        collectedAt: "Added on",
+        confirmRemove: "Remove this word from your vocabulary?",
+        removeSuccess: "Removed successfully",
+        collectSuccess: "Added to vocabulary"
+      },
+      myWords: {
+        empty: "Your vocabulary is empty",
+        emptyHint: "Search and add words to start learning",
+        status: {
+          all: "All",
+          new: "New",
+          learning: "Learning",
+          mastered: "Mastered"
+        },
+        total: "Total: {{count}} words"
+      },
+      error: {
+        searchFailed: "Search failed",
+        collectFailed: "Failed to add",
+        removeFailed: "Failed to remove",
+        loadFailed: "Failed to load",
+        networkError: "Network error, please try again",
+        textRequired: "Please enter a word",
+        textTooLong: "Word cannot exceed 500 characters"
+      },
+      pos: {
+        noun: "Noun",
+        verb: "Verb",
+        adjective: "Adjective",
+        adverb: "Adverb",
+        particle: "Particle"
       }
     }
     }
@@ -408,6 +468,10 @@ export const resources = {
       features: {
         title: "我们的工具",
         subtitle: "更多工具正在开发中，敬请期待",
+        vocabulary: {
+          title: "单词本",
+          description: "查询和收藏中日文单词，包含详细释义和例句"
+        },
         reminder: {
           title: "提醒事项",
           description: "设置重要事项提醒，永不错过关键时刻"
@@ -428,6 +492,62 @@ export const resources = {
           title: "实用工具",
           description: "更多实用小工具，提升您的工作效率"
         }
+      }
+    },
+    vocabulary: {
+      title: "单词本",
+      tabs: {
+        search: "单词查询",
+        myWords: "我的单词本"
+      },
+      search: {
+        placeholder: "请输入中文或日文单词",
+        button: "查询",
+        searching: "查询中...",
+        notFound: "未找到相关单词",
+        tryAgain: "试试其他单词",
+        fromCache: "来自缓存"
+      },
+      word: {
+        frequency: "常用度",
+        example: "例句",
+        usage: "用法说明",
+        synonyms: "同义词",
+        collect: "加入单词本",
+        collected: "已加入",
+        remove: "移除",
+        myNote: "我的笔记",
+        collectedAt: "收藏时间",
+        confirmRemove: "确定要从单词本中移除这个单词吗？",
+        removeSuccess: "移除成功",
+        collectSuccess: "已加入单词本"
+      },
+      myWords: {
+        empty: "您的单词本还是空的",
+        emptyHint: "快去查询单词并添加吧",
+        status: {
+          all: "全部",
+          new: "新学习",
+          learning: "学习中",
+          mastered: "已掌握"
+        },
+        total: "共 {{count}} 个单词"
+      },
+      error: {
+        searchFailed: "查询失败",
+        collectFailed: "添加失败",
+        removeFailed: "移除失败",
+        loadFailed: "加载失败",
+        networkError: "网络错误，请重试",
+        textRequired: "请输入单词",
+        textTooLong: "单词长度不能超过 500 个字符"
+      },
+      pos: {
+        noun: "名词",
+        verb: "动词",
+        adjective: "形容词",
+        adverb: "副词",
+        particle: "助词"
       }
     }
   }

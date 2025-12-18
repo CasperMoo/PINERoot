@@ -6,6 +6,7 @@ import {
   BarChartOutlined,
   ToolOutlined,
   BellOutlined,
+  BookOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import FeatureCard from './FeatureCard';
@@ -23,6 +24,13 @@ const FeaturesSection = () => {
 
   // 工具列表
   const features = [
+    {
+      icon: <BookOutlined />,
+      title: t('features.vocabulary.title'),
+      description: t('features.vocabulary.description'),
+      comingSoon: false,
+      link: '/vocabulary',
+    },
     {
       icon: <BellOutlined />,
       title: t('features.reminder.title'),
