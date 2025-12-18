@@ -146,7 +146,7 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
 
         await vocabularyService.updateWordStatus(userId, id, params);
 
-        return ok(reply, null, '更新成功');
+        return ok(reply, null, request.t('vocabulary.updateSuccess'));
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in updateWordStatus: ${err.message}`);

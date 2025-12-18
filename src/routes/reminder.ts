@@ -144,7 +144,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
 
         const reminder = await getReminderById(reminderId, userId)
         if (!reminder) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '提醒不存在或已删除')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.reminderNotFound'))
         }
 
         return ok(reply, reminder)
@@ -179,13 +179,13 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
 
         const updated = await updateReminder(reminderId, userId, request.body)
         if (!updated) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '提醒不存在或已删除')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.reminderNotFound'))
         }
 
         return ok(reply, updated, request.t('reminder.updateSuccess'))
       } catch (err) {
         console.error('Update reminder error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '更新提醒失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('reminder.updateFailed'), 500)
       }
     }
   )

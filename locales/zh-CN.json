@@ -58,7 +58,9 @@
     "dayOfMonthRequired": "月份中的日期是必需的",
     "dayOfMonthRange": "月份中的日期必须在 1-31 之间",
     "createSuccess": "提醒创建成功",
-    "updateSuccess": "提醒更新成功"
+    "updateSuccess": "提醒更新成功",
+    "reminderNotFound": "提醒不存在或已删除",
+    "updateFailed": "更新提醒失败"
   },
   "config": {
     "tagNameRequired": "标签名称是必需的",
@@ -66,7 +68,10 @@
     "invalidConfigFormat": "配置格式无效",
     "createSuccess": "创建成功",
     "updateSuccess": "更新成功",
-    "deleteSuccess": "删除成功"
+    "deleteSuccess": "删除成功",
+    "createFailed": "创建活动配置失败",
+    "updateFailed": "更新活动配置失败",
+    "deleteFailed": "删除活动配置失败"
   },
   "image": {
     "fileParseFailed": "文件解析失败",
@@ -76,7 +81,12 @@
     "deleteSuccess": "删除成功",
     "tagCreateSuccess": "标签创建成功",
     "tagUpdateSuccess": "标签修改成功",
-    "tagDeleteSuccess": "标签删除成功"
+    "tagDeleteSuccess": "标签删除成功",
+    "noPermission": "图片不存在或无权限操作",
+    "deleteFailed": "删除失败",
+    "tagCreateFailed": "创建标签失败",
+    "tagUpdateFailed": "修改标签失败",
+    "tagDeleteFailed": "删除标签失败"
   },
   "coze": {
     "responseBodyNull": "响应体为空"

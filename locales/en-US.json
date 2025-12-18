@@ -58,7 +58,9 @@
     "dayOfMonthRequired": "Day of month is required",
     "dayOfMonthRange": "Day of month must be between 1-31",
     "createSuccess": "Reminder created successfully",
-    "updateSuccess": "Reminder updated successfully"
+    "updateSuccess": "Reminder updated successfully",
+    "reminderNotFound": "Reminder not found or deleted",
+    "updateFailed": "Failed to update reminder"
   },
   "config": {
     "tagNameRequired": "Tag name is required",
@@ -66,7 +68,10 @@
     "invalidConfigFormat": "Invalid configuration format",
     "createSuccess": "Created successfully",
     "updateSuccess": "Updated successfully",
-    "deleteSuccess": "Deleted successfully"
+    "deleteSuccess": "Deleted successfully",
+    "createFailed": "Failed to create activity config",
+    "updateFailed": "Failed to update activity config",
+    "deleteFailed": "Failed to delete activity config"
   },
   "image": {
     "fileParseFailed": "File parse failed",
@@ -76,7 +81,12 @@
     "deleteSuccess": "Deleted successfully",
     "tagCreateSuccess": "Tag created successfully",
     "tagUpdateSuccess": "Tag updated successfully",
-    "tagDeleteSuccess": "Tag deleted successfully"
+    "tagDeleteSuccess": "Tag deleted successfully",
+    "noPermission": "Image not found or permission denied",
+    "deleteFailed": "Failed to delete",
+    "tagCreateFailed": "Failed to create tag",
+    "tagUpdateFailed": "Failed to update tag",
+    "tagDeleteFailed": "Failed to delete tag"
   },
   "coze": {
     "responseBodyNull": "Response body is null"
