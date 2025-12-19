@@ -16,6 +16,7 @@ import {
   getTodayUTC,
   validateDateFields
 } from '../utils/dateUtils'
+import { BusinessError } from '../utils/errors'
 
 /**
  * 创建提醒参数
@@ -381,7 +382,7 @@ export async function completeReminder(id: number, userId: number) {
 
   // 业务校验：只有"今日待完成"和"已过期"状态才能标记完成
   if (existing.triggerStatus !== 'TRIGGER_TODAY' && existing.triggerStatus !== 'OVERDUE') {
-    throw new Error('只有今日待完成或已过期的提醒才能标记完成')
+    throw new BusinessError('reminder.onlyTodayOrOverdueCanComplete')
   }
 
   // 如果是单次提醒，直接标记为完成

@@ -45,10 +45,10 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in translate: ${err.message}`);
-          return error(reply, err.code, err.message);
+          return error(reply, err.statusCode, request.t(err.i18nKey, err.data));
         }
         fastify.log.error(err, 'System error in translate');
-        return error(reply, 500, err.message || '翻译失败');
+        return error(reply, 500, err.message || request.t('vocabulary.translateFailed'));
       }
     }
   );
@@ -71,10 +71,10 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in collect: ${err.message}`);
-          return error(reply, err.code, err.message);
+          return error(reply, err.statusCode, request.t(err.i18nKey, err.data));
         }
         fastify.log.error(err, 'System error in collect');
-        return error(reply, 500, err.message || '收藏失败');
+        return error(reply, 500, err.message || request.t('vocabulary.collectFailed'));
       }
     }
   );
@@ -97,10 +97,10 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in getMyWords: ${err.message}`);
-          return error(reply, err.code, err.message);
+          return error(reply, err.statusCode, request.t(err.i18nKey, err.data));
         }
         fastify.log.error(err, 'System error in getMyWords');
-        return error(reply, 500, err.message || '获取单词本失败');
+        return error(reply, 500, err.message || request.t('vocabulary.getMyWordsFailed'));
       }
     }
   );
@@ -123,10 +123,10 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in removeFromMyWords: ${err.message}`);
-          return error(reply, err.code, err.message);
+          return error(reply, err.statusCode, request.t(err.i18nKey, err.data));
         }
         fastify.log.error(err, 'System error in removeFromMyWords');
-        return error(reply, 500, err.message || '移除失败');
+        return error(reply, 500, err.message || request.t('vocabulary.removeFailed'));
       }
     }
   );
@@ -150,10 +150,10 @@ const vocabularyRoutes: FastifyPluginAsync = async (fastify) => {
       } catch (err: any) {
         if (err instanceof BusinessError) {
           fastify.log.warn(`Business error in updateWordStatus: ${err.message}`);
-          return error(reply, err.code, err.message);
+          return error(reply, err.statusCode, request.t(err.i18nKey, err.data));
         }
         fastify.log.error(err, 'System error in updateWordStatus');
-        return error(reply, 500, err.message || '更新失败');
+        return error(reply, 500, err.message || request.t('vocabulary.updateFailed'));
       }
     }
   );

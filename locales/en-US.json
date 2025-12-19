@@ -44,8 +44,17 @@
     "recordNotFoundOrNoPermission": "Record not found or permission denied",
     "recordNotFoundOrNoPermissionToUpdate": "Record not found or permission denied",
     "selectedIndexInvalid": "Invalid translation index",
+    "noteTooLong": "Note cannot exceed {{max}} characters",
+    "translationResultNotArray": "Translation result must be an array",
+    "missingField": "Missing required field {{field}}",
+    "parseTranslationFailed": "Failed to parse translation result",
     "removed": "Removed",
-    "updateSuccess": "Updated successfully"
+    "updateSuccess": "Updated successfully",
+    "translateFailed": "Failed to translate",
+    "collectFailed": "Failed to collect",
+    "getMyWordsFailed": "Failed to get vocabulary",
+    "removeFailed": "Failed to remove",
+    "updateFailed": "Failed to update"
   },
   "reminder": {
     "onlyTodayOrOverdueCanComplete": "Only pending or overdue reminders for today can be completed",
@@ -58,9 +67,17 @@
     "dayOfMonthRequired": "Day of month is required",
     "dayOfMonthRange": "Day of month must be between 1-31",
     "createSuccess": "Reminder created successfully",
+    "createFailed": "Failed to create reminder",
     "updateSuccess": "Reminder updated successfully",
+    "updateFailed": "Failed to update reminder",
     "reminderNotFound": "Reminder not found or deleted",
-    "updateFailed": "Failed to update reminder"
+    "invalidReminderId": "Invalid reminder ID",
+    "listFailed": "Failed to get reminder list",
+    "detailFailed": "Failed to get reminder details",
+    "deleteFailed": "Failed to delete reminder",
+    "completeSuccess": "Reminder completed",
+    "completeSuccessWithNextTrigger": "Reminder completed, next trigger date updated",
+    "completeFailed": "Failed to complete reminder"
   },
   "config": {
     "tagNameRequired": "Tag name is required",
@@ -71,7 +88,11 @@
     "deleteSuccess": "Deleted successfully",
     "createFailed": "Failed to create activity config",
     "updateFailed": "Failed to update activity config",
-    "deleteFailed": "Failed to delete activity config"
+    "deleteFailed": "Failed to delete activity config",
+    "listFailed": "Failed to get activity config list",
+    "getDetailFailed": "Failed to get activity config",
+    "getHistoryFailed": "Failed to get activity config history",
+    "rollbackFailed": "Failed to rollback"
   },
   "image": {
     "fileParseFailed": "File parse failed",

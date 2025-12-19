@@ -44,8 +44,17 @@
     "recordNotFoundOrNoPermission": "记录不存在或无权限删除",
     "recordNotFoundOrNoPermissionToUpdate": "记录不存在或无权限修改",
     "selectedIndexInvalid": "选择的翻译索引无效",
+    "noteTooLong": "笔记长度不能超过 {{max}} 个字符",
+    "translationResultNotArray": "翻译结果不是数组格式",
+    "missingField": "缺少必填字段 {{field}}",
+    "parseTranslationFailed": "解析翻译结果失败",
     "removed": "已移除",
-    "updateSuccess": "更新成功"
+    "updateSuccess": "更新成功",
+    "translateFailed": "翻译失败",
+    "collectFailed": "收藏失败",
+    "getMyWordsFailed": "获取单词本失败",
+    "removeFailed": "移除失败",
+    "updateFailed": "更新失败"
   },
   "reminder": {
     "onlyTodayOrOverdueCanComplete": "只有今日待完成或已过期的提醒才能标记完成",
@@ -58,9 +67,17 @@
     "dayOfMonthRequired": "月份中的日期是必需的",
     "dayOfMonthRange": "月份中的日期必须在 1-31 之间",
     "createSuccess": "提醒创建成功",
+    "createFailed": "创建提醒失败",
     "updateSuccess": "提醒更新成功",
+    "updateFailed": "更新提醒失败",
     "reminderNotFound": "提醒不存在或已删除",
-    "updateFailed": "更新提醒失败"
+    "invalidReminderId": "无效的提醒ID",
+    "listFailed": "获取提醒列表失败",
+    "detailFailed": "获取提醒详情失败",
+    "deleteFailed": "删除提醒失败",
+    "completeSuccess": "提醒已完成",
+    "completeSuccessWithNextTrigger": "提醒已完成，下次触发日期已更新",
+    "completeFailed": "标记完成失败"
   },
   "config": {
     "tagNameRequired": "标签名称是必需的",
@@ -71,7 +88,11 @@
     "deleteSuccess": "删除成功",
     "createFailed": "创建活动配置失败",
     "updateFailed": "更新活动配置失败",
-    "deleteFailed": "删除活动配置失败"
+    "deleteFailed": "删除活动配置失败",
+    "listFailed": "获取活动配置列表失败",
+    "getDetailFailed": "获取活动配置失败",
+    "getHistoryFailed": "获取活动配置历史失败",
+    "rollbackFailed": "回滚失败"
   },
   "image": {
     "fileParseFailed": "文件解析失败",

@@ -620,6 +620,7 @@ describe("Vocabulary API - 单词本模块集成测试", () => {
         url: `/api/vocabulary/my-words/${vocabId}`,
         headers: {
           Authorization: `Bearer ${authToken}`,
+          'Accept-Language': 'zh-CN',
         },
       });
 
@@ -671,7 +672,7 @@ describe("Vocabulary API - 单词本模块集成测试", () => {
         },
       });
 
-      expect(response.statusCode).toBe(500);
+      expect(response.statusCode).toBe(404);
     });
 
     it("❌ 应该拒绝删除不存在的单词", async () => {
@@ -683,7 +684,7 @@ describe("Vocabulary API - 单词本模块集成测试", () => {
         },
       });
 
-      expect(response.statusCode).toBe(500);
+      expect(response.statusCode).toBe(404);
     });
 
     it("❌ 应该拒绝未认证的请求", async () => {

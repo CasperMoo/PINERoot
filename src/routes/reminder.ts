@@ -43,7 +43,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
       } catch (err: any) {
         console.error('Create reminder error:', err)
         // 解析错误信息
-        const message = err.message || '创建提醒失败'
+        const message = err.message || request.t('reminder.createFailed')
         if (message.includes('title')) {
           return error(reply, ErrorCode.TITLE_REQUIRED, message)
         }
@@ -117,7 +117,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         return ok(reply, result)
       } catch (err) {
         console.error('Get reminder list error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '获取提醒列表失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('reminder.listFailed'), 500)
       }
     }
   )
@@ -139,7 +139,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         if (isNaN(reminderId)) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '无效的提醒ID')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.invalidReminderId'))
         }
 
         const reminder = await getReminderById(reminderId, userId)
@@ -150,7 +150,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         return ok(reply, reminder)
       } catch (err) {
         console.error('Get reminder error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '获取提醒详情失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('reminder.detailFailed'), 500)
       }
     }
   )
@@ -174,7 +174,7 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         if (isNaN(reminderId)) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '无效的提醒ID')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.invalidReminderId'))
         }
 
         const updated = await updateReminder(reminderId, userId, request.body)
@@ -207,18 +207,18 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         if (isNaN(reminderId)) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '无效的提醒ID')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.invalidReminderId'))
         }
 
         const deleted = await deleteReminder(reminderId, userId)
         if (!deleted) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '提醒不存在或已删除')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.reminderNotFound'))
         }
 
         return reply.status(204).send()
       } catch (err) {
         console.error('Delete reminder error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '删除提醒失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('reminder.deleteFailed'), 500)
       }
     }
   )
@@ -240,23 +240,23 @@ export default async function reminderRoutes(fastify: FastifyInstance) {
         const userId = request.currentUser!.id
 
         if (isNaN(reminderId)) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '无效的提醒ID')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.invalidReminderId'))
         }
 
         const completed = await completeReminder(reminderId, userId)
         if (!completed) {
-          return error(reply, ErrorCode.REMINDER_NOT_FOUND, '提醒不存在或已删除')
+          return error(reply, ErrorCode.REMINDER_NOT_FOUND, request.t('reminder.reminderNotFound'))
         }
 
         // 根据频率返回不同的提示信息
         const message = completed.frequency === 'ONCE'
-          ? '提醒已完成'
-          : '提醒已完成，下次触发日期已更新'
+          ? request.t('reminder.completeSuccess')
+          : request.t('reminder.completeSuccessWithNextTrigger')
 
         return ok(reply, completed, message)
       } catch (err) {
         console.error('Complete reminder error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '标记完成失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('reminder.completeFailed'), 500)
       }
     }
   )

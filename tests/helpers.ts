@@ -19,8 +19,10 @@ export async function cleanDatabase() {
     // 先删除有外键依赖的表
     await testPrisma.image.deleteMany()
     await testPrisma.reminder.deleteMany()
+    await testPrisma.userVocabulary.deleteMany() // 删除用户单词本记录
     await testPrisma.imageTag.deleteMany()
     await testPrisma.activityConfig.deleteMany()
+    await testPrisma.wordLibrary.deleteMany() // 删除单词库
     await testPrisma.user.deleteMany()
   } finally {
     await testPrisma.$disconnect()

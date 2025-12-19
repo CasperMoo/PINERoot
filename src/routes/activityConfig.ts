@@ -68,7 +68,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, formattedConfigs)
       } catch (err) {
         console.error('Get activity configs error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '获取活动配置列表失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.listFailed'), 500)
       }
     }
   )
@@ -101,7 +101,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, config)
       } catch (err) {
         console.error('Get activity config error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '获取活动配置失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.getDetailFailed'), 500)
       }
     }
   )
@@ -133,7 +133,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, configs)
       } catch (err) {
         console.error('Get activity config history error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '获取活动配置历史失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.getHistoryFailed'), 500)
       }
     }
   )
@@ -181,7 +181,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, newConfig, request.t('config.createSuccess'))
       } catch (err) {
         console.error('Create activity config error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '创建活动配置失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.createFailed'), 500)
       }
     }
   )
@@ -238,7 +238,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, newConfig, request.t('config.updateSuccess'))
       } catch (err) {
         console.error('Update activity config error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '更新活动配置失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.updateFailed'), 500)
       }
     }
   )
@@ -300,7 +300,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, rolledBackConfig, `已回滚到版本 ${version}`)
       } catch (err) {
         console.error('Rollback activity config error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '回滚失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.rollbackFailed'), 500)
       }
     }
   )
@@ -336,7 +336,7 @@ export default async function activityConfigRoutes(fastify: FastifyInstance) {
         return ok(reply, null, request.t('config.deleteSuccess'))
       } catch (err) {
         console.error('Delete activity config error:', err)
-        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, '删除活动配置失败', 500)
+        return error(reply, ErrorCode.SERVICE_UNAVAILABLE, request.t('config.deleteFailed'), 500)
       }
     }
   )

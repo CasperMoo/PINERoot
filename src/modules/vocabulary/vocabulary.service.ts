@@ -38,10 +38,10 @@ export class VocabularyService {
 
     // 1. 校验参数
     if (!text || text.trim().length === 0) {
-      throw new ValidationError('输入文本不能为空');
+      throw new ValidationError('vocabulary.textRequired');
     }
     if (text.length > MAX_TEXT_LENGTH) {
-      throw new ValidationError(`输入文本长度不能超过${MAX_TEXT_LENGTH}字符`);
+      throw new ValidationError('vocabulary.textTooLong', undefined, { max: MAX_TEXT_LENGTH });
     }
 
     // 2. 检测语言类型
@@ -127,13 +127,13 @@ export class VocabularyService {
     });
 
     if (!word) {
-      throw new NotFoundError('单词不存在');
+      throw new NotFoundError('vocabulary.wordNotFound');
     }
 
     // 3. 验证 selectedIndex 是否有效
     const translations = fromPrismaJson<WordItem[]>(word.translationData);
     if (selectedIndex < 0 || selectedIndex >= translations.length) {
-      throw new ValidationError('选择的翻译索引无效');
+      throw new ValidationError('vocabulary.selectedIndexInvalid');
     }
 
     // 4. 检查是否已收藏（同一个单词只能收藏一次）
@@ -147,12 +147,12 @@ export class VocabularyService {
     });
 
     if (existing) {
-      throw new BusinessError('该单词已在单词本中');
+      throw new BusinessError('vocabulary.wordAlreadyCollected');
     }
 
     // 5. 校验 note 长度
     if (note && note.length > MAX_NOTE_LENGTH) {
-      throw new ValidationError(`笔记长度不能超过${MAX_NOTE_LENGTH}字符`);
+      throw new ValidationError('vocabulary.noteTooLong', undefined, { max: MAX_NOTE_LENGTH });
     }
 
     // 6. 创建收藏记录
@@ -243,7 +243,7 @@ export class VocabularyService {
     });
 
     if (!vocabulary) {
-      throw new NotFoundError('记录不存在或无权限删除');
+      throw new NotFoundError('vocabulary.recordNotFoundOrNoPermission');
     }
 
     // 2. 删除记录
@@ -264,12 +264,12 @@ export class VocabularyService {
     });
 
     if (!vocabulary) {
-      throw new NotFoundError('记录不存在或无权限修改');
+      throw new NotFoundError('vocabulary.recordNotFoundOrNoPermissionToUpdate');
     }
 
     // 2. 校验 note 长度
     if (note && note.length > MAX_NOTE_LENGTH) {
-      throw new ValidationError(`笔记长度不能超过${MAX_NOTE_LENGTH}字符`);
+      throw new ValidationError('vocabulary.noteTooLong', undefined, { max: MAX_NOTE_LENGTH });
     }
 
     // 3. 构建更新数据
@@ -315,21 +315,24 @@ export class VocabularyService {
 
       // 验证是否为数组
       if (!Array.isArray(parsed)) {
-        throw new Error('Translation result is not an array');
+        throw new ValidationError('vocabulary.translationResultNotArray');
       }
 
       // 验证每个单词的必填字段
       parsed.forEach((item, index) => {
         REQUIRED_TRANSLATION_FIELDS.forEach((field) => {
           if (!item[field]) {
-            throw new Error(`Missing field "${field}" at index ${index}`);
+            throw new ValidationError('vocabulary.missingField', undefined, { field, index });
           }
         });
       });
 
       return parsed as WordItem[];
     } catch (error) {
-      throw new Error(`Failed to parse translation result: ${(error as Error).message}`);
+      if (error instanceof BusinessError) {
+        throw error;
+      }
+      throw new ValidationError('vocabulary.parseTranslationFailed');
     }
   }
 }
