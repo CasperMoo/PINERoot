@@ -193,29 +193,30 @@ export const resources = {
       features: {
         title: "Our Tools",
         subtitle: "More tools are under development, stay tuned",
-      vocabulary: {
-        title: "Vocabulary Book",
-        description: "Search and save Japanese/Chinese words with detailed meanings and examples"
-      },
-      reminder: {
-        title: "Reminders",
-        description: "Set important reminders and never miss critical moments"
-      },
-      tasks: {
-        title: "Task Management",
-        description: "Efficiently manage your to-do items and plan your work and life"
-      },
-      notes: {
-        title: "Notes Tool",
-        description: "Record your inspirations anytime with rich text and Markdown support"
-      },
-      analytics: {
-        title: "Data Analytics",
-        description: "Visualize your data and generate professional charts and reports"
-      },
-      utilities: {
-        title: "Utilities",
-        description: "More practical utilities to boost your work efficiency"
+        vocabulary: {
+          title: "Vocabulary Book",
+          description: "Search and save Japanese/Chinese words with detailed meanings and examples"
+        },
+        reminder: {
+          title: "Reminders",
+          description: "Set important reminders and never miss critical moments"
+        },
+        tasks: {
+          title: "Task Management",
+          description: "Efficiently manage your to-do items and plan your work and life"
+        },
+        notes: {
+          title: "Notes Tool",
+          description: "Record your inspirations anytime with rich text and Markdown support"
+        },
+        analytics: {
+          title: "Data Analytics",
+          description: "Visualize your data and generate professional charts and reports"
+        },
+        utilities: {
+          title: "Utilities",
+          description: "More practical utilities to boost your work efficiency"
+        }
       }
     },
     vocabulary: {
@@ -741,6 +742,5 @@ export const resources = {
         }
       }
     }
-  }
   }
 } as const

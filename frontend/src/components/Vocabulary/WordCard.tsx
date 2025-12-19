@@ -95,13 +95,13 @@ const WordCard: React.FC<WordCardProps> = ({
             onClick={handleCollect}
             className="rounded-lg"
           >
-            {isCollected ? t('vocabulary:word.collected') : t('vocabulary:word.collect')}
+            {isCollected ? t('word.collected') : t('word.collect')}
           </Button>
         )}
 
         {showActions && actionType === 'remove' && (
           <Popconfirm
-            title={t('vocabulary:word.confirmRemove')}
+            title={t('word.confirmRemove')}
             onConfirm={handleRemove}
             okText={t('common:button.confirm')}
             cancelText={t('common:button.cancel')}
@@ -112,7 +112,7 @@ const WordCard: React.FC<WordCardProps> = ({
               loading={loading}
               className="rounded-lg"
             >
-              {t('vocabulary:word.remove')}
+              {t('word.remove')}
             </Button>
           </Popconfirm>
         )}
@@ -129,7 +129,7 @@ const WordCard: React.FC<WordCardProps> = ({
           {word.frequency && (
             <div className="flex items-center">
               <span className="text-xs md:text-sm text-gray-500 mr-1">
-                {t('vocabulary:word.frequency')}:
+                {t('word.frequency')}:
               </span>
               <Rate disabled value={formatFrequency(word.frequency)} className="text-sm md:text-base" />
             </div>
@@ -156,7 +156,7 @@ const WordCard: React.FC<WordCardProps> = ({
             header={
               <div className="flex items-center">
                 <BookOutlined className="mr-2" />
-                {t('vocabulary:word.example')}
+                {t('word.example')}
               </div>
             }
             key="example"
@@ -170,7 +170,7 @@ const WordCard: React.FC<WordCardProps> = ({
       {word.note && (
         <div className="mb-3 p-3 bg-blue-50 rounded">
           <strong className="text-sm text-gray-700">
-            {t('vocabulary:word.usage')}:
+            {t('word.usage')}:
           </strong>
           <p className="text-sm text-gray-600 mt-1">{word.note}</p>
         </div>
@@ -180,7 +180,7 @@ const WordCard: React.FC<WordCardProps> = ({
       {word.synonyms && word.synonyms.length > 0 && (
         <div className="mb-3">
           <strong className="text-sm text-gray-700 block mb-2">
-            {t('vocabulary:word.synonyms')}:
+            {t('word.synonyms')}:
           </strong>
           <div className="flex flex-wrap gap-2">
             {word.synonyms.map((syn, index) => (
@@ -198,7 +198,7 @@ const WordCard: React.FC<WordCardProps> = ({
       {collectionNote && (
         <div className="mt-3 p-3 bg-yellow-50 rounded">
           <strong className="text-sm text-gray-700">
-            {t('vocabulary:word.myNote')}:
+            {t('word.myNote')}:
           </strong>
           <p className="text-sm text-gray-600 mt-1">{collectionNote}</p>
         </div>
@@ -206,7 +206,7 @@ const WordCard: React.FC<WordCardProps> = ({
 
       {collectedAt && (
         <div className="mt-2 text-xs text-gray-400">
-          {t('vocabulary:word.collectedAt')}: {new Date(collectedAt).toLocaleString()}
+          {t('word.collectedAt')}: {new Date(collectedAt).toLocaleString()}
         </div>
       )}
     </Card>

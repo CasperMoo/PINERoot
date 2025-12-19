@@ -29,7 +29,7 @@ const StatusFilter: React.FC<StatusFilterProps> = memo(({
     {
       label: (
         <Space>
-          {t('vocabulary:myWords.status.all')}
+          {t('myWords.status.all')}
           {counts && (
             <Tag color="default" className="ml-1">
               {counts.total}
@@ -42,7 +42,7 @@ const StatusFilter: React.FC<StatusFilterProps> = memo(({
     {
       label: (
         <Space>
-          {t('vocabulary:myWords.status.new')}
+          {t('myWords.status.new')}
           {counts && (
             <Tag color={getStatusColor('NEW')} className="ml-1">
               {counts.new}
@@ -55,7 +55,7 @@ const StatusFilter: React.FC<StatusFilterProps> = memo(({
     {
       label: (
         <Space>
-          {t('vocabulary:myWords.status.learning')}
+          {t('myWords.status.learning')}
           {counts && (
             <Tag color={getStatusColor('LEARNING')} className="ml-1">
               {counts.learning}
@@ -68,7 +68,7 @@ const StatusFilter: React.FC<StatusFilterProps> = memo(({
     {
       label: (
         <Space>
-          {t('vocabulary:myWords.status.mastered')}
+          {t('myWords.status.mastered')}
           {counts && (
             <Tag color={getStatusColor('MASTERED')} className="ml-1">
               {counts.mastered}

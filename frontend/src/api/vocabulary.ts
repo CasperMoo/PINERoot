@@ -1,4 +1,5 @@
 import request from './request';
+import type { ApiResponse } from './types';
 
 /**
  * 单词查询请求参数
@@ -105,57 +106,48 @@ export interface PaginatedResponse<T> {
 }
 
 /**
- * API 响应类型
- */
-export interface ApiResponse<T = any> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
-/**
  * 单词翻译 API
  */
 export async function translate(params: TranslateRequest): Promise<TranslateResponse> {
-  const response = await request.post<ApiResponse<TranslateResponse>>('/vocabulary/translate', params);
-  return response.data.data;
+  const response = await request.post('/vocabulary/translate', params) as ApiResponse<TranslateResponse>;
+  return response.data!;
 }
 
 /**
  * 收藏单词 API
  */
 export async function collectWord(params: CollectRequest): Promise<void> {
-  await request.post<ApiResponse<void>>('/vocabulary/collect', params);
+  await request.post('/vocabulary/collect', params);
 }
 
 /**
  * 获取我的单词本 API
  */
 export async function getMyWords(params: GetMyWordsRequest = {}): Promise<PaginatedResponse<MyWordItem>> {
-  const response = await request.get<ApiResponse<PaginatedResponse<MyWordItem>>>('/vocabulary/my-words', {
+  const response = await request.get('/vocabulary/my-words', {
     params,
-  });
-  return response.data.data;
+  }) as ApiResponse<PaginatedResponse<MyWordItem>>;
+  return response.data!;
 }
 
 /**
  * 更新单词状态 API
  */
 export async function updateWord(id: number, params: UpdateWordRequest): Promise<void> {
-  await request.put<ApiResponse<void>>(`/vocabulary/my-words/${id}`, params);
+  await request.put(`/vocabulary/my-words/${id}`, params);
 }
 
 /**
  * 移除单词 API
  */
 export async function removeWord(id: number): Promise<void> {
-  await request.delete<ApiResponse<void>>(`/vocabulary/my-words/${id}`);
+  await request.delete(`/vocabulary/my-words/${id}`);
 }
 
 /**
  * 获取单词详情 API
  */
 export async function getWordDetail(id: number): Promise<MyWordItem> {
-  const response = await request.get<ApiResponse<MyWordItem>>(`/vocabulary/my-words/${id}`);
-  return response.data.data;
+  const response = await request.get(`/vocabulary/my-words/${id}`) as ApiResponse<MyWordItem>;
+  return response.data!;
 }

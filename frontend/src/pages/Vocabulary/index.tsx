@@ -43,7 +43,7 @@ const Vocabulary: React.FC = () => {
       const result = await translate({ text });
       setSearchResult(result);
     } catch (error: any) {
-      messageApi.error(error.message || t('vocabulary:error.searchFailed'));
+      messageApi.error(error.message || t('error.searchFailed'));
     } finally {
       setSearchLoading(false);
     }
@@ -55,7 +55,7 @@ const Vocabulary: React.FC = () => {
       await collectWord({
         wordId,
       });
-      messageApi.success(t('vocabulary:word.collectSuccess'));
+      messageApi.success(t('word.collectSuccess'));
       // 更新对应单词的收藏状态
       setSearchResult(prev => {
         if (!prev) return null;
@@ -65,7 +65,7 @@ const Vocabulary: React.FC = () => {
         return { ...prev, translation: newTranslation };
       });
     } catch (error: any) {
-      messageApi.error(error.message || t('vocabulary:error.collectFailed'));
+      messageApi.error(error.message || t('error.collectFailed'));
     }
   }, [messageApi, t]);
 
@@ -85,7 +85,7 @@ const Vocabulary: React.FC = () => {
         total: response.total,
       }));
     } catch (error: any) {
-      messageApi.error(error.message || t('vocabulary:error.loadFailed'));
+      messageApi.error(error.message || t('error.loadFailed'));
     } finally {
       setMyWordsLoading(false);
     }
@@ -95,10 +95,10 @@ const Vocabulary: React.FC = () => {
   const handleRemove = useCallback(async (id: number) => {
     try {
       await removeWord(id);
-      messageApi.success(t('vocabulary:word.removeSuccess'));
+      messageApi.success(t('word.removeSuccess'));
       loadMyWords(pagination.current, statusFilter);
     } catch (error: any) {
-      messageApi.error(error.message || t('vocabulary:error.removeFailed'));
+      messageApi.error(error.message || t('error.removeFailed'));
     }
   }, [messageApi, t, loadMyWords, pagination.current, statusFilter]);
 
@@ -160,7 +160,7 @@ const Vocabulary: React.FC = () => {
           <div className="mb-4 md:mb-6">
             <Title level={2} className="!mb-4 flex items-center text-xl md:text-2xl lg:text-3xl">
               <BookOutlined className="mr-2" />
-              {t('vocabulary:title')}
+              {t('title')}
             </Title>
           </div>
 
@@ -173,7 +173,7 @@ const Vocabulary: React.FC = () => {
               items={[
                 {
                   key: 'search',
-                  label: t('vocabulary:tabs.search'),
+                  label: t('tabs.search'),
                   children: (
                     <div className="space-y-6">
                       {/* 查询表单 */}
@@ -188,7 +188,7 @@ const Vocabulary: React.FC = () => {
                             {/* 原始文本 */}
                             <div className="mb-2">
                               <div className="text-base md:text-lg font-medium text-gray-700">
-                                {t('vocabulary:search.resultsFor')}: <span className="text-primary">{searchResult.originalText}</span>
+                                {t('search.resultsFor')}: <span className="text-primary">{searchResult.originalText}</span>
                               </div>
                             </div>
 
@@ -204,7 +204,7 @@ const Vocabulary: React.FC = () => {
                                   if (word.id) {
                                     handleCollect(word.id, index);
                                   } else {
-                                    messageApi.error(t('vocabulary:error.collectFailed'));
+                                    messageApi.error(t('error.collectFailed'));
                                   }
                                 }}
                               />
@@ -212,7 +212,7 @@ const Vocabulary: React.FC = () => {
                           </div>
                         ) : (
                           <Empty
-                            description={t('vocabulary:search.notFound')}
+                            description={t('search.notFound')}
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
                             className="py-12"
                           />
@@ -223,7 +223,7 @@ const Vocabulary: React.FC = () => {
                 },
                 {
                   key: 'my-words',
-                  label: t('vocabulary:tabs.myWords'),
+                  label: t('tabs.myWords'),
                   children: (
                     <div className="space-y-4">
                       {/* 状态筛选器 */}
@@ -270,7 +270,7 @@ const Vocabulary: React.FC = () => {
                                   showSizeChanger={false}
                                   showQuickJumper
                                   showTotal={(total, range) =>
-                                    t('vocabulary:myWords.paginationInfo', {
+                                    t('myWords.paginationInfo', {
                                       start: range[0],
                                       end: range[1],
                                       total,
@@ -282,19 +282,19 @@ const Vocabulary: React.FC = () => {
                           </>
                         ) : (
                           <Empty
-                            description={t('vocabulary:myWords.empty')}
+                            description={t('myWords.empty')}
                             image={Empty.PRESENTED_IMAGE_SIMPLE}
                             className="py-16"
                           >
                             <p className="text-gray-500 mb-4">
-                              {t('vocabulary:myWords.emptyHint')}
+                              {t('myWords.emptyHint')}
                             </p>
                             <button
                               type="button"
                               className="ant-btn ant-btn-primary"
                               onClick={() => setActiveTab('search')}
                             >
-                              {t('vocabulary:search.button')}
+                              {t('search.button')}
                             </button>
                           </Empty>
                         )}

@@ -23,8 +23,8 @@ const SearchForm: React.FC<SearchFormProps> = memo(({
   const searchSchema = z.object({
     text: z
       .string()
-      .min(1, t('vocabulary:error.textRequired'))
-      .max(500, t('vocabulary:error.textTooLong'))
+      .min(1, t('error.textRequired'))
+      .max(500, t('error.textTooLong'))
       .transform(val => val.trim()),
   });
 
@@ -54,7 +54,7 @@ const SearchForm: React.FC<SearchFormProps> = memo(({
             <Input.Search
               {...field}
               size="large"
-              placeholder={t('vocabulary:search.placeholder')}
+              placeholder={t('search.placeholder')}
               enterButton={
                 <Button
                   type="primary"
@@ -63,7 +63,7 @@ const SearchForm: React.FC<SearchFormProps> = memo(({
                   loading={loading}
                   className="rounded-lg"
                 >
-                  {t('vocabulary:search.button')}
+                  {t('search.button')}
                 </Button>
               }
               onSearch={(value) => {
