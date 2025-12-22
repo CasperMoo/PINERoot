@@ -41,6 +41,9 @@ RUN npx prisma generate
 # 从builder复制编译后的代码
 COPY --from=builder /app/dist ./dist
 
+# 复制国际化文件
+COPY --from=builder /app/locales ./locales
+
 # 使用非root用户
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
