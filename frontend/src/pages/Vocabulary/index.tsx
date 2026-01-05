@@ -154,7 +154,7 @@ const Vocabulary: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 py-4 md:py-8 px-4 md:px-6 lg:px-8">
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 py-4 md:py-8 px-4 md:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* 页面标题 */}
           <div className="mb-4 md:mb-6">

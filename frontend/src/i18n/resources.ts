@@ -245,7 +245,13 @@ export const resources = {
         collectedAt: "Added on",
         confirmRemove: "Remove this word from your vocabulary?",
         removeSuccess: "Removed successfully",
-        collectSuccess: "Added to vocabulary"
+        collectSuccess: "Added to vocabulary",
+        pronounce: "Pronounce",
+        pitch: "Pitch",
+        noTextToSpeak: "No text available to pronounce",
+        speechNotSupported: "Your browser does not support speech synthesis",
+        speechError: "Pronunciation failed, please try again",
+        stopSpeaking: "Stop pronunciation"
       },
       myWords: {
         empty: "Your vocabulary is empty",
@@ -616,7 +622,13 @@ export const resources = {
         collectedAt: "收藏时间",
         confirmRemove: "确定要从单词本中移除这个单词吗？",
         removeSuccess: "移除成功",
-        collectSuccess: "已加入单词本"
+        collectSuccess: "已加入单词本",
+        pronounce: "发音",
+        pitch: "声调",
+        noTextToSpeak: "没有可发音的文本",
+        speechNotSupported: "您的浏览器不支持语音功能",
+        speechError: "发音失败，请重试",
+        stopSpeaking: "停止发音"
       },
       myWords: {
         empty: "您的单词本还是空的",
