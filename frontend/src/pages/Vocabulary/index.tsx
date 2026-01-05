@@ -4,7 +4,7 @@ import { App } from 'antd';
 import { BookOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import Layout from '@/components/Layout';
-import { WordCard, SearchForm, StatusFilter } from '@/components/Vocabulary';
+import { WordCard, CompactWordCard, SearchForm, StatusFilter } from '@/components/Vocabulary';
 import {
   translate,
   collectWord,
@@ -184,9 +184,9 @@ const Vocabulary: React.FC = () => {
                         {searchLoading ? (
                           <Skeleton active paragraph={{ rows: 6 }} />
                         ) : searchResult ? (
-                          <div className="space-y-4">
+                          <div>
                             {/* 原始文本 */}
-                            <div className="mb-2">
+                            <div className="mb-6">
                               <div className="text-base md:text-lg font-medium text-gray-700">
                                 {t('search.resultsFor')}: <span className="text-primary">{searchResult.originalText}</span>
                               </div>
@@ -243,13 +243,12 @@ const Vocabulary: React.FC = () => {
                           </div>
                         ) : myWords.length > 0 ? (
                           <>
-                            <div className="space-y-4">
+                            <div>
                               {myWords.map((item) => (
-                                <WordCard
+                                <CompactWordCard
                                   key={item.id}
                                   word={item.translation[0]}
                                   showActions={true}
-                                  actionType="remove"
                                   onRemove={handleRemove}
                                   collectionId={item.id}
                                   collectionNote={item.note}

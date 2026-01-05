@@ -125,11 +125,12 @@ const WordCard: React.FC<WordCardProps> = ({
   const statusStyle = status ? getStatusStyle(status) : null;
 
   return (
-    <Card
-      className="mb-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 bg-white overflow-hidden"
-      size="small"
-      bordered
-    >
+    <div className="mb-6">
+      <Card
+        className="rounded-2xl border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-white overflow-hidden"
+        size="small"
+        bordered
+      >
       {/* 头部：汉字、假名、状态、操作按钮 */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 pb-3 border-b border-gray-100">
         <div className="flex flex-wrap items-center gap-2">
@@ -328,6 +329,7 @@ const WordCard: React.FC<WordCardProps> = ({
         </div>
       )}
     </Card>
+    </div>
   );
 };
 
