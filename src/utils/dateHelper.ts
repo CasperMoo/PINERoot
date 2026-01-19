@@ -214,54 +214,121 @@ export function calculateInitialTriggerDate(params: {
 
 /**
  * 计算下一次触发日期(完成后)
+ *
+ * 核心逻辑：从原始触发日期开始循环计算，直到找到大于完成日期的下一个触发日期
+ * 这样可以保持周期的一致性，避免因为延迟完成而导致周期漂移
+ *
+ * 例如：每3天提醒一次，原始触发日期是1号
+ * - 如果1号准时完成，下次触发4号
+ * - 如果3号才完成（逾期），下次触发仍然是4号（而不是6号）
  */
 export function calculateNextTriggerDate(params: {
   frequency: Frequency
   completedDate: Date
+  originalNextTriggerDate: Date  // 原始触发日期（完成前的 nextTriggerDate）
   interval?: number | null
   weekDays?: string | null  // JSON 字符串数组
   dayOfMonth?: number | null
   startDate?: Date | null
 }): Date {
-  const { frequency, completedDate, interval, weekDays, dayOfMonth, startDate } = params
+  const { frequency, completedDate, originalNextTriggerDate, interval, weekDays, dayOfMonth, startDate } = params
+
+  const completedDay = startOfDay(completedDate)
+  const originalDay = startOfDay(originalNextTriggerDate)
 
   switch (frequency) {
     case 'ONCE':
       // 单次提醒不需要计算下次触发日期
       return completedDate
 
-    case 'DAILY':
-      // 每日提醒：完成日期 + 1 天
-      return addDays(startOfDay(completedDate), 1)
+    case 'DAILY': {
+      // 每日提醒：从原始日期开始，每次加1天，直到大于完成日期
+      let nextDate = originalDay
+      while (!isAfter(nextDate, completedDay)) {
+        nextDate = addDays(nextDate, 1)
+      }
+      return nextDate
+    }
 
-    case 'EVERY_X_DAYS':
-      // 每隔 x 天：完成日期 + interval 天
+    case 'EVERY_X_DAYS': {
+      // 每隔 x 天：从原始日期开始循环加 interval 天，直到大于完成日期
       if (!interval || interval <= 0) {
         throw new Error('interval is required and must be greater than 0 for EVERY_X_DAYS')
       }
-      return addDays(startOfDay(completedDate), interval)
+      let nextDate = originalDay
+      while (!isAfter(nextDate, completedDay)) {
+        nextDate = addDays(nextDate, interval)
+      }
+      return nextDate
+    }
 
     case 'WEEKLY':
-      // 每周提醒：找到下一个符合条件的星期几
+      // 每周提醒：从原始日期开始循环，找到下一个符合条件的星期几
+      // 对于多星期几的提醒（如周一、三、五），周期是这些天的循环序列
       if (!weekDays) {
         throw new Error('weekDays is required for WEEKLY')
       }
       const parsedWeekDays = JSON.parse(weekDays) as WeekDay[]
-      return getNextWeekDay(completedDate, parsedWeekDays)
+      const targetDays = parsedWeekDays.map(day => WEEKDAY_TO_JS_MAP[day])
+
+      // 从原始日期开始，每次加 1 天，直到找到第一个大于完成日期的目标星期几
+      let nextWeeklyDate = originalDay
+      while (!isAfter(nextWeeklyDate, completedDay) || !targetDays.includes(getDay(nextWeeklyDate))) {
+        nextWeeklyDate = addDays(nextWeeklyDate, 1)
+        // 防止无限循环（最多找 400 天 = 约 57 周，足够覆盖所有情况）
+        const daysDiff = Math.floor((nextWeeklyDate.getTime() - originalDay.getTime()) / (1000 * 60 * 60 * 24))
+        if (daysDiff > 400) {
+          throw new Error('Invalid weekDays configuration or calculation error')
+        }
+      }
+      return nextWeeklyDate
 
     case 'MONTHLY':
-      // 每月提醒：找到下一个符合条件的每月日期
+      // 每月提醒：从原始日期开始循环加 1 个月，直到大于完成日期
       if (!dayOfMonth || dayOfMonth < 1 || dayOfMonth > 31) {
         throw new Error('dayOfMonth is required and must be between 1 and 31 for MONTHLY')
       }
-      return getNextMonthDay(completedDate, dayOfMonth)
+      let nextMonthlyDate = setDate(originalDay, dayOfMonth)
+      // 如果原始日期的日数大于目标日数（如 31日 -> 15日），从原始月份开始
+      if (isNaN(nextMonthlyDate.getTime())) {
+        nextMonthlyDate = new Date(originalDay.getFullYear(), originalDay.getMonth(), dayOfMonth)
+      }
+      while (!isAfter(nextMonthlyDate, completedDay)) {
+        nextMonthlyDate = addMonths(nextMonthlyDate, 1)
+        // 防止无限循环（最多 120 个月 = 10 年）
+        const monthDiff = (nextMonthlyDate.getFullYear() - originalDay.getFullYear()) * 12 +
+                         (nextMonthlyDate.getMonth() - originalDay.getMonth())
+        if (monthDiff > 120) {
+          throw new Error('Invalid dayOfMonth configuration or calculation error')
+        }
+      }
+      return nextMonthlyDate
 
     case 'YEARLY':
-      // 每年提醒：找到下一个符合条件的每年日期
+      // 每年提醒：从原始日期开始循环加 1 年，直到大于完成日期
       if (!startDate) {
         throw new Error('startDate is required for YEARLY')
       }
-      return getNextYearDay(completedDate, startDate, dayOfMonth)
+      const targetMonth = new Date(startDate).getMonth()
+      const targetDay = dayOfMonth ?? new Date(startDate).getDate()
+      let nextYearlyDate = new Date(originalDay.getFullYear(), targetMonth, targetDay)
+      // 处理无效日期（如 2月30日）
+      if (nextYearlyDate.getMonth() !== targetMonth || nextYearlyDate.getDate() !== targetDay) {
+        // 如果目标日期无效，使用该月最后一天
+        nextYearlyDate = new Date(originalDay.getFullYear(), targetMonth + 1, 0)
+      }
+      while (!isAfter(nextYearlyDate, completedDay)) {
+        nextYearlyDate = new Date(nextYearlyDate.getFullYear() + 1, targetMonth, targetDay)
+        // 处理无效日期
+        if (nextYearlyDate.getMonth() !== targetMonth || nextYearlyDate.getDate() !== targetDay) {
+          nextYearlyDate = new Date(nextYearlyDate.getFullYear(), targetMonth + 1, 0)
+        }
+        // 防止无限循环（最多 10 年）
+        if (nextYearlyDate.getFullYear() - originalDay.getFullYear() > 10) {
+          throw new Error('Invalid yearly configuration or calculation error')
+        }
+      }
+      return nextYearlyDate
 
     default:
       throw new Error(`Unsupported frequency: ${frequency}`)

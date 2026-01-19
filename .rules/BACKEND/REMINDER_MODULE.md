@@ -426,10 +426,21 @@ POST /api/reminders/:id/complete
 
 **权限**：所有认证用户（requireUser），只能标记自己的提醒
 
+**前置校验**：
+- 只有 `triggerStatus` 为 `TRIGGER_TODAY` 或 `OVERDUE` 的提醒才能被标记完成
+- 未来的提醒（`nextTriggerDate > 今天`）不允许完成
+
 **功能说明**：
 
-- 对于单次提醒（ONCE）：将状态设为 COMPLETED
-- 对于循环提醒：更新 `lastCompletedDate`，计算新的 `nextTriggerDate`，状态设为 PENDING
+| 提醒类型 | 处理逻辑 |
+|---------|---------|
+| 单次提醒（ONCE） | `status` = COMPLETED，`lastCompletedDate` = 今天 |
+| 循环提醒 | `status` 保持 PENDING，`lastCompletedDate` = 今天，`nextTriggerDate` = 基于原触发日期循环推算 |
+
+**🔴 关键逻辑**：
+1. `lastCompletedDate` = **点击完成时的日期**（今天）
+2. `nextTriggerDate` = 基于**原本的 nextTriggerDate** 循环推算，直到结果 > 今天
+3. 循环提醒完成后，状态保持 `PENDING`，前端根据 `lastCompletedDate == 今天` 来判断显示为「已完成」
 
 **请求体**：
 
@@ -447,13 +458,14 @@ POST /api/reminders/:id/complete
     "id": "uuid",
     "title": "圣诞节购物",
     "status": "COMPLETED",
+    "lastCompletedDate": "2025-12-25T00:00:00.000Z",
     "nextTriggerDate": "2025-12-25T00:00:00.000Z",
     "updatedAt": "2025-12-25T18:00:00.000Z"
   }
 }
 ```
 
-**响应 - 循环提醒**：
+**响应 - 循环提醒（过期场景）**：
 
 ```json
 {
@@ -464,17 +476,60 @@ POST /api/reminders/:id/complete
     "title": "浇花",
     "frequency": "EVERY_X_DAYS",
     "interval": 3,
-    "lastCompletedDate": "2025-01-01T00:00:00.000Z",
-    "nextTriggerDate": "2025-01-04T00:00:00.000Z",
+    "lastCompletedDate": "2025-01-19T00:00:00.000Z",
+    "nextTriggerDate": "2025-01-22T00:00:00.000Z",
     "status": "PENDING",
-    "updatedAt": "2025-01-01T18:00:00.000Z"
+    "updatedAt": "2025-01-19T18:00:00.000Z"
   }
 }
 ```
 
+> 说明：原 nextTriggerDate 是 2025-01-10，今天是 2025-01-19，循环推算后得到 2025-01-22
+
 ---
 
 ## 四、业务逻辑设计
+
+### 🎯 核心设计原则
+
+> **后端职责**：存储数据 + 必要校验
+> **前端职责**：根据字段实时推导展示状态
+
+后端只存储和维护以下关键字段，不负责计算展示状态：
+
+| 字段 | 用途 |
+|------|------|
+| `nextTriggerDate` | 下次应该触发的日期 |
+| `lastCompletedDate` | 上次实际完成的日期（点击完成时的日期） |
+| `frequency` | 频率类型 |
+| `status` | 仅用于单次提醒标记是否完成（循环提醒始终为 PENDING） |
+
+### 前端展示状态推导规则（由前端实现）
+
+前端根据后端返回的字段，实时推导展示状态：
+
+```
+今天 = 当前日期
+
+推导逻辑（优先级从高到低）：
+┌─────────────────────────────────────────────────────────────┐
+│ 1. 如果 lastCompletedDate == 今天                           │
+│    → 显示为「已完成」(今天已经完成了，不管下次触发是哪天)    │
+├─────────────────────────────────────────────────────────────┤
+│ 2. 如果 nextTriggerDate == 今天 且 lastCompletedDate != 今天│
+│    → 显示为「今日待办」(可点击完成)                         │
+├─────────────────────────────────────────────────────────────┤
+│ 3. 如果 nextTriggerDate < 今天 且 lastCompletedDate != 今天 │
+│    → 显示为「已过期」(可点击完成)                           │
+├─────────────────────────────────────────────────────────────┤
+│ 4. 如果 nextTriggerDate > 今天                              │
+│    → 显示为「未来/即将到来」(不可点击完成)                  │
+└─────────────────────────────────────────────────────────────┘
+
+单次提醒特殊处理：
+- 如果 frequency == ONCE 且 status == COMPLETED
+  → 显示为「已完成」(当天保留展示，之后可根据业务需求决定是否隐藏)
+```
 
 ### 触发判断机制（被动模式）
 
@@ -507,26 +562,72 @@ function checkTriggerStatus(reminder: Reminder, currentDate: Date) {
 
 当用户通过 `/complete` 接口完成一次提醒时：
 
+#### 🔴 重要：计算规则
+
+1. **`lastCompletedDate`** = 点击完成时的日期（今天）
+2. **`nextTriggerDate`** = 基于**原本的 nextTriggerDate** 循环推算，直到 > 今天
+
+#### 为什么不基于「今天」计算？
+
+保持周期一致性。用户设置「每3天」，期望的是固定节奏。即使错过了几次，最终也会「回到正轨」。
+
+#### 循环推算示例
+
+```
+场景：每3天浇花
+原 nextTriggerDate = 2026-01-10
+今天 = 2026-01-19（已过期9天）
+点击完成
+
+推算过程：
+  2026-01-10 + 3 = 2026-01-13（仍 < 今天，继续）
+  2026-01-13 + 3 = 2026-01-16（仍 < 今天，继续）
+  2026-01-16 + 3 = 2026-01-19（== 今天，继续）
+  2026-01-19 + 3 = 2026-01-22（> 今天，停止）
+
+结果：
+  lastCompletedDate = 2026-01-19（点击日期）
+  nextTriggerDate = 2026-01-22
+```
+
+#### 计算函数（伪代码）
+
 ```typescript
-function calculateNextTriggerDate(reminder: Reminder, completedDate: Date): Date {
+function calculateNextTriggerDate(
+  reminder: Reminder,
+  completedDate: Date  // 点击完成时的日期
+): Date {
   switch (reminder.frequency) {
     case 'ONCE':
       return reminder.nextTriggerDate  // 不变，状态设为 COMPLETED
 
     case 'DAILY':
-      return addDays(completedDate, 1)
+      // 循环推算直到 > completedDate
+      let next = reminder.nextTriggerDate
+      while (next <= completedDate) {
+        next = addDays(next, 1)
+      }
+      return next
 
     case 'EVERY_X_DAYS':
-      return addDays(completedDate, reminder.interval!)
+      // 循环推算直到 > completedDate
+      let next = reminder.nextTriggerDate
+      while (next <= completedDate) {
+        next = addDays(next, reminder.interval!)
+      }
+      return next
 
     case 'WEEKLY':
-      return getNextWeekDay(completedDate, reminder.weekDays!)
+      // 从原 nextTriggerDate 开始找下一个符合的周几
+      return getNextWeekDayAfter(reminder.nextTriggerDate, reminder.weekDays!, completedDate)
 
     case 'MONTHLY':
-      return getNextMonthDay(completedDate, reminder.dayOfMonth!)
+      // 从原 nextTriggerDate 开始找下一个符合的日期
+      return getNextMonthDayAfter(reminder.nextTriggerDate, reminder.dayOfMonth!, completedDate)
 
     case 'YEARLY':
-      return getNextYearDay(completedDate, reminder.startDate!, reminder.dayOfMonth)
+      // 从原 nextTriggerDate 开始找下一个符合的年份日期
+      return getNextYearDayAfter(reminder.nextTriggerDate, reminder.startDate!, completedDate)
   }
 }
 ```

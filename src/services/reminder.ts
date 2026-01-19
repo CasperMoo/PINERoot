@@ -398,9 +398,11 @@ export async function completeReminder(id: number, userId: number) {
   }
 
   // 循环提醒：计算下一次触发日期
+  // 使用原始的 nextTriggerDate 进行周期计算，保持周期一致性
   const nextTriggerDate = calculateNextTriggerDate({
     frequency: existing.frequency,
     completedDate: todayLocal,
+    originalNextTriggerDate: existing.nextTriggerDate,  // 传入原始触发日期
     interval: existing.interval,
     weekDays: stringifyWeekDays(existing.weekDays),
     dayOfMonth: existing.dayOfMonth,
