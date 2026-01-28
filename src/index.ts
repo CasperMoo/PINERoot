@@ -17,6 +17,7 @@ import { ok, error } from "./utils/response";
 import { parseAcceptLanguage, createTranslator } from './utils/i18n'
 import { initAIWorkflowModule } from './modules/ai-workflow'
 import { initLLMProviderModule } from './modules/llm-provider/llm-provider.module'
+import { initMemoryModule } from './modules/memory/memory.module'
 import testAIWorkflowRoutes from './routes/test-ai-workflow'
 
 // 导出build函数供测试使用
@@ -108,6 +109,10 @@ export async function build() {
   // Initialize LLM Provider module
   const llmProviderModule = await initLLMProviderModule(app);
   app.decorate('llm', llmProviderModule.service);
+
+  // Initialize Memory module
+  const memoryModule = await initMemoryModule(app);
+  app.decorate('memory', memoryModule.service);
 
   // Register vocabulary routes (must be after AI Workflow initialization)
   await app.register(vocabularyRoutes, { prefix: "/api" });
