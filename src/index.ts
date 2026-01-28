@@ -11,6 +11,7 @@ import activityConfigRoutes from './routes/activityConfig'
 import halloweenRoutes from './routes/anchor/halloween'
 import reminderRoutes from './routes/reminder'
 import vocabularyRoutes from './routes/vocabulary'
+import personaRoutes from './routes/persona'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -100,6 +101,9 @@ export async function build() {
 
   // Register reminder routes
   await app.register(reminderRoutes, { prefix: "/api" });
+
+  // Register persona routes
+  await app.register(personaRoutes, { prefix: "/api" });
 
   // Initialize AI Workflow module
   const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
