@@ -16,6 +16,7 @@ import './types'
 import { ok, error } from "./utils/response";
 import { parseAcceptLanguage, createTranslator } from './utils/i18n'
 import { initAIWorkflowModule } from './modules/ai-workflow'
+import { initLLMProviderModule } from './modules/llm-provider/llm-provider.module'
 import testAIWorkflowRoutes from './routes/test-ai-workflow'
 
 // 导出build函数供测试使用
@@ -103,6 +104,10 @@ export async function build() {
   const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
   app.decorate('aiWorkflow', aiWorkflowModule.service);
   await app.register(testAIWorkflowRoutes, { prefix: "/api" });
+
+  // Initialize LLM Provider module
+  const llmProviderModule = await initLLMProviderModule(app);
+  app.decorate('llm', llmProviderModule.service);
 
   // Register vocabulary routes (must be after AI Workflow initialization)
   await app.register(vocabularyRoutes, { prefix: "/api" });

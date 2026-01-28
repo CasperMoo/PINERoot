@@ -1,6 +1,7 @@
 import { FastifyRequest } from 'fastify'
 import { UserRole, PrismaClient } from '@prisma/client'
 import { AIWorkflowService } from './modules/ai-workflow'
+import { LLMProviderService } from './modules/llm-provider'
 
 // 定义用户负载类型（不含密码）
 export interface UserPayload {
@@ -25,5 +26,6 @@ declare module 'fastify' {
   interface FastifyInstance {
     prisma: PrismaClient
     aiWorkflow: AIWorkflowService
+    llm: LLMProviderService
   }
 }
