@@ -14,6 +14,10 @@ interface Config {
   }
   COZE_API_TOKEN: string
   COZE_API_BASE_URL: string
+  // Chat Companion
+  MEM0_API_KEY: string
+  VOLCENGINE_API_KEY: string
+  ZHIPU_API_KEY: string
 }
 
 const requiredEnvVars = [
@@ -46,4 +50,8 @@ export const config: Config = {
   },
   COZE_API_TOKEN: process.env.COZE_API_TOKEN || '',
   COZE_API_BASE_URL: process.env.COZE_API_BASE_URL || 'https://api.coze.cn',
+  // Chat Companion
+  MEM0_API_KEY: process.env.MEM0_API_KEY || '',
+  VOLCENGINE_API_KEY: process.env.VOLCENGINE_API_KEY || '',
+  ZHIPU_API_KEY: process.env.ZHIPU_API_KEY || '',
 }
