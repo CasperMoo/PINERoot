@@ -12,6 +12,7 @@ import halloweenRoutes from './routes/anchor/halloween'
 import reminderRoutes from './routes/reminder'
 import vocabularyRoutes from './routes/vocabulary'
 import personaRoutes from './routes/persona'
+import chatRoutes from './routes/chat'
 import { authMiddleware } from './middleware/auth'
 import './types'
 import { ok, error } from "./utils/response";
@@ -104,6 +105,9 @@ export async function build() {
 
   // Register persona routes
   await app.register(personaRoutes, { prefix: "/api" });
+
+  // Register chat routes
+  await app.register(chatRoutes, { prefix: "/api" });
 
   // Initialize AI Workflow module
   const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
