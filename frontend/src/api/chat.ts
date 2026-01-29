@@ -1,4 +1,5 @@
 import request from './request';
+import type { ApiResponse } from './types';
 
 export interface ChatMessage {
   id: number;
@@ -28,30 +29,36 @@ export interface ModelConfig {
 }
 
 export async function getSession(): Promise<{ session: ChatSession | null }> {
-  return request.get('/chat/session');
+  const response: ApiResponse<{ session: ChatSession | null }> = await request.get('/chat/session');
+  return response.data!;
 }
 
 export async function getMessages(params?: {
   limit?: number;
   before?: number;
 }): Promise<{ messages: ChatMessage[]; hasMore: boolean }> {
-  return request.get('/chat/messages', { params });
+  const response: ApiResponse<{ messages: ChatMessage[]; hasMore: boolean }> = await request.get('/chat/messages', { params });
+  return response.data!;
 }
 
 export async function clearHistory(): Promise<{ success: boolean }> {
-  return request.delete('/chat/history');
+  const response: ApiResponse<{ success: boolean }> = await request.delete('/chat/history');
+  return response.data!;
 }
 
 export async function updateModel(modelId: string): Promise<{ session: ChatSession }> {
-  return request.put('/chat/session/model', { modelId });
+  const response: ApiResponse<{ session: ChatSession }> = await request.put('/chat/session/model', { modelId });
+  return response.data!;
 }
 
 export async function updatePersona(personaId: number): Promise<{ session: ChatSession }> {
-  return request.put('/chat/session/persona', { personaId });
+  const response: ApiResponse<{ session: ChatSession }> = await request.put('/chat/session/persona', { personaId });
+  return response.data!;
 }
 
 export async function getModels(): Promise<{ models: ModelConfig[] }> {
-  return request.get('/chat/models');
+  const response: ApiResponse<{ models: ModelConfig[] }> = await request.get('/chat/models');
+  return response.data!;
 }
 
 // SSE streaming for chat

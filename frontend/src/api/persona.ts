@@ -1,4 +1,5 @@
 import request from './request';
+import type { ApiResponse } from './types';
 
 export interface PersonaTemplate {
   id: number;
@@ -13,13 +14,15 @@ export interface PersonaTemplate {
 export async function getPersonaTemplates(
   includeInactive = false
 ): Promise<{ templates: PersonaTemplate[] }> {
-  return request.get('/persona-templates', {
+  const response: ApiResponse<{ templates: PersonaTemplate[] }> = await request.get('/persona-templates', {
     params: { includeInactive: includeInactive.toString() },
   });
+  return response.data!;
 }
 
 export async function getPersonaTemplate(id: number): Promise<PersonaTemplate> {
-  return request.get(`/persona-templates/${id}`);
+  const response: ApiResponse<PersonaTemplate> = await request.get(`/persona-templates/${id}`);
+  return response.data!;
 }
 
 export async function createPersonaTemplate(data: {
@@ -27,7 +30,8 @@ export async function createPersonaTemplate(data: {
   description?: string;
   prompt: string;
 }): Promise<PersonaTemplate> {
-  return request.post('/persona-templates', data);
+  const response: ApiResponse<PersonaTemplate> = await request.post('/persona-templates', data);
+  return response.data!;
 }
 
 export async function updatePersonaTemplate(
@@ -39,9 +43,11 @@ export async function updatePersonaTemplate(
     isActive?: boolean;
   }
 ): Promise<PersonaTemplate> {
-  return request.put(`/persona-templates/${id}`, data);
+  const response: ApiResponse<PersonaTemplate> = await request.put(`/persona-templates/${id}`, data);
+  return response.data!;
 }
 
 export async function deletePersonaTemplate(id: number): Promise<{ success: boolean }> {
-  return request.delete(`/persona-templates/${id}`);
+  const response: ApiResponse<{ success: boolean }> = await request.delete(`/persona-templates/${id}`);
+  return response.data!;
 }
