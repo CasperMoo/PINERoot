@@ -1,6 +1,6 @@
 import { Card, Button, Typography } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import { PictureOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import { PictureOutlined, MessageOutlined, ArrowRightOutlined } from '@ant-design/icons'
 
 const { Title, Text } = Typography
 
@@ -61,6 +61,13 @@ export default function Super() {
             description="管理图片和图片标签，支持上传、分类和删除"
             icon={<PictureOutlined />}
             path="/super/image-manage"
+          />
+
+          <FeatureCard
+            title="聊天调试"
+            description="AI 聊天功能调试，支持模型切换和人设配置"
+            icon={<MessageOutlined />}
+            path="/super/chat"
           />
 
           {/* 可以在这里添加更多功能卡片 */}

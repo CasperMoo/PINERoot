@@ -12,6 +12,7 @@ import Reminder from '@/pages/Reminder'
 import Vocabulary from '@/pages/Vocabulary'
 import Super from '@/pages/Super'
 import ImageManage from '@/pages/Super/ImageManage'
+import ChatPage from '@/pages/Super/Chat'
 import NotFound from '@/pages/NotFound'
 import PrivateRoute from '@/components/PrivateRoute'
 import AdminRoute from '@/components/AdminRoute'
@@ -128,6 +129,16 @@ function App() {
           element={
             <AdminRoute>
               <ImageManage />
+            </AdminRoute>
+          }
+        />
+
+        {/* 聊天调试（仅管理员）*/}
+        <Route
+          path="/super/chat"
+          element={
+            <AdminRoute>
+              <ChatPage />
             </AdminRoute>
           }
         />
