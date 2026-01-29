@@ -1,5 +1,6 @@
 import React from 'react';
-import { Select, Card, Space } from 'antd';
+import { Select, Card, Space, Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ModelConfig } from '@/api/chat';
 import type { PersonaTemplate } from '@/api/persona';
 
@@ -10,6 +11,7 @@ interface DebugPanelProps {
   currentPersonaId: number | null;
   onModelChange: (modelId: string) => void;
   onPersonaChange: (personaId: number) => void;
+  onCreatePersona?: () => void;
   disabled?: boolean;
 }
 
@@ -20,11 +22,12 @@ const DebugPanel: React.FC<DebugPanelProps> = ({
   currentPersonaId,
   onModelChange,
   onPersonaChange,
+  onCreatePersona,
   disabled,
 }) => {
   return (
     <Card size="small" className="mb-4">
-      <Space size="large">
+      <Space size="large" wrap>
         <div>
           <span className="mr-2 text-gray-600">模型:</span>
           <Select
@@ -54,6 +57,16 @@ const DebugPanel: React.FC<DebugPanelProps> = ({
             }))}
           />
         </div>
+        {onCreatePersona && (
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={onCreatePersona}
+            disabled={disabled}
+          >
+            创建人设
+          </Button>
+        )}
       </Space>
     </Card>
   );

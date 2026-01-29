@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { App, Spin } from 'antd';
 import DebugPanel from './DebugPanel';
 import ChatWindow from './ChatWindow';
 import MessageInput from './MessageInput';
+import CreatePersonaModal from './CreatePersonaModal';
 import { useSession } from './hooks/useSession';
 import { useChat } from './hooks/useChat';
 
 const ChatPage: React.FC = () => {
   const { message: messageApi } = App.useApp();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const {
     session,
     models,
@@ -56,6 +59,21 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  const handleCreatePersona = () => {
+    setIsCreateModalOpen(true);
+  };
+
+  const handlePersonaCreated = async (personaId: number) => {
+    // Auto switch to the newly created persona
+    try {
+      await changePersona(personaId);
+      await refreshSession();
+      messageApi.success('人设创建成功并已切换');
+    } catch {
+      messageApi.error('切换到新人设失败');
+    }
+  };
+
   const handleClear = async () => {
     try {
       await clear();
@@ -84,6 +102,7 @@ const ChatPage: React.FC = () => {
           currentPersonaId={session?.personaId || null}
           onModelChange={handleModelChange}
           onPersonaChange={handlePersonaChange}
+          onCreatePersona={handleCreatePersona}
           disabled={sending}
         />
       </div>
@@ -101,6 +120,13 @@ const ChatPage: React.FC = () => {
         onClear={handleClear}
         onAbort={abort}
         sending={sending}
+      />
+
+      <CreatePersonaModal
+        open={isCreateModalOpen}
+        onCancel={() => setIsCreateModalOpen(false)}
+        onSuccess={handlePersonaCreated}
+        personas={personas}
       />
     </div>
   );
