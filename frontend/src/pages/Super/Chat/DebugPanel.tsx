@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select, Card, Space } from 'antd';
-import { ModelConfig } from '@/api/chat';
-import { PersonaTemplate } from '@/api/persona';
+import type { ModelConfig } from '@/api/chat';
+import type { PersonaTemplate } from '@/api/persona';
 
 interface DebugPanelProps {
   models: ModelConfig[];

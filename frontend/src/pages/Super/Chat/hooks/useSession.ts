@@ -4,10 +4,10 @@ import {
   getModels,
   updateModel,
   updatePersona,
-  ChatSession,
-  ModelConfig,
 } from '@/api/chat';
-import { getPersonaTemplates, PersonaTemplate } from '@/api/persona';
+import type { ChatSession, ModelConfig } from '@/api/chat';
+import { getPersonaTemplates } from '@/api/persona';
+import type { PersonaTemplate } from '@/api/persona';
 
 export function useSession() {
   const [session, setSession] = useState<ChatSession | null>(null);
