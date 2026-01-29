@@ -4,7 +4,7 @@ import {
   clearHistory,
   sendMessageStream,
   ChatMessage,
-} from '../../../api/chat';
+} from '@/api/chat';
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

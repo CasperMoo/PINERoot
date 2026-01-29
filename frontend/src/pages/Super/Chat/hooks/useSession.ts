@@ -6,8 +6,8 @@ import {
   updatePersona,
   ChatSession,
   ModelConfig,
-} from '../../../api/chat';
-import { getPersonaTemplates, PersonaTemplate } from '../../../api/persona';
+} from '@/api/chat';
+import { getPersonaTemplates, PersonaTemplate } from '@/api/persona';
 
 export function useSession() {
   const [session, setSession] = useState<ChatSession | null>(null);

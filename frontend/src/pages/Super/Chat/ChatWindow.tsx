@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Spin } from 'antd';
-import { ChatMessage } from '../../../api/chat';
+import { ChatMessage } from '@/api/chat';
 
 interface ChatWindowProps {
   messages: ChatMessage[];
