@@ -70,10 +70,7 @@ export class ChatService {
   }
 
   async updateSession(userId: number, input: UpdateSessionInput): Promise<ChatSessionDTO> {
-    const session = await this.getSession(userId);
-    if (!session) {
-      throw new NotFoundError('chat.sessionNotFound', 'No active chat session');
-    }
+    const session = await this.getOrCreateSession(userId);
 
     // Validate modelId if provided
     if (input.modelId && !this.llm.isModelAvailable(input.modelId)) {

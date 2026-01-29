@@ -35,11 +35,16 @@ const chatRoutes: FastifyPluginAsync = async (fastify) => {
         const userId = request.currentUser!.id;
         const { content } = validateData(sendMessageSchema, request.body);
 
-        // Set SSE headers
+        // Set SSE headers with CORS
+        const origin = request.headers.origin;
         reply.raw.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
           'Connection': 'keep-alive',
+          ...(origin ? {
+            'Access-Control-Allow-Origin': origin,
+            'Access-Control-Allow-Credentials': 'true',
+          } : {}),
         });
 
         const stream = chatService.sendMessage(userId, content);

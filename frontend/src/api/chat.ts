@@ -1,6 +1,13 @@
 import request from './request';
 import type { ApiResponse } from './types';
 
+function unwrap<T>(response: ApiResponse<T>): T {
+  if (response.code !== 0) {
+    throw new Error(response.message || '请求失败');
+  }
+  return response.data as T;
+}
+
 export interface ChatMessage {
   id: number;
   sessionId: number;
@@ -30,7 +37,7 @@ export interface ModelConfig {
 
 export async function getSession(): Promise<{ session: ChatSession | null }> {
   const response: ApiResponse<{ session: ChatSession | null }> = await request.get('/chat/session');
-  return response.data!;
+  return unwrap(response);
 }
 
 export async function getMessages(params?: {
@@ -38,27 +45,27 @@ export async function getMessages(params?: {
   before?: number;
 }): Promise<{ messages: ChatMessage[]; hasMore: boolean }> {
   const response: ApiResponse<{ messages: ChatMessage[]; hasMore: boolean }> = await request.get('/chat/messages', { params });
-  return response.data!;
+  return unwrap(response);
 }
 
 export async function clearHistory(): Promise<{ success: boolean }> {
   const response: ApiResponse<{ success: boolean }> = await request.delete('/chat/history');
-  return response.data!;
+  return unwrap(response);
 }
 
 export async function updateModel(modelId: string): Promise<{ session: ChatSession }> {
   const response: ApiResponse<{ session: ChatSession }> = await request.put('/chat/session/model', { modelId });
-  return response.data!;
+  return unwrap(response);
 }
 
 export async function updatePersona(personaId: number): Promise<{ session: ChatSession }> {
   const response: ApiResponse<{ session: ChatSession }> = await request.put('/chat/session/persona', { personaId });
-  return response.data!;
+  return unwrap(response);
 }
 
 export async function getModels(): Promise<{ models: ModelConfig[] }> {
   const response: ApiResponse<{ models: ModelConfig[] }> = await request.get('/chat/models');
-  return response.data!;
+  return unwrap(response);
 }
 
 // SSE streaming for chat
@@ -73,7 +80,7 @@ export function sendMessageStream(
 
   const abortController = new AbortController();
 
-  fetch(`${baseUrl}/api/chat/message`, {
+  fetch(`${baseUrl}/chat/message`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

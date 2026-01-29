@@ -103,16 +103,9 @@ export async function build() {
   // Register reminder routes
   await app.register(reminderRoutes, { prefix: "/api" });
 
-  // Register persona routes
-  await app.register(personaRoutes, { prefix: "/api" });
-
-  // Register chat routes
-  await app.register(chatRoutes, { prefix: "/api" });
-
   // Initialize AI Workflow module
   const aiWorkflowModule = await initAIWorkflowModule(app, prisma);
   app.decorate('aiWorkflow', aiWorkflowModule.service);
-  await app.register(testAIWorkflowRoutes, { prefix: "/api" });
 
   // Initialize LLM Provider module
   const llmProviderModule = await initLLMProviderModule(app);
@@ -122,8 +115,11 @@ export async function build() {
   const memoryModule = await initMemoryModule(app);
   app.decorate('memory', memoryModule.service);
 
-  // Register vocabulary routes (must be after AI Workflow initialization)
+  // Register routes that depend on modules above
+  await app.register(personaRoutes, { prefix: "/api" });
+  await app.register(chatRoutes, { prefix: "/api" });
   await app.register(vocabularyRoutes, { prefix: "/api" });
+  await app.register(testAIWorkflowRoutes, { prefix: "/api" });
 
   // Protected route - Get current user
   app.get(
