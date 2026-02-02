@@ -7,7 +7,10 @@ interface ChatWindowProps {
   streamingContent: string;
   loading: boolean;
   hasMore: boolean;
+  isThinking: boolean;
+  error: string | null;
   onLoadMore: () => void;
+  onRetry?: (content: string) => void;
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -15,7 +18,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   streamingContent,
   loading,
   hasMore,
+  isThinking,
+  error,
   onLoadMore,
+  onRetry,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -23,7 +29,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // Auto scroll to bottom on new messages
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent]);
+  }, [messages, streamingContent, isThinking, error]);
 
   const handleScroll = () => {
     if (containerRef.current) {
@@ -71,6 +77,38 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           <div className="max-w-[70%] p-3 rounded-lg bg-gray-100 text-gray-800">
             <p className="whitespace-pre-wrap break-words">{streamingContent}</p>
             <span className="inline-block w-2 h-4 bg-gray-400 animate-pulse ml-1" />
+          </div>
+        </div>
+      )}
+
+      {/* Thinking indicator with animated dots */}
+      {isThinking && (
+        <div className="flex justify-start">
+          <div className="max-w-[70%] p-3 rounded-lg bg-gray-100 text-gray-800">
+            <div className="flex items-center space-x-1">
+              <span className="inline-block w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="inline-block w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <span className="inline-block w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error message with retry button */}
+      {error && (
+        <div className="flex justify-start">
+          <div className="max-w-[70%] p-3 rounded-lg bg-red-50 border border-red-200">
+            <div className="flex items-center space-x-2">
+              <span className="text-red-600 text-sm">{error}</span>
+              {onRetry && messages.length > 0 && (
+                <button
+                  onClick={() => onRetry(messages[messages.length - 1].content)}
+                  className="text-xs px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+                >
+                  重试
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

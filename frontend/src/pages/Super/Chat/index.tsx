@@ -27,11 +27,14 @@ const ChatPage: React.FC = () => {
     loading: messagesLoading,
     sending,
     streamingContent,
+    isThinking,
+    error,
     loadMessages,
     loadMore,
     sendMessage,
     clear,
     abort,
+    retry,
   } = useChat();
 
   // Load messages when session is ready
@@ -112,7 +115,10 @@ const ChatPage: React.FC = () => {
         streamingContent={streamingContent}
         loading={messagesLoading}
         hasMore={hasMore}
+        isThinking={isThinking}
+        error={error}
         onLoadMore={loadMore}
+        onRetry={retry}
       />
 
       <MessageInput

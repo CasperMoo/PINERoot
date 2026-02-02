@@ -12,6 +12,8 @@ export function useChat() {
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [isThinking, setIsThinking] = useState(false); // New state for "thinking" indicator
+  const [error, setError] = useState<string | null>(null); // New state for error handling
   const abortRef = useRef<(() => void) | null>(null);
 
   const loadMessages = useCallback(async (before?: number) => {
@@ -39,6 +41,8 @@ export function useChat() {
 
   const sendMessage = useCallback(async (content: string) => {
     setSending(true);
+    setIsThinking(true); // Show thinking indicator
+    setError(null); // Clear previous errors
     setStreamingContent('');
 
     // Add user message optimistically
@@ -54,10 +58,16 @@ export function useChat() {
 
     try {
       let assistantContent = '';
+      let firstChunkReceived = false;
 
       abortRef.current = sendMessageStream(
         content,
         (chunk) => {
+          // Hide thinking indicator when first chunk arrives
+          if (!firstChunkReceived) {
+            setIsThinking(false);
+            firstChunkReceived = true;
+          }
           assistantContent += chunk;
           setStreamingContent(assistantContent);
         },
@@ -74,17 +84,22 @@ export function useChat() {
           setMessages((prev) => [...prev, assistantMessage]);
           setStreamingContent('');
           setSending(false);
+          setIsThinking(false);
           abortRef.current = null;
         },
         (error) => {
           console.error('Chat error:', error);
+          setIsThinking(false);
           setSending(false);
+          setError(error instanceof Error ? error.message : '发送消息失败，请重试');
           abortRef.current = null;
         }
       );
     } catch (error) {
       console.error('Failed to send message:', error);
+      setIsThinking(false);
       setSending(false);
+      setError(error instanceof Error ? error.message : '发送消息失败，请重试');
     }
   }, []);
 
@@ -104,9 +119,16 @@ export function useChat() {
       abortRef.current();
       abortRef.current = null;
       setSending(false);
+      setIsThinking(false);
       setStreamingContent('');
     }
   }, []);
+
+  // Add retry function
+  const retry = useCallback(async (content: string) => {
+    setError(null);
+    await sendMessage(content);
+  }, [sendMessage]);
 
   return {
     messages,
@@ -114,10 +136,13 @@ export function useChat() {
     loading,
     sending,
     streamingContent,
+    isThinking,
+    error,
     loadMessages,
     loadMore,
     sendMessage,
     clear,
     abort,
+    retry,
   };
 }
